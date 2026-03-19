@@ -1,0 +1,235 @@
+.tsukuyomi-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+
+
+/* 主内容区 */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 左侧导航栏（桌面端） */
+.side-nav {
+  width: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-menu {
+  padding: 20px 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.7);
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.3) 0%, transparent 100%);
+  color: #fff;
+  border-left-color: #2196F3;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 内容展示区域 */
+.content-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content-placeholder {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  animation: fadeIn 0.6s ease;
+}
+
+.content-placeholder h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #fff 0%, #64B5F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.content-placeholder p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 底部导航栏（移动端） */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 200;
+  padding: 10px 0;
+}
+
+.bottom-nav .nav-menu {
+  display: flex;
+  justify-content: space-around;
+  padding: 0;
+}
+
+.bottom-nav .nav-item {
+  flex: 1;
+  flex-direction: column;
+  text-align: center;
+  padding: 8px 10px;
+  color: #666;
+  border-left: none;
+  border-top: 3px solid transparent;
+}
+
+.bottom-nav .nav-item:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bottom-nav .nav-item.active {
+  color: #1976D2;
+  background: transparent;
+  border-top-color: #2196F3;
+  box-shadow: none;
+}
+
+.bottom-nav .nav-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.bottom-nav .nav-label {
+  font-size: 12px;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+
+  
+  /* 左侧导航栏（隐藏） */
+  .side-nav {
+    display: none;
+  }
+  
+  /* 内容区域 */
+  .content-area {
+    padding: 16px;
+  }
+  
+  .content-placeholder h2 {
+    font-size: 20px;
+  }
+  
+  .content-placeholder p {
+    font-size: 14px;
+  }
+  
+  /* 底部导航栏（显示） */
+  .bottom-nav {
+    display: block;
+  }
+  
+  /* 调整主内容区高度，为底部导航栏留出空间 */
+  .main-content {
+    margin-bottom: 60px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .side-nav {
+    width: 180px;
+  }
+  
+  .nav-item {
+    padding: 10px 16px;
+  }
+  
+  .nav-label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-placeholder h2 {
+    font-size: 18px;
+  }
+  
+  .content-placeholder p {
+    font-size: 13px;
+  }
+}

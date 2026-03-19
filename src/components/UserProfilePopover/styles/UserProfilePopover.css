@@ -1,0 +1,137 @@
+.user-profile-popover-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.user-profile-popover {
+  position: absolute;
+  top: 70%;
+  right: -20px;
+  width: 240px;
+  background: rgba(220, 230, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 60px 20px 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  transform-origin: top right;
+}
+
+
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.popover-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.popover-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.popover-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.popover-username {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popover-role {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.popover-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 15px 0;
+}
+
+.popover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popover-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(200, 210, 255, 0.5);
+  border-radius: 10px;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.popover-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(33, 150, 243, 0.5);
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-text {
+  flex: 1;
+  text-align: left;
+}
+
+.settings-btn:hover {
+  background: rgba(33, 150, 243, 0.1);
+  border-color: rgba(33, 150, 243, 0.5);
+}
+
+.logout-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+/* 弹出动画 - 与头像放大同步 */
+.popover-fade-enter-active,
+.popover-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.popover-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.popover-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-5px) scale(0.95);
+}

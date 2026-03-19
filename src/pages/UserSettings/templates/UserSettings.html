@@ -1,0 +1,141 @@
+<div class="settings-container">
+  <div class="settings-card">
+    <div class="settings-header">
+      <button class="back-btn" @click="goBack">
+        <span>←</span>
+        <span>返回</span>
+      </button>
+      <h1 class="settings-title">个人设置</h1>
+      <div class="placeholder"></div>
+    </div>
+
+    <div v-if="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <span>加载中...</span>
+    </div>
+
+    <div v-else class="settings-content">
+      <!-- 头像设置 -->
+      <div class="settings-section">
+        <h2 class="section-title">头像设置</h2>
+        <div class="avatar-section">
+          <div class="avatar-preview-container">
+            <div class="avatar-preview">
+              <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
+              <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+            </div>
+          </div>
+          <div class="avatar-actions">
+            <div class="file-input-wrapper">
+              <input
+                type="file"
+                id="avatar-input"
+                accept="image/jpeg,image/png,image/gif"
+                @change="handleFileSelect"
+                class="file-input"
+              />
+              <label for="avatar-input" class="file-input-label">
+                选择图片
+              </label>
+            </div>
+            <button
+              class="upload-btn"
+              @click="uploadAvatar"
+              :disabled="isUploading || !selectedFile"
+            >
+              <span v-if="isUploading" class="btn-spinner"></span>
+              <span v-else>上传头像</span>
+            </button>
+          </div>
+        </div>
+        <p v-if="avatarError" class="error-text">{{ avatarError }}</p>
+        <p class="help-text">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 用户详情 -->
+      <div class="settings-section">
+        <h2 class="section-title">基本信息</h2>
+        
+        <div class="form-group">
+          <label class="form-label">昵称</label>
+          <input
+            v-model="userName"
+            type="text"
+            placeholder="输入昵称"
+            class="form-input"
+            maxlength="20"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">个人简介</label>
+          <textarea
+            v-model="userIntroduction"
+            placeholder="介绍一下自己..."
+            class="form-textarea"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">性别</label>
+            <select v-model="userGender" class="form-select">
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">生日</label>
+            <input
+              v-model="userBirthday"
+              type="date"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">城市</label>
+            <input
+              v-model="userCity"
+              type="text"
+              placeholder="所在城市"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">电话</label>
+            <input
+              v-model="userPhone"
+              type="tel"
+              placeholder="联系电话"
+              class="form-input"
+            />
+          </div>
+        </div>
+
+        <div class="save-section">
+          <p v-if="detailError" class="error-text">{{ detailError }}</p>
+          <button
+            class="save-btn"
+            @click="saveUserDetail"
+            :disabled="isSavingDetail"
+          >
+            <span v-if="isSavingDetail" class="btn-spinner"></span>
+            <span v-else>保存信息</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

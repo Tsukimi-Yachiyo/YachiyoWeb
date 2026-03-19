@@ -1,0 +1,16 @@
+<div class="user-profile-popover-wrapper" ref="popoverRef">
+  <slot name="trigger" :showPopover="showPopover" :hidePopover="hidePopover" :isVisible="isVisible"></slot>
+  
+  <transition name="popover-fade">
+    <div v-show="isVisible" class="user-profile-popover" @mouseenter="keepVisible" @mouseleave="hidePopover">
+      <div class="popover-actions">
+        <button class="popover-btn settings-btn" @click="goToSettings">
+          <span class="btn-text">设置</span>
+        </button>
+        <button class="popover-btn logout-btn" @click="$emit('logout')">
+          <span class="btn-text">退出</span>
+        </button>
+      </div>
+    </div>
+  </transition>
+</div>

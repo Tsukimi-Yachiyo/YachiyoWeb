@@ -1,0 +1,48 @@
+<div class="tsukuyomi-container">
+  <!-- 标题栏 -->
+  <AppHeader 
+    currentPage="tsukuyomi" 
+    :username="username" 
+    :userAvatar="userAvatar" 
+  />
+
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <!-- 左侧导航栏（桌面端） -->
+    <aside class="side-nav">
+      <nav class="nav-menu">
+        <div 
+          v-for="item in navItems" 
+          :key="item.id"
+          :class="['nav-item', { active: currentNavItem === item.id }]"
+          @click="selectNavItem(item.id)"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 内容展示区域 -->
+    <main class="content-area">
+      <div class="content-placeholder">
+        <h2>内容加载中...</h2>
+        <p>此区域将展示用户发布的帖子内容</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- 底部导航栏（移动端） -->
+  <nav class="bottom-nav">
+    <div 
+      v-for="item in navItems" 
+      :key="item.id"
+      :class="['nav-item', { active: currentNavItem === item.id }]"
+      @click="selectNavItem(item.id)"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label">{{ item.label }}</span>
+    </div>
+  </nav>
+</div>
