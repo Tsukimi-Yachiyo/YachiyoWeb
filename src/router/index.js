@@ -8,7 +8,7 @@ const routes = [
     component: Login
   },
   {
-    path: '/home',
+    path: '/chat/home',
     name: 'Home',
     // 懒加载聊天主页组件
     component: () => import('../pages/ChatHome/ChatHome.vue'),
@@ -60,6 +60,16 @@ const routes = [
     name: 'IconTest',
     // 懒加载图标测试组件
     component: () => import('../components/IconTest/IconTest.vue')
+  },
+  {
+    path: '/tsukuyomi/post-editor',
+    name: 'PostEditor',
+    // 懒加载帖子编辑上传界面组件
+    component: () => import('../pages/PostEditor/PostEditor.vue'),
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true
+    }
   }
 ];
 

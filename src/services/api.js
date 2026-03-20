@@ -225,4 +225,14 @@ export const userAPI = {
   }
 };
 
+export const postAPI = {
+  uploadPost(formData) {
+    return apiClient.post('/api/v2/posting/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+};
+
 export default apiClient;

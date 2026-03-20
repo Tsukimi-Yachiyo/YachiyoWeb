@@ -249,7 +249,7 @@ export function useLogin() {
         login(response.data.data, form.value.username);
         loginSuccess.value = true;
         setTimeout(() => {
-          router.push('/home');
+          router.push('/chat/home');
         }, 1000);
       } else {
         error.value = response.data?.message || '注册失败，请重试';
@@ -276,7 +276,7 @@ export function useLogin() {
         login(response.data.data, form.value.username);
         loginSuccess.value = true;
         setTimeout(() => {
-          router.push('/home');
+          router.push('/chat/home');
         }, 1000);
       } else {
         const errorCode = response.data.code;

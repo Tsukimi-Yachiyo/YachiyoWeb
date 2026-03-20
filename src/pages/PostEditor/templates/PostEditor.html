@@ -1,0 +1,90 @@
+<div class="post-editor">
+  <header class="title-bar">
+    <div class="title-bar-content">
+      <div class="title-section">
+        <div class="nav-buttons">
+          <button 
+            class="nav-button"
+            @click="handleExit"
+            title="直接退出（删除所有内容）"
+          >
+            <img v-if="exitIconUrl" :src="exitIconUrl" alt="退出" style="width: 16px; height: 16px;" />
+            <span v-else>退出</span>
+          </button>
+          <button 
+            class="nav-button"
+            @click="handleSaveLocally"
+            title="缓存到本地"
+          >
+            <img v-if="saveIconUrl" :src="saveIconUrl" alt="保存" style="width: 16px; height: 16px;" />
+            <span v-else>保存</span>
+          </button>
+        </div>
+      </div>
+      <div class="user-info-header">
+        <span class="username-header">{{ username }}</span>
+        <div class="user-avatar-header">
+          <img v-if="userAvatar" :src="userAvatar" alt="用户头像" />
+          <span v-else>{{ username.charAt(0).toUpperCase() }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <div class="editor-content">
+    <div class="editor-form">
+      <div class="form-row">
+        <div class="form-left">
+          <div class="form-group">
+            <label for="title">标题</label>
+            <input type="text" id="title" v-model="title" placeholder="请输入标题" />
+          </div>
+          
+          <div class="form-group">
+            <label for="postType">帖子类型</label>
+            <select id="postType" v-model="postType">
+              <option value="article">文章</option>
+              <option value="news">新闻</option>
+              <option value="story">故事</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-right">
+          <div class="form-group">
+            <label>封面图片</label>
+            <div class="cover-image-uploader" @click="triggerCoverImageUpload" style="cursor: pointer;">
+              <img v-if="coverImagePreview" :src="coverImagePreview" alt="封面图片" style="pointer-events: none;" />
+              <div v-else class="add-image-placeholder">
+                <span>+ 添加图片</span>
+              </div>
+              <input type="file" id="coverImage" ref="coverImageInput" @change="handleCoverImageChange" style="display: none;" />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="content">内容</label>
+        <textarea 
+          id="content" 
+          v-model="content" 
+          placeholder="支持 Markdown 和 HTML 格式，可拖拽图片到此处"
+          @dragover="handleDragOver"
+          @drop="handleDrop"
+          @input="autoResizeTextarea"
+        ></textarea>
+      </div>
+      
+     
+    </div>
+  </div>
+</div>
+
+ <!-- 上传按钮 -->
+<div class="upload-button-container">
+  <button class="upload-button" @click="handleSaveAndExit" title="上传">
+    <img v-if="uploadIconUrl" :src="uploadIconUrl" alt="上传" style="width: 24px; height: 24px;" />
+    <span v-else>上传</span>
+  </button>
+</div>

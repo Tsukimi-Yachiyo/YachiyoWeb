@@ -25,7 +25,7 @@ const userProfileIsVisible = ref(false);
 
 // 切换到聊天界面
 const goToChat = () => {
-  router.push('/home');
+  router.push('/chat/home');
 };
 
 // 切换到月读界面
