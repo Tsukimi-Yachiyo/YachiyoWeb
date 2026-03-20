@@ -25,7 +25,25 @@ const routes = [
     // 路由守卫，需要登录才能访问
     meta: {
       requiresAuth: true
-    }
+    },
+    redirect: '/tsukuyomi/home',
+    children: [
+      {
+        path: 'home',
+        name: 'TsukuyomiHome',
+        component: () => import('../pages/Tsukuyomi/views/HomeView.vue')
+      },
+      {
+        path: 'follow',
+        name: 'TsukuyomiFollow',
+        component: () => import('../pages/Tsukuyomi/views/FollowView.vue')
+      },
+      {
+        path: 'column',
+        name: 'TsukuyomiColumn',
+        component: () => import('../pages/Tsukuyomi/views/ColumnView.vue')
+      }
+    ]
   },
   {
     path: '/settings',
@@ -36,6 +54,12 @@ const routes = [
     meta: {
       requiresAuth: true
     }
+  },
+  {
+    path: '/icon-test',
+    name: 'IconTest',
+    // 懒加载图标测试组件
+    component: () => import('../components/IconTest/IconTest.vue')
   }
 ];
 

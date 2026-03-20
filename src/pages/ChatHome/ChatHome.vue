@@ -1,8 +1,28 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useChatHome } from '../../composables/useChatHome.js';
+import { useIconManager } from '../../composables/useIconManager.js';
 import AppHeader from '../../components/AppHeader/AppHeader.vue';
 import Live2DModel from '../../components/Live2DModel/Live2DModel.vue';
+
+// 初始化图标管理器
+const { checkIconCache } = useIconManager();
+
+// 计算属性，用于获取图标数据URL
+const editIconUrl = computed(() => {
+  const iconData = checkIconCache('edit.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
+
+const deleteIconUrl = computed(() => {
+  const iconData = checkIconCache('trash.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
+
+const voiceIconUrl = computed(() => {
+  const iconData = checkIconCache('volume-up.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
 
 const userProfileIsVisible = ref(false);
 const hoveredConversationId = ref(null);

@@ -1,25 +1,63 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import AppHeader from '../../components/AppHeader/AppHeader.vue';
 import { useUserProfile } from '../../composables/useUserProfile.js';
+import { useIconManager } from '../../composables/useIconManager.js';
+
+// 初始化图标管理器
+const { checkIconCache } = useIconManager();
+
+// 计算属性，用于获取图标数据URL
+const homeIconUrl = computed(() => {
+  const iconData = checkIconCache('home.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
+
+const followIconUrl = computed(() => {
+  const iconData = checkIconCache('users-group.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
+
+const columnIconUrl = computed(() => {
+  const iconData = checkIconCache('book.svg');
+  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
+});
 
 const userProfileIsVisible = ref(false);
+const router = useRouter();
+const route = useRoute();
 
-// 导航项
+// 导航项 - 重构为三个主要选项
 const navItems = [
-  { id: 'home', label: '主页', icon: '🏠' },
-  { id: 'hot', label: '热门', icon: '🔥' },
-  { id: 'follow', label: '关注', icon: '👥' },
-  { id: 'message', label: '消息', icon: '💬' },
-  { id: 'me', label: '我', icon: '👤' }
+  { id: 'home', label: '主页', icon: '🏠', path: '/tsukuyomi/home' },
+  { id: 'follow', label: '关注', icon: '👥', path: '/tsukuyomi/follow' },
+  { id: 'column', label: '专栏', icon: '📚', path: '/tsukuyomi/column' }
 ];
 
 // 当前选中的导航项
-const currentNavItem = ref('home');
+const currentNavItem = computed(() => {
+  const path = route.path;
+  const navItem = navItems.find(item => path === item.path);
+  return navItem ? navItem.id : 'home';
+});
+
+// 导航栏激活状态
+const isNavActive = ref(false);
 
 // 切换导航项
-const selectNavItem = (itemId) => {
-  currentNavItem.value = itemId;
+const selectNavItem = (path) => {
+  router.push(path);
+};
+
+// 激活导航栏
+const activateNav = () => {
+  isNavActive.value = true;
+};
+
+// 失活导航栏
+const deactivateNav = () => {
+  isNavActive.value = false;
 };
 
 // 获取用户信息

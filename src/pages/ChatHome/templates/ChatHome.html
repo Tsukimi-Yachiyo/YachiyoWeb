@@ -50,8 +50,14 @@
               </div>
             </div>
             <div v-if="(hoveredConversationId === conv.id || longPressedConversationId === conv.id) && editModeConversationId !== conv.id" class="conversation-actions">
-              <button @click.stop="startEditTitle(conv)" class="action-btn edit-btn" title="编辑标题">✏️</button>
-              <button @click="handleDeleteConversation(conv.id, $event)" class="action-btn delete-btn" title="删除会话">🗑️</button>
+              <button @click.stop="startEditTitle(conv)" class="action-btn edit-btn" title="编辑标题">
+                <img v-if="editIconUrl" :src="editIconUrl" alt="编辑" style="width: 16px; height: 16px;" />
+                <span v-else>✏️</span>
+              </button>
+              <button @click="handleDeleteConversation(conv.id, $event)" class="action-btn delete-btn" title="删除会话">
+                <img v-if="deleteIconUrl" :src="deleteIconUrl" alt="删除" style="width: 16px; height: 16px;" />
+                <span v-else>🗑️</span>
+              </button>
             </div>
           </div>
         </transition-group>
@@ -101,6 +107,7 @@
                 title="播放语音"
               >
                 <span v-if="getVoiceStatus(msg.content).isLoading" class="voice-spinner"></span>
+                <img v-else-if="voiceIconUrl" :src="voiceIconUrl" alt="播放语音" style="width: 16px; height: 16px;" />
                 <span v-else>🔊</span>
               </button>
             </div>

@@ -1,5 +1,8 @@
 <script setup>
-// App.vue 现在只负责路由视图的显示
+import { useIconManager } from './composables/useIconManager';
+
+// 初始化图标管理器，自动预加载图标
+useIconManager();
 </script>
 
 <template src="./templates/App.html"></template>

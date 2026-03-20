@@ -6,43 +6,36 @@
     :userAvatar="userAvatar" 
   />
 
-
   <!-- 主内容区 -->
-  <div class="main-content">
-    <!-- 左侧导航栏（桌面端） -->
-    <aside class="side-nav">
-      <nav class="nav-menu">
-        <div 
-          v-for="item in navItems" 
-          :key="item.id"
-          :class="['nav-item', { active: currentNavItem === item.id }]"
-          @click="selectNavItem(item.id)"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label">{{ item.label }}</span>
-        </div>
-      </nav>
-    </aside>
-
-    <!-- 内容展示区域 -->
+  <div class="main-content" @mouseenter="deactivateNav">
+    <!-- 内容展示区域 - 使用 router-view 显示子路由 -->
     <main class="content-area">
-      <div class="content-placeholder">
-        <h2>内容加载中...</h2>
-        <p>此区域将展示用户发布的帖子内容</p>
-      </div>
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </main>
   </div>
 
-  <!-- 底部导航栏（移动端） -->
-  <nav class="bottom-nav">
-    <div 
-      v-for="item in navItems" 
-      :key="item.id"
-      :class="['nav-item', { active: currentNavItem === item.id }]"
-      @click="selectNavItem(item.id)"
-    >
-      <span class="nav-icon">{{ item.icon }}</span>
-      <span class="nav-label">{{ item.label }}</span>
-    </div>
-  </nav>
+  <!-- 底部圆形导航按钮组 -->
+  <div class="bottom-nav-container" @mouseenter="activateNav">
+    <nav class="nav-buttons" :class="{ active: isNavActive }">
+      <div 
+        v-for="item in navItems" 
+        :key="item.id"
+        :class="['nav-button', { active: currentNavItem === item.id }]"
+        @click="selectNavItem(item.path)"
+      >
+        <span class="nav-icon">
+          <img v-if="item.id === 'home' && homeIconUrl" :src="homeIconUrl" alt="主页" style="width: 20px; height: 20px;" />
+          <img v-else-if="item.id === 'follow' && followIconUrl" :src="followIconUrl" alt="关注" style="width: 20px; height: 20px;" />
+          <img v-else-if="item.id === 'column' && columnIconUrl" :src="columnIconUrl" alt="专栏" style="width: 20px; height: 20px;" />
+          <span v-else>{{ item.icon }}</span>
+        </span>
+        <!-- 悬停提示 -->
+        <span class="nav-tooltip">{{ item.label }}</span>
+      </div>
+    </nav>
+  </div>
 </div>
