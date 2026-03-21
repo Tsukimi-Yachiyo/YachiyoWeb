@@ -197,7 +197,7 @@ export const chatAPI = {
   },
 
   deleteConversation(conversationId) {
-    return apiClient.get(`/api/v2/clear/${conversationId}`);
+    return apiClient.get(`/api/v2/history/clear/${conversationId}`);
   }
 };
 

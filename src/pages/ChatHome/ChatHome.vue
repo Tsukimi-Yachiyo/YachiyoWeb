@@ -93,6 +93,13 @@ const handleDeleteConversation = async (conversationId, event) => {
     await deleteConversation(conversationId);
   }
 };
+
+const saveEditTitle = async (conversationId) => {
+  if (editTitle.value.trim()) {
+    await updateConversationTitle(conversationId, editTitle.value.trim());
+  }
+  editModeConversationId.value = null;
+};
 </script>
 
 <template src="./templates/ChatHome.html"></template>

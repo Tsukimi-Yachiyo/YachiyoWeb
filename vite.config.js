@@ -28,6 +28,7 @@ export default defineConfig({
     allowedHosts: [
       // 1. 添加报错的 ngrok 域名
       "adamantly-unappalled-bertie.ngrok-free.dev",
+      "yachiyo.fucku.top",
       // 2. 可选：允许所有 ngrok-free.dev 子域名（避免每次 ngrok 换域名都要改）
       ".ngrok-free.dev",
       'www.tsukimi-yachiyo.top', // 你需要允许的域名
@@ -45,7 +46,7 @@ export default defineConfig({
     // 配置代理，解决CORS问题
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '/api')
       }
