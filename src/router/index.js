@@ -70,6 +70,16 @@ const routes = [
     meta: {
       requiresAuth: true
     }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    // 懒加载admin页面组件
+    component: () => import('../pages/admin/Admin.vue'),
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true
+    }
   }
 ];
 

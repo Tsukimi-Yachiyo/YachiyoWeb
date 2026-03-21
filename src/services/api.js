@@ -14,6 +14,10 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // 如果是 FormData，移除默认的 Content-Type，让浏览器自动设置
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -232,6 +236,16 @@ export const postAPI = {
         'Content-Type': 'multipart/form-data'
       }
     });
+  }
+};
+
+export const adminAPI = {
+  uploadFiles(files) {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    return apiClient.post('/api/yachiyo/168/mini/admin/upload', formData);
   }
 };
 
