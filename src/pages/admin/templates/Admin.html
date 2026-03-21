@@ -1,0 +1,53 @@
+<div class="admin-container">
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <div class="admin-panel">
+      <div class="admin-header">
+        <h1>Admin 页面</h1>
+        <p>文件上传管理</p>
+      </div>
+      
+      <div class="upload-section">
+        <div class="upload-area">
+          <input 
+            type="file" 
+            id="fileInput"
+            multiple 
+            @change="handleFileChange"
+            class="file-input"
+          />
+          <label for="fileInput" class="file-label">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">
+              <p>点击或拖拽文件到此处</p>
+              <p class="upload-hint">支持上传多个文件</p>
+            </div>
+            <div v-if="files.length > 0" class="file-list">
+              <div v-for="(file, index) in files" :key="index" class="file-item">
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">{{ (file.size / 1024).toFixed(2) }} KB</span>
+              </div>
+            </div>
+          </label>
+        </div>
+        
+        <button 
+          @click="handleUpload" 
+          class="upload-btn"
+          :disabled="isLoading || files.length === 0"
+        >
+          <span v-if="isLoading" class="loading-spinner"></span>
+          <span v-else>上传文件</span>
+        </button>
+      </div>
+      
+      <!-- 消息提示 -->
+      <div v-if="successMessage" class="message success-message">
+        {{ successMessage }}
+      </div>
+      <div v-if="errorMessage" class="message error-message">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+</div>
