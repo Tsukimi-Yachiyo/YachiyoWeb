@@ -33,7 +33,7 @@
             @mouseleave="hidePopover"
           >
             <img v-if="userAvatar" :src="userAvatar" alt="用户头像" />
-            <span v-else>{{ username.charAt(0).toUpperCase() }}</span>
+            <span v-else>{{ username && username.length > 0 ? username.charAt(0).toUpperCase() : 'U' }}</span>
           </div>
         </template>
       </UserProfilePopover>

@@ -4,6 +4,9 @@
   <transition name="popover-fade">
     <div v-show="isVisible" class="user-profile-popover" @mouseenter="keepVisible" @mouseleave="hidePopover">
       <div class="popover-actions">
+        <button class="popover-btn manager-btn" @click="goToManager">
+          <span class="btn-text">管理</span>
+        </button>
         <button class="popover-btn settings-btn" @click="goToSettings">
           <span class="btn-text">设置</span>
         </button>

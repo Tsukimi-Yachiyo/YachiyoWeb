@@ -4,6 +4,7 @@
     currentPage="tsukuyomi" 
     :username="username" 
     :userAvatar="userAvatar" 
+    @logout="logout" 
   />
 
   <!-- 主内容区 -->
@@ -19,7 +20,7 @@
   </div>
 
   <!-- 底部圆形导航按钮组 -->
-  <div class="bottom-nav-container" @mouseenter="activateNav">
+  <div v-if="!route.path.includes('/post/')" class="bottom-nav-container" @mouseenter="activateNav">
     <nav class="nav-buttons" :class="{ active: isNavActive }">
       <div 
         v-for="item in navItems" 

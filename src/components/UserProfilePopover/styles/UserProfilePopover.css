@@ -110,6 +110,11 @@
   text-align: left;
 }
 
+.manager-btn:hover {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.5);
+}
+
 .settings-btn:hover {
   background: rgba(33, 150, 243, 0.1);
   border-color: rgba(33, 150, 243, 0.5);

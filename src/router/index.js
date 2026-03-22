@@ -42,6 +42,11 @@ const routes = [
         path: 'column',
         name: 'TsukuyomiColumn',
         component: () => import('../pages/Tsukuyomi/views/ColumnView.vue')
+      },
+      {
+        path: 'post/:post_id',
+        name: 'PostDetail',
+        component: () => import('../pages/Tsukuyomi/views/PostDetailView.vue')
       }
     ]
   },
@@ -80,6 +85,29 @@ const routes = [
     meta: {
       requiresAuth: true
     }
+  },
+  {
+    path: '/manager',
+    name: 'Manager',
+    // 懒加载管理中心组件
+    component: () => import('../pages/Manager/Manager.vue'),
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true
+    },
+    redirect: '/manager/post',
+    children: [
+      {
+        path: 'post',
+        name: 'PostManagement',
+        component: () => import('../pages/Manager/views/PostManagementView.vue')
+      },
+      {
+        path: 'user',
+        name: 'UserManagement',
+        component: () => import('../pages/Manager/views/UserManagementView.vue')
+      }
+    ]
   }
 ];
 

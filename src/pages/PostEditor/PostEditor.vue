@@ -53,7 +53,7 @@ const handleExit = () => {
     files.value = [];
     // 清除本地缓存
     localStorage.removeItem('postEditorCache');
-    router.push('/tsukuyomi');
+    router.back();
   }
 };
 

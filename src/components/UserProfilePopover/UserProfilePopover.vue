@@ -21,7 +21,8 @@ const {
   showPopover,
   hidePopover,
   keepVisible,
-  goToSettings
+  goToSettings,
+  goToManager
 } = useUserProfilePopover(props, emit);
 
 // 监听isVisible变化并通知父组件

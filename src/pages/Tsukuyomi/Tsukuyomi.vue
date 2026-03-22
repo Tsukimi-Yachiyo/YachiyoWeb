@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import AppHeader from '../../components/AppHeader/AppHeader.vue';
 import { useUserProfile } from '../../composables/useUserProfile.js';
+import { useAuth } from '../../composables/useAuth.js';
 import { useIconManager } from '../../composables/useIconManager.js';
 
 // 初始化图标管理器
@@ -62,6 +63,8 @@ const deactivateNav = () => {
 
 // 获取用户信息
 const { username, userAvatar, loadUserDetail } = useUserProfile();
+// 获取认证信息和登出方法
+const { logout } = useAuth();
 
 // 加载用户详情
 loadUserDetail();

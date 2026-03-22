@@ -185,7 +185,7 @@ export function useUserSettings() {
   };
 
   const goBack = () => {
-    router.push('/chat/home');
+    router.back();
   };
 
   onMounted(() => {

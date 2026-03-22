@@ -226,16 +226,76 @@ export const userAPI = {
         'Content-Type': 'multipart/form-data'
       }
     });
+  },
+
+  getPosterDetail(userId) {
+    return apiClient.post(`/api/v1/user/detail/detail/get/user?userId=${userId}`);
   }
 };
 
 export const postAPI = {
   uploadPost(formData) {
-    return apiClient.post('/api/v2/posting/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    return apiClient.post('/api/v2/posting/upload', formData);
+  },
+  
+  searchPosting(keyword) {
+    return apiClient.post(`/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}`);
+  },
+  
+  getPostingEncapsulate(postingId) {
+    return apiClient.post(`/api/v2/searching/encapsulate?postingId=${postingId}`);
+  },
+  
+  getPosting(postingId) {
+    return apiClient.post(`/api/v2/posting/get?postingId=${postingId}`);
+  },
+  
+  isLiked(postingId) {
+    return apiClient.post(`/api/v2/posting/isLiked?postingId=${postingId}`);
+  },
+  
+  isCollected(postingId) {
+    return apiClient.post(`/api/v2/posting/isCollected?postingId=${postingId}`);
+  },
+  
+  // 点赞帖子
+  likePosting(postingId) {
+    return apiClient.post(`/api/v2/posting/like?postingId=${postingId}`);
+  },
+  
+  // 收藏帖子
+  collectionPosting(postingId) {
+    return apiClient.post(`/api/v2/posting/collection?postingId=${postingId}`);
+  },
+  
+  // 取消点赞帖子
+  cancelLikePosting(postingId) {
+    return apiClient.post(`/api/v2/posting/cancelLike?postingId=${postingId}`);
+  },
+  
+  // 取消收藏帖子
+  cancelCollectionPosting(postingId) {
+    return apiClient.post(`/api/v2/posting/cancelCollection?postingId=${postingId}`);
+  },
+  
+  // 获取帖子的收藏数
+  getCollectionCount(postingId) {
+    return apiClient.post(`/api/v2/posting/getCollectionCount?postingId=${postingId}`);
+  },
+  
+  // 获取帖子的点赞数
+  getLikeCount(postingId) {
+    return apiClient.post(`/api/v2/posting/getLikeCount?postingId=${postingId}`);
+  },
+  
+  // 获取自己的帖子
+  getMyPosting() {
+    return apiClient.post('/api/v2/posting/getMyPosting');
+  },
+  
+  // 删除帖子
+  deletePosting(postingId) {
+    return apiClient.post(`/api/v2/posting/delete?postingId=${postingId}`);
   }
 };
 
@@ -246,6 +306,23 @@ export const adminAPI = {
       formData.append('files', file);
     });
     return apiClient.post('/api/yachiyo/168/mini/admin/upload', formData);
+  }
+};
+
+export const commentAPI = {
+  // 添加评论
+  addComment(commentRequest) {
+    return apiClient.post('/api/v1/auth/add-comment', commentRequest);
+  },
+  
+  // 获取评论列表
+  getCommentList(postingId) {
+    return apiClient.post('/api/v1/auth/get-comment-list', postingId);
+  },
+  
+  // 删除评论
+  deleteComment(commentId) {
+    return apiClient.post('/api/v1/auth/delete-comment', commentId);
   }
 };
 

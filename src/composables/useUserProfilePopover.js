@@ -33,6 +33,11 @@ export function useUserProfilePopover(props, emit) {
     router.push('/settings');
   };
 
+  const goToManager = () => {
+    isVisible.value = false;
+    router.push('/manager');
+  };
+
   const handleClickOutside = (event) => {
     if (popoverRef.value && !popoverRef.value.contains(event.target)) {
       isVisible.value = false;
@@ -56,6 +61,7 @@ export function useUserProfilePopover(props, emit) {
     showPopover,
     hidePopover,
     keepVisible,
-    goToSettings
+    goToSettings,
+    goToManager
   };
 }
