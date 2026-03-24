@@ -132,7 +132,8 @@
           :disabled="isChatLoading || isModelLoading" ref="inputRef" />
         <button class="send-btn" @click="sendMessage" :disabled="isChatLoading || isModelLoading || !inputMessage.trim()">
           <span v-if="isChatLoading" class="loading-spinner"></span>
-          <span v-else>发送</span>
+          <!-- <span v-else>发送</span> -->
+          <img v-else src="/icons/theme/ENTER.svg" alt="发送" width="36" height="36">
         </button>
       </div>
     </div>
