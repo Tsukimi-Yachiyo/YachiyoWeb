@@ -50,8 +50,7 @@ const processImageData = (imageData) => {
       const uint8Array = new Uint8Array(imageData);
       base64String = btoa(String.fromCharCode(...uint8Array));
     }
-    
-    return `data:image/jpeg;base64,${base64String}`;
+    return `http://47.98.229.211:8080/file/generate${base64String}`;
   } catch (error) {
     console.error('处理图片数据失败:', error);
     return null;
