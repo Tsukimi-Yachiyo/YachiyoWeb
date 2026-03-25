@@ -57,14 +57,14 @@ const getHotPosts = async () => {
 const fetchAllPostDetails = async () => {
   detailsLoading.value = true;
   postDetails.value = [];
-  
+
   try {
     for (const postId of posts.value) {
       // 获取帖子简述
       const encapsulateResponse = await postAPI.getPostingEncapsulate(postId);
       if (encapsulateResponse.success && encapsulateResponse.data) {
         const postEncapsulate = encapsulateResponse.data;
-        
+
         // 获取发帖人详情
         let posterDetail = null;
         if (postEncapsulate.posterId) {
@@ -73,7 +73,7 @@ const fetchAllPostDetails = async () => {
             posterDetail = posterResponse.data;
           }
         }
-        
+
         // 添加到帖子详情列表
         postDetails.value.push({
           id: postId,
@@ -141,30 +141,26 @@ onMounted(() => {
   <div class="view-container">
     <!-- 搜索栏 -->
     <div class="search-container">
-      <input 
-        type="text" 
-        v-model="searchKeyword" 
-        placeholder="搜索帖子..."
-        class="search-input"
-        @keyup.enter="searchPosts"
-      />
+      <input type="text" v-model="searchKeyword" placeholder="搜索帖子..." class="search-input"
+        @keyup.enter="searchPosts" />
       <button @click="searchPosts" class="search-button" title="搜索">
-        <img v-if="searchIconUrl" :src="searchIconUrl" alt="搜索" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" />
+        <img v-if="searchIconUrl" :src="searchIconUrl" alt="搜索"
+          style="width: 20px; height: 20px; filter: brightness(0) invert(1);" />
         <span v-else>搜索</span>
       </button>
     </div>
-    
+
     <!-- 加载状态 -->
     <div v-if="loading || detailsLoading" class="loading">
       <p>加载中...</p>
     </div>
-    
+
     <!-- 错误信息 -->
     <div v-else-if="error" class="error">
       <p>{{ error }}</p>
       <button @click="getHotPosts" class="retry-button">重试</button>
     </div>
-    
+
     <!-- 帖子列表 -->
     <div v-else class="posts-wrapper">
       <div v-if="postDetails.length === 0" class="empty-posts">
@@ -172,42 +168,20 @@ onMounted(() => {
       </div>
       <!-- 第一行：单数索引的帖子 -->
       <div class="row-container">
-        <div 
-          v-for="post in firstRowPosts" 
-          :key="post.id"
-          class="post-wrapper"
-          @click="goToPostDetail(post.id)"
-        >
-          <Post 
-            :user_name="post.userName"
-            :user_id="post.posterId"
-            :title="post.title"
-            :post_id="post.id"
-            :user_avatar="post.userAvatar"
-            :cover_image="post.coverImage"
-          />
+        <div v-for="post in firstRowPosts" :key="post.id" class="post-wrapper" @click="goToPostDetail(post.id)">
+          <Post :user_name="post.userName" :user_id="post.posterId" :title="post.title" :post_id="post.id"
+            :user_avatar="post.userAvatar" :cover_image="post.coverImage" />
         </div>
       </div>
       <!-- 第二行：双数索引的帖子 -->
       <div class="row-container">
-        <div 
-          v-for="post in secondRowPosts" 
-          :key="post.id"
-          class="post-wrapper"
-          @click="goToPostDetail(post.id)"
-        >
-          <Post 
-            :user_name="post.userName"
-            :user_id="post.posterId"
-            :title="post.title"
-            :post_id="post.id"
-            :user_avatar="post.userAvatar"
-            :cover_image="post.coverImage"
-          />
+        <div v-for="post in secondRowPosts" :key="post.id" class="post-wrapper" @click="goToPostDetail(post.id)">
+          <Post :user_name="post.userName" :user_id="post.posterId" :title="post.title" :post_id="post.id"
+            :user_avatar="post.userAvatar" :cover_image="post.coverImage" />
         </div>
       </div>
     </div>
-    
+
     <button class="edit-button" @click="goToPostEditor" title="编辑帖子">
       <img v-if="editIconUrl" :src="editIconUrl" alt="编辑帖子" style="width: 24px; height: 24px;" />
       <span v-else>编辑</span>
@@ -216,32 +190,17 @@ onMounted(() => {
 </template>
 
 <style scoped>
+@reference "tailwindcss";
+
 .view-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.8);
-  position: relative;
-  box-sizing: border-box;}
+  @apply w-full h-full;
+}
 
 /* 搜索栏容器 */
 .search-container {
-  position: fixed;
-  top: 90px;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  @apply flex items-center gap-3 w-full max-w-3xl mx-auto p-5 z-10;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  box-sizing: border-box;
 }
 
 /* 搜索输入框 */
@@ -360,6 +319,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -380,6 +340,7 @@ onMounted(() => {
     opacity: 1;
     transform: translateX(0);
   }
+
   to {
     opacity: 0;
     transform: translateX(-100%);
@@ -388,6 +349,7 @@ onMounted(() => {
 
 /* 帖子容器 */
 .posts-wrapper {
+  @apply flex flex-col items-center;
   width: 100%;
   max-width: 1400px;
   display: flex;
@@ -462,11 +424,11 @@ onMounted(() => {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .search-button {
     width: 100%;
   }
-  
+
   .posts-grid {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
@@ -477,12 +439,12 @@ onMounted(() => {
   .view-container {
     padding: 10px;
   }
-  
+
   .posts-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .edit-button {
     bottom: 20px;
     right: 20px;

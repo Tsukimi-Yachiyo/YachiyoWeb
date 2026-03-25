@@ -1,37 +1,22 @@
 <header class="title-bar">
   <div class="title-bar-content">
     <div class="title-section">
-      <router-link 
-        class="app-title-button"
-        to="/chat/home"
-      >
-        <img src="/icons/theme/月见八千代.svg" alt="月见八千代" width="64" height="64">        
+      <router-link class="app-title-button" to="/chat/home">
+        <img src="/icons/theme/月见八千代.svg" alt="月见八千代" width="64" height="64">
       </router-link>
       <div class="nav-buttons">
-        <router-link 
-          class="nav-button text-only"
-          :class="{ active: currentPage === 'tsukuyomi' }"
-          to="/tsukuyomi"
-        >
-          <img src="/icons/theme/月读空间.svg" alt="月读空间" width="64" height="64">        
+        <router-link class="nav-button" :class="{ active: currentPage === 'tsukuyomi' }" to="/tsukuyomi">
+          <img src="/icons/theme/月读空间.svg" alt="月读空间" width="64" height="64">
         </router-link>
       </div>
     </div>
     <div class="user-info-header">
       <span class="username-header" :class="{ 'avatar-active': userProfileIsVisible }">{{ username }}</span>
-      <UserProfilePopover 
-        :username="username" 
-        :userAvatar="userAvatar" 
-        @logout="handleLogout" 
-        @update:isVisible="value => userProfileIsVisible = value"
-      >
+      <UserProfilePopover :username="username" :userAvatar="userAvatar" @logout="handleLogout"
+        @update:isVisible="value => userProfileIsVisible = value">
         <template #trigger="{ showPopover, hidePopover, isVisible }">
-          <div
-            class="user-avatar-header"
-            :class="{ 'avatar-active': isVisible }"
-            @mouseenter="showPopover"
-            @mouseleave="hidePopover"
-          >
+          <div class="user-avatar-header" :class="{ 'avatar-active': isVisible }" @mouseenter="showPopover"
+            @mouseleave="hidePopover">
             <img v-if="userAvatar" :src="userAvatar" alt="用户头像" />
             <span v-else>{{ username && username.length > 0 ? username.charAt(0).toUpperCase() : 'U' }}</span>
           </div>

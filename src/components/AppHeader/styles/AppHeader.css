@@ -1,41 +1,24 @@
+@reference "tailwindcss";
+
 /* 标题栏 */
 .title-bar {
-  background: #FFFFFF;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 300;
-  position: sticky;
+  @apply h-20 bg-white shadow-md z-100;
 }
 
 .title-bar-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  @apply flex justify-between items-center px-4 md:px-8 mx-auto h-full w-full max-w-7xl;
 }
 
 .title-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+  @apply flex items-center gap-8;
 }
 
 .app-title-button {
-  color: #1a237e;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  padding: 0;
-  border: none;
   background: transparent;
-  cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .app-title-button:hover {
-  color: #1976D2;
   transform: translateY(-2px);
 }
 
@@ -45,54 +28,16 @@
 }
 
 .nav-button {
-  padding: 8px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  background: #f5f5f5;
-  color: #333;
-  font-size: 14px;
-  cursor: pointer;
+  background: transparent;
   transition: all 0.3s ease;
 }
 
-.nav-button.text-only {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  color: #333;
-}
-
-.nav-button.text-only:hover {
-  background: transparent;
-  color: #1976D2;
-  transform: translateY(-2px);
-}
-
-.nav-button.text-only.active {
-  background: transparent;
-  color: #1976D2;
-  border: none;
-  box-shadow: none;
-}
-
 .nav-button:hover {
-  background: #e0e0e0;
   transform: translateY(-2px);
-}
-
-.nav-button.active {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  color: white;
-  border-color: #1976D2;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
 }
 
 .user-info-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
+  @apply flex items-center gap-3 relative;
 }
 
 .username-header {
@@ -148,33 +93,33 @@
   .title-bar-content {
     padding: 10px 16px;
   }
-  
+
   .title-section {
     gap: 10px;
   }
-  
+
   .app-title-button {
     font-size: 16px;
   }
-  
+
   .nav-buttons {
     gap: 8px;
   }
-  
+
   .nav-button {
     padding: 6px 12px;
     font-size: 13px;
   }
-  
+
   .nav-button.text-only {
     padding: 6px 12px;
   }
-  
+
   .username-header {
     font-size: 13px;
     max-width: 120px;
   }
-  
+
   .user-avatar-header {
     width: 32px;
     height: 32px;
@@ -186,20 +131,20 @@
   .title-section {
     gap: 8px;
   }
-  
+
   .app-title-button {
     font-size: 14px;
   }
-  
+
   .nav-button {
     padding: 4px 8px;
     font-size: 12px;
   }
-  
+
   .nav-button.text-only {
     padding: 4px 8px;
   }
-  
+
   .username-header {
     display: none;
   }
