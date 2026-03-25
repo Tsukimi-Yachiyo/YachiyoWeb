@@ -1,20 +1,20 @@
 <header class="title-bar">
   <div class="title-bar-content">
     <div class="title-section">
-      <button 
+      <router-link 
         class="app-title-button"
-        @click="goToChat"
+        to="/chat/home"
       >
         <img src="/icons/theme/月见八千代.svg" alt="月见八千代" width="64" height="64">        
-      </button>
+      </router-link>
       <div class="nav-buttons">
-        <button 
+        <router-link 
           class="nav-button text-only"
           :class="{ active: currentPage === 'tsukuyomi' }"
-          @click="goToTsukuyomi"
+          to="/tsukuyomi"
         >
           <img src="/icons/theme/月读空间.svg" alt="月读空间" width="64" height="64">        
-        </button>
+        </router-link>
       </div>
     </div>
     <div class="user-info-header">

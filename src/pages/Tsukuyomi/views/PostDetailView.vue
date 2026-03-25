@@ -296,7 +296,6 @@ const loadComments = async () => {
 // 提交评论
 const submitComment = async () => {
   if (!commentContent.value.trim() || submittingComment.value) return;
-  
   try {
     submittingComment.value = true;
     const commentRequest = {

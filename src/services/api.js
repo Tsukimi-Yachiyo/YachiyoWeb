@@ -238,8 +238,8 @@ export const postAPI = {
     return apiClient.post('/api/v2/posting/upload', formData);
   },
   
-  searchPosting(keyword) {
-    return apiClient.post(`/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}`);
+  searchPosting(keyword, pageNum, pageSize) {
+    return apiClient.post(`/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}&pageNum=${encodeURIComponent(pageNum)}&pageSize=${encodeURIComponent(pageSize)}`);
   },
   
   getPostingEncapsulate(postingId) {

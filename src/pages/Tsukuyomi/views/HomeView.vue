@@ -38,7 +38,7 @@ const getHotPosts = async () => {
   loading.value = true;
   error.value = '';
   try {
-    const response = await postAPI.searchPosting('');
+    const response = await postAPI.searchPosting('', 1, 12);
     if (response.success) {
       posts.value = response.data || [];
       // 立即获取所有帖子的详情
@@ -228,7 +228,7 @@ onMounted(() => {
 /* 搜索栏容器 */
 .search-container {
   position: fixed;
-  top: 60px;
+  top: 90px;
   left: 0;
   right: 0;
   z-index: 99;
