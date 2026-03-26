@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.vue",
+    "lint:fix": "eslint . --ext .js,.vue --fix",
+    "format": "prettier --write \"src/**/*.{js,vue,css,scss,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,vue,css,scss,json,md}\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -17,7 +21,13 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.22.0",
     "@vitejs/plugin-vue": "^6.0.4",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-vue": "^10.0.0",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.3",
     "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6"

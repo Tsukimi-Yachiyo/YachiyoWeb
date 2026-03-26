@@ -1,0 +1,23 @@
+# Build output
+dist
+build
+
+# Dependencies
+node_modules
+
+# Public directory
+public
+
+# Cache
+.cache
+.temp
+
+# Log files
+*.log
+
+# Editor directories
+.vscode
+.idea
+
+# OS files
+.DS_Store
