@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue'
-  import { processImageData } from '@/composables/useImageData'
+  import { processImageData } from '@/composables/useImageData.js'
 
   const props = defineProps({
     user_name: {
