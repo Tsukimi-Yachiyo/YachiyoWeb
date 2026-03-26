@@ -59,11 +59,17 @@ export function useLogin() {
     try {
       // 加载初始视频
       if (introVideo.value) {
-        await loadVideoWithMediaSource(introVideo.value, '/resource/login_show.mp4')
+        await loadVideoWithMediaSource(
+          introVideo.value,
+          `${import.meta.env.BASE_URL}resource/login_show.mp4`
+        )
       }
       // 加载循环视频
       if (cycleVideo.value) {
-        await loadVideoWithMediaSource(cycleVideo.value, '/resource/login_show_cycle.mp4')
+        await loadVideoWithMediaSource(
+          cycleVideo.value,
+          `${import.meta.env.BASE_URL}resource/login_show_cycle.mp4`
+        )
       }
       // 视频加载完成后显示表单
       handleVideoLoaded()

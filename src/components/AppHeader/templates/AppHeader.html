@@ -2,11 +2,11 @@
   <div class="title-bar-content">
     <div class="title-section">
       <router-link class="app-title-button" to="/chat/home">
-        <img src="/icons/theme/月见八千代.svg" alt="月见八千代" width="64" height="64">
+        <img :src="appLogoUrl" alt="月见八千代" width="64" height="64">
       </router-link>
       <div class="nav-buttons">
         <router-link class="nav-button" :class="{ active: currentPage === 'tsukuyomi' }" to="/tsukuyomi">
-          <img src="/icons/theme/月读空间.svg" alt="月读空间" width="64" height="64">
+          <img :src="tsukuyomiLogoUrl" alt="月读空间" width="64" height="64">
         </router-link>
       </div>
     </div>

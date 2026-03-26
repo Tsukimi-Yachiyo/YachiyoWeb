@@ -19,6 +19,9 @@
   })
 
   const emit = defineEmits(['logout'])
+  const iconBaseUrl = `${import.meta.env.BASE_URL}icons/theme/`
+  const appLogoUrl = `${iconBaseUrl}月见八千代.svg`
+  const tsukuyomiLogoUrl = `${iconBaseUrl}月读空间.svg`
 
   // eslint-disable-next-line no-unused-vars
   const userProfileIsVisible = ref(false)

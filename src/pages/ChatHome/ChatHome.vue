@@ -5,6 +5,8 @@
   import AppHeader from '../../components/AppHeader/AppHeader.vue'
   import Live2DModel from '../../components/Live2DModel/Live2DModel.vue'
 
+  const enterIconUrl = `${import.meta.env.BASE_URL}icons/theme/ENTER.svg`
+
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()
 
