@@ -1,5 +1,5 @@
-import { ref } from 'vue';
-import { userAPI } from '../services/api.js';
+import { ref } from 'vue'
+import { userAPI } from '../services/api.js'
 import { processImageData } from './useImageData.js'
 
 // 缓存键名
@@ -24,10 +24,10 @@ export function useUserProfile() {
       }
 
       if (avatarResult.success && avatarResult.data) {
-        const avatarData = avatarResult.data;
-        const avatarValue = processImageData(avatarData);
-        userAvatar.value = avatarValue;
-        localStorage.setItem(AVATAR_CACHE_KEY, avatarValue);
+        const avatarData = avatarResult.data
+        const avatarValue = processImageData(avatarData)
+        userAvatar.value = avatarValue
+        localStorage.setItem(AVATAR_CACHE_KEY, avatarValue)
       }
     } catch (error) {
       console.error('加载用户详情失败:', error)

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { processImageData } from '@/composables/useImageData.js'
+  import { ref, computed, watch, onMounted } from 'vue'
+  import { processImageData } from '@/composables/useImageData.js'
 
   const props = defineProps({
     user_name: {
@@ -34,15 +34,16 @@ import { processImageData } from '@/composables/useImageData.js'
   // 从缓存中获取封面
   const coverImage = ref(null)
 
-// 从缓存获取数据或使用传递的数据
-const fetchUserAvatar = () => {
-  if (props.user_avatar) {
-    // 使用从父组件传递的头像数据
-    userAvatar.value = processImageData(props.user_avatar);
-  } else {
-    // 实际项目中，这里应该从缓存或本地存储中获取头像
-    // 这里使用模拟数据
-    userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20portrait&image_size=square`;
+  // 从缓存获取数据或使用传递的数据
+  const fetchUserAvatar = () => {
+    if (props.user_avatar) {
+      // 使用从父组件传递的头像数据
+      userAvatar.value = processImageData(props.user_avatar)
+    } else {
+      // 实际项目中，这里应该从缓存或本地存储中获取头像
+      // 这里使用模拟数据
+      userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20portrait&image_size=square`
+    }
   }
 
   const fetchCoverImage = () => {

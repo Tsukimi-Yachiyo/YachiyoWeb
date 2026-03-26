@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useUserProfile } from '../../../composables/useUserProfile.js';
-import { useIconManager } from '../../../composables/useIconManager.js';
-import { postAPI, userAPI, commentAPI } from '../../../services/api.js';
-import { marked } from 'marked';
-import { processImageData } from '@/composables/useImageData.js';
+  import { ref, onMounted, computed } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import { useUserProfile } from '@/composables/useUserProfile.js'
+  import { useIconManager } from '@/composables/useIconManager.js'
+  import { processImageData } from '@/composables/useImageData.js'
+  import { postAPI, userAPI, commentAPI } from '@/services/api.js'
+  import { marked } from 'marked'
 
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()
@@ -338,10 +338,10 @@ import { processImageData } from '@/composables/useImageData.js';
     }
   }
 
-// 组件挂载时加载帖子详情和评论
-onMounted(() => {
-  loadPostDetail();
-});
+  // 组件挂载时加载帖子详情和评论
+  onMounted(() => {
+    loadPostDetail()
+  })
 
   // 将byte[]转换为图片URL
   const getImageUrl = byteArray => {
