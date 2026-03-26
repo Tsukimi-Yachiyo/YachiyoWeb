@@ -6,6 +6,31 @@
   <link rel="icon" href="./favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YachiyoChat</title>
+  <script>
+    // GitHub Pages 路由重定向恢复
+    (function() {
+      const storedPath = sessionStorage.getItem('ghp_redirect_path');
+      if (storedPath) {
+        // 清除存储，避免重复应用
+        sessionStorage.removeItem('ghp_redirect_path');
+
+        // 基础路径，必须与 vite.config.js 中的 base 配置一致
+        const basePath = '/YachiyoWeb/';
+
+        // 构建新的完整路径
+        // 确保 storedPath 以斜杠开头，且 basePath 以斜杠结尾
+        const normalizedBase = basePath.endsWith('/') ? basePath : basePath + '/';
+        const normalizedPath = storedPath.startsWith('/') ? storedPath : '/' + storedPath;
+        const newPathname = normalizedBase + normalizedPath.substring(1); // 合并，避免双斜杠
+
+        // 使用 history.replaceState 更新 URL，不刷新页面
+        const newUrl = newPathname + window.location.search + window.location.hash;
+        history.replaceState(null, '', newUrl);
+
+        console.log('GitHub Pages 路由重定向恢复:', storedPath, '->', newUrl);
+      }
+    })();
+  </script>
 </head>
 
 <body>
