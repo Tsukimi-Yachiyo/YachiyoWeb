@@ -29,6 +29,7 @@
 
     <div class="test-result">
       <h4>处理结果：</h4>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div v-html="processedText"></div>
     </div>
 

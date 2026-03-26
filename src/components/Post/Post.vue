@@ -1,13 +1,13 @@
 <script setup>
-  import { ref, computed, watch, onMounted } from 'vue'
+  import { ref, watch, onMounted } from 'vue'
   import { processImageData } from '@/composables/useImageData.js'
 
   const props = defineProps({
-    user_name: {
+    userName: {
       type: String,
       required: true,
     },
-    user_id: {
+    userId: {
       type: String,
       required: true,
     },
@@ -15,58 +15,58 @@
       type: String,
       required: true,
     },
-    post_id: {
+    postId: {
       type: String,
       required: true,
     },
-    user_avatar: {
+    userAvatar: {
       type: [String, Array],
       default: null,
     },
-    cover_image: {
+    coverImage: {
       type: [String, Array],
       default: null,
     },
   })
 
   // 从缓存中获取头像
-  const userAvatar = ref(null)
+  const userAvatarSrc = ref(null)
   // 从缓存中获取封面
-  const coverImage = ref(null)
+  const coverImageSrc = ref(null)
 
   // 从缓存获取数据或使用传递的数据
   const fetchUserAvatar = () => {
-    if (props.user_avatar) {
+    if (props.userAvatar) {
       // 使用从父组件传递的头像数据
-      userAvatar.value = processImageData(props.user_avatar)
+      userAvatarSrc.value = processImageData(props.userAvatar)
     } else {
       // 实际项目中，这里应该从缓存或本地存储中获取头像
       // 这里使用模拟数据
-      userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20portrait&image_size=square`
+      userAvatarSrc.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20portrait&image_size=square`
     }
   }
 
   const fetchCoverImage = () => {
-    if (props.cover_image) {
+    if (props.coverImage) {
       // 使用从父组件传递的封面数据
-      coverImage.value = processImageData(props.cover_image)
+      coverImageSrc.value = processImageData(props.coverImage)
     } else {
       // 实际项目中，这里应该从缓存或本地存储中获取封面
       // 这里使用模拟数据
-      coverImage.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=post%20cover%20image&image_size=landscape_16_9`
+      coverImageSrc.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=post%20cover%20image&image_size=landscape_16_9`
     }
   }
 
   // 监听属性变化
   watch(
-    () => props.user_avatar,
+    () => props.userAvatar,
     () => {
       fetchUserAvatar()
     }
   )
 
   watch(
-    () => props.cover_image,
+    () => props.coverImage,
     () => {
       fetchCoverImage()
     }

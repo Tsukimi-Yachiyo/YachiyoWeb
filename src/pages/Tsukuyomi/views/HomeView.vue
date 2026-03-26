@@ -184,12 +184,12 @@
           @click="goToPostDetail(post.id)"
         >
           <Post
-            :user_name="post.userName"
-            :user_id="post.posterId"
+            :user-name="post.userName"
+            :user-id="post.posterId"
             :title="post.title"
-            :post_id="post.id"
-            :user_avatar="post.userAvatar"
-            :cover_image="post.coverImage"
+            :post-id="post.id"
+            :user-avatar="post.userAvatar"
+            :cover-image="post.coverImage"
           />
         </div>
       </div>
@@ -202,12 +202,12 @@
           @click="goToPostDetail(post.id)"
         >
           <Post
-            :user_name="post.userName"
-            :user_id="post.posterId"
+            :user-name="post.userName"
+            :user-id="post.posterId"
             :title="post.title"
-            :post_id="post.id"
-            :user_avatar="post.userAvatar"
-            :cover_image="post.coverImage"
+            :post-id="post.id"
+            :user-avatar="post.userAvatar"
+            :cover-image="post.coverImage"
           />
         </div>
       </div>
