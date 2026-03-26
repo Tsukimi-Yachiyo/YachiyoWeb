@@ -31,7 +31,7 @@
 .content-placeholder h2 {
   font-size: 24px;
   margin-bottom: 10px;
-  background: linear-gradient(135deg, #fff 0%, #64B5F6 100%);
+  background: linear-gradient(135deg, #fff 0%, #64b5f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -130,7 +130,7 @@
 
 /* 导航按钮 - 选中状态 */
 .nav-button.active {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
 }
 
@@ -243,7 +243,9 @@
 /* 路由过渡动画 */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fade-enter-from,
@@ -272,7 +274,6 @@
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-
   /* 内容区域 */
   .content-area {
     padding: 16px;
@@ -404,7 +405,6 @@
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-
   /* 导航按钮 - 平板调整 */
   .nav-buttons.active .nav-button {
     width: 55px;

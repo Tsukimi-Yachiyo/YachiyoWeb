@@ -1,73 +1,73 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import AppHeader from '../../components/AppHeader/AppHeader.vue';
-import { useUserProfile } from '../../composables/useUserProfile.js';
-import { useAuth } from '../../composables/useAuth.js';
-import { useIconManager } from '../../composables/useIconManager.js';
+  import { ref, computed, watch } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import AppHeader from '../../components/AppHeader/AppHeader.vue'
+  import { useUserProfile } from '../../composables/useUserProfile.js'
+  import { useAuth } from '../../composables/useAuth.js'
+  import { useIconManager } from '../../composables/useIconManager.js'
 
-// 初始化图标管理器
-const { checkIconCache } = useIconManager();
+  // 初始化图标管理器
+  const { checkIconCache } = useIconManager()
 
-// 计算属性，用于获取图标数据URL
-const homeIconUrl = computed(() => {
-  const iconData = checkIconCache('home.svg');
-  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
-});
+  // 计算属性，用于获取图标数据URL
+  const homeIconUrl = computed(() => {
+    const iconData = checkIconCache('home.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
 
-const followIconUrl = computed(() => {
-  const iconData = checkIconCache('users-group.svg');
-  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
-});
+  const followIconUrl = computed(() => {
+    const iconData = checkIconCache('users-group.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
 
-const columnIconUrl = computed(() => {
-  const iconData = checkIconCache('book.svg');
-  return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : '';
-});
+  const columnIconUrl = computed(() => {
+    const iconData = checkIconCache('book.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
 
-const userProfileIsVisible = ref(false);
-const router = useRouter();
-const route = useRoute();
+  const userProfileIsVisible = ref(false)
+  const router = useRouter()
+  const route = useRoute()
 
-// 导航项 - 重构为三个主要选项
-const navItems = [
-  { id: 'home', label: '主页', icon: '🏠', path: '/tsukuyomi/home' },
-  { id: 'follow', label: '关注', icon: '👥', path: '/tsukuyomi/follow' },
-  { id: 'column', label: '专栏', icon: '📚', path: '/tsukuyomi/column' }
-];
+  // 导航项 - 重构为三个主要选项
+  const navItems = [
+    { id: 'home', label: '主页', icon: '🏠', path: '/tsukuyomi/home' },
+    { id: 'follow', label: '关注', icon: '👥', path: '/tsukuyomi/follow' },
+    { id: 'column', label: '专栏', icon: '📚', path: '/tsukuyomi/column' },
+  ]
 
-// 当前选中的导航项
-const currentNavItem = computed(() => {
-  const path = route.path;
-  const navItem = navItems.find(item => path === item.path);
-  return navItem ? navItem.id : 'home';
-});
+  // 当前选中的导航项
+  const currentNavItem = computed(() => {
+    const path = route.path
+    const navItem = navItems.find(item => path === item.path)
+    return navItem ? navItem.id : 'home'
+  })
 
-// 导航栏激活状态
-const isNavActive = ref(false);
+  // 导航栏激活状态
+  const isNavActive = ref(false)
 
-// 切换导航项
-const selectNavItem = (path) => {
-  router.push(path);
-};
+  // 切换导航项
+  const selectNavItem = path => {
+    router.push(path)
+  }
 
-// 激活导航栏
-const activateNav = () => {
-  isNavActive.value = true;
-};
+  // 激活导航栏
+  const activateNav = () => {
+    isNavActive.value = true
+  }
 
-// 失活导航栏
-const deactivateNav = () => {
-  isNavActive.value = false;
-};
+  // 失活导航栏
+  const deactivateNav = () => {
+    isNavActive.value = false
+  }
 
-// 获取用户信息
-const { username, userAvatar, loadUserDetail } = useUserProfile();
-// 获取认证信息和登出方法
-const { logout } = useAuth();
+  // 获取用户信息
+  const { username, userAvatar, loadUserDetail } = useUserProfile()
+  // 获取认证信息和登出方法
+  const { logout } = useAuth()
 
-// 加载用户详情
-loadUserDetail();
+  // 加载用户详情
+  loadUserDetail()
 </script>
 
 <template src="./templates/Tsukuyomi.html"></template>

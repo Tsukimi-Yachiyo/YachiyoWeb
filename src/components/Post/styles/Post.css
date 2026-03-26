@@ -4,7 +4,7 @@
   height: 280px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  background: #FFFFFF;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -84,7 +84,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,22 +107,22 @@
   .post-container {
     height: 240px;
   }
-  
+
   .post-content {
     padding: 12px;
     padding-top: 36px;
     max-width: 320px;
   }
-  
+
   .post-title {
     font-size: 14px;
     max-height: 42px;
   }
-  
+
   .post-username {
     font-size: 12px;
   }
-  
+
   .post-avatar {
     width: 50px;
     height: 50px;
@@ -130,7 +130,7 @@
     right: -15px;
     font-size: 16px;
   }
-  
+
   .post-cover {
     height: 140px;
   }
@@ -140,22 +140,22 @@
   .post-container {
     height: 220px;
   }
-  
+
   .post-content {
     padding: 10px;
     padding-top: 32px;
     max-width: 100%;
   }
-  
+
   .post-title {
     font-size: 13px;
     max-height: 39px;
   }
-  
+
   .post-username {
     font-size: 11px;
   }
-  
+
   .post-avatar {
     width: 44px;
     height: 44px;
@@ -163,7 +163,7 @@
     right: -12px;
     font-size: 14px;
   }
-  
+
   .post-cover {
     height: 120px;
   }
