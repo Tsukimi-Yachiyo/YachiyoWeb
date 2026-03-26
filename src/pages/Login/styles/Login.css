@@ -100,14 +100,14 @@
 }
 
 .form-footer a {
-  color: #64B5F6;
+  color: #64b5f6;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .form-footer a:hover {
-  color: #42A5F5;
+  color: #42a5f5;
   text-decoration: underline;
 }
 
@@ -140,12 +140,12 @@
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .captcha-container input {
     width: 100%;
     margin-bottom: 10px;
   }
-  
+
   .captcha-image {
     width: 100px;
     align-self: center;
@@ -166,13 +166,13 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: #64B5F6;
+  background-color: #64b5f6;
   color: white;
   white-space: nowrap;
 }
 
 .code-btn:hover:not(:disabled) {
-  background-color: #42A5F5;
+  background-color: #42a5f5;
 }
 
 .code-btn:disabled {
@@ -206,13 +206,13 @@
   font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: #64B5F6;
+  background-color: #64b5f6;
   color: white;
   width: 100%;
 }
 
 .login-btn:hover {
-  background-color: #42A5F5;
+  background-color: #42a5f5;
 }
 
 .login-btn:disabled {
@@ -331,12 +331,12 @@
 }
 
 .confirm-btn {
-  background-color: #64B5F6;
+  background-color: #64b5f6;
   color: white;
 }
 
 .confirm-btn:hover:not(:disabled) {
-  background-color: #42A5F5;
+  background-color: #42a5f5;
 }
 
 .confirm-btn:disabled {

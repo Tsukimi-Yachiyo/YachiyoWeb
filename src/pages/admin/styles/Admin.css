@@ -42,7 +42,7 @@
   font-size: 28px;
   font-weight: bold;
   margin: 0 0 10px 0;
-  background: linear-gradient(135deg, #fff 0%, #64B5F6 100%);
+  background: linear-gradient(135deg, #fff 0%, #64b5f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -154,7 +154,7 @@
 /* 上传按钮 */
 .upload-btn {
   padding: 15px 30px;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   border: none;
   border-radius: 25px;
@@ -236,20 +236,20 @@
     padding: 30px 20px;
     margin: 20px;
   }
-  
+
   .admin-header h1 {
     font-size: 24px;
   }
-  
+
   .file-label {
     padding: 30px 15px;
     min-height: 180px;
   }
-  
+
   .upload-icon {
     font-size: 36px;
   }
-  
+
   .upload-text p {
     font-size: 14px;
   }

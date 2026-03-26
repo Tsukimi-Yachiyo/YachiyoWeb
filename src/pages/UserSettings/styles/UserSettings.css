@@ -80,7 +80,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #2196F3;
+  border-top-color: #2196f3;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -125,7 +125,7 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +183,7 @@
 
 .upload-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -275,7 +275,7 @@
 
 .save-btn {
   padding: 14px 30px;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   border: none;
   border-radius: 12px;
