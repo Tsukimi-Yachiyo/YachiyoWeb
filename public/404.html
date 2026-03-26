@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // 基础路径，根据仓库名称调整
+        const base = '/YachiyoWeb/';
+        const basePath = base.replace(/\/$/, ''); // 移除末尾斜杠，用于比较
+
+        // 获取当前 URL 各部分
+        const pathname = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+
+        // 提取原始路由路径（移除基础路径部分）
+        let routePath = '';
+        if (pathname.startsWith(basePath)) {
+            // 获取基础路径之后的部分，确保以斜杠开头
+            const remaining = pathname.slice(basePath.length);
+            routePath = remaining || '/';
+        } else {
+            // 如果路径不以基础路径开头，可能是访问了错误的路径
+            // 使用整个路径（移除开头的斜杠如果存在）
+            routePath = pathname.startsWith('/') ? pathname : '/' + pathname;
+        }
+
+        // 存储路由路径到 sessionStorage，供 index.html 使用
+        if (routePath && routePath !== '/') {
+            sessionStorage.setItem('ghp_redirect_path', routePath);
+        }
+
+        // 构建重定向 URL：基础路径 + index.html + 查询参数 + hash
+        const redirectUrl = base + 'index.html' + search + hash;
+
+        // 执行重定向
+        window.location.replace(redirectUrl);
+    </script>
+</head>
+<body>
+    <p>If you are not redirected automatically, <a id="link" href="/YachiyoWeb/">click here</a>.</p>
+    <script>
+        // 设置链接（这里 redirectUrl 变量在全局作用域可用）
+        document.getElementById('link').href = redirectUrl;
+    </script>
+</body>
+</html>
