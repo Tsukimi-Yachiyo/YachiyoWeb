@@ -55,6 +55,7 @@ export default defineConfig({
       '/file': {
         target: 'http://47.98.229.211:8080',
         changeOrigin: true,
+        rewrite: (path) => path
       }
     }
   },
