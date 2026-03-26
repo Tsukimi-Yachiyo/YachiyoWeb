@@ -39,7 +39,7 @@ export default defineConfig({
       "www.yachiyo.owo.vin",
       // 3. 保留默认的本地主机（可选，Vite 会自动包含）
       "localhost",
-      "127.0.0.1"
+      "127.0.0.1",
     ],
     // 可选：如果需要通过 IP 访问，开启以下配置
     host: "0.0.0.0",
