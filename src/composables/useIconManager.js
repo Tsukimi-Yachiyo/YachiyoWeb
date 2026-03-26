@@ -351,6 +351,7 @@ export function useIconManager() {
   const isLoading = ref(false)
   const isLoaded = ref(false)
   const error = ref(null)
+  const iconBaseUrl = `${import.meta.env.BASE_URL}icons/`
   const cacheKey = generateKey()
 
   // 检查图标是否已缓存
@@ -394,7 +395,7 @@ export function useIconManager() {
         }
 
         // 加载图标
-        const response = await fetch(`/icons/${iconFile}`)
+        const response = await fetch(`${iconBaseUrl}${iconFile}`)
         if (!response.ok) {
           throw new Error(`Failed to load icon: ${iconFile}`)
         }
