@@ -48,9 +48,13 @@ export default defineConfig({
     // 配置代理，解决CORS问题
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://47.98.229.211:8080',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '/api')
+      },
+      '/file': {
+        target: 'http://47.98.229.211:8080',
+        changeOrigin: true,
       }
     }
   },

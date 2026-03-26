@@ -1,5 +1,6 @@
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue'
+  import { processImageData } from '@/composables/useImageData'
 
   const props = defineProps({
     user_name: {
@@ -32,31 +33,6 @@
   const userAvatar = ref(null)
   // 从缓存中获取封面
   const coverImage = ref(null)
-
-  // 处理图片数据，转换为 Base64 URL
-  const processImageData = imageData => {
-    if (!imageData) {
-      return null
-    }
-
-    try {
-      let base64String = ''
-
-      if (typeof imageData === 'string') {
-        // 如果已经是Base64字符串
-        base64String = imageData
-      } else if (Array.isArray(imageData)) {
-        // 如果是数字数组
-        const uint8Array = new Uint8Array(imageData)
-        base64String = btoa(String.fromCharCode(...uint8Array))
-      }
-
-      return `data:image/jpeg;base64,${base64String}`
-    } catch (error) {
-      console.error('处理图片数据失败:', error)
-      return null
-    }
-  }
 
   // 从缓存获取数据或使用传递的数据
   const fetchUserAvatar = () => {
