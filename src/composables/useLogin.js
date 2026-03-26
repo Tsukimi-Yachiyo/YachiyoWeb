@@ -2,6 +2,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuth } from './useAuth.js'
+import apiClient from '../services/api.js'
 
 export function useLogin() {
   const router = useRouter()
@@ -198,7 +199,7 @@ export function useLogin() {
 
     try {
       // 发送验证码
-      const codeResponse = await axios.post('/api/v1/auth/send-code', email.value, {
+      const codeResponse = await apiClient.post('/api/v1/auth/send-code', email.value, {
         headers: {
           'Content-Type': 'text/plain',
         },
@@ -244,7 +245,7 @@ export function useLogin() {
     }
 
     try {
-      const response = await axios.post('/api/v1/auth/register', {
+      const response = await apiClient.post('/api/v1/auth/register', {
         username: form.value.username,
         password: form.value.password,
         email: email.value,
@@ -262,7 +263,15 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('[Register] 注册失败:', err)
-      error.value = '网络错误，请检查网络连接'
+      if (err.response && err.response.data) {
+        const errorCode = err.response.data.code
+        const errorMessage = err.response.data.message
+        error.value = errorMessage || '注册失败，请重试'
+      } else if (err.code) {
+        error.value = err.message || '注册失败，请重试'
+      } else {
+        error.value = '网络错误，请检查网络连接'
+      }
     } finally {
       isLoading.value = false
     }
@@ -273,25 +282,25 @@ export function useLogin() {
     isLoading.value = true
 
     try {
-      const response = await axios.post('/api/v1/auth/login', {
+      const response = await apiClient.post('/api/v1/auth/login', {
         username: form.value.username,
         password: form.value.password,
       })
 
-      if (response.data && response.data.code === '200') {
-        login(response.data.data, form.value.username)
+      if (response.code === '200') {
+        login(response.data, form.value.username)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
         }, 1000)
       } else {
-        const errorCode = response.data.code
+        const errorCode = response.code
         if (errorCode === '400.1') {
           error.value = '用户不存在，请先注册'
         } else if (errorCode === '400.2') {
           error.value = '密码错误，请重新输入'
         } else {
-          error.value = response.data?.message || '操作失败，请重试'
+          error.value = response.message || '操作失败，请重试'
         }
       }
     } catch (err) {
@@ -300,6 +309,23 @@ export function useLogin() {
       if (err.response && err.response.data) {
         const errorCode = err.response.data.code
         const errorMessage = err.response.data.message
+        // 根据错误码设置错误信息
+        if (errorCode === '400.1') {
+          error.value = '用户不存在，请先注册'
+        } else if (errorCode === '400.2') {
+          error.value = '密码错误，请重新输入'
+        } else {
+          error.value = errorMessage || '操作失败，请重试'
+        }
+      } else if (err.code) {
+        // 处理 apiClient 拦截器返回的自定义错误对象
+        if (err.code === '400.1') {
+          error.value = '用户不存在，请先注册'
+        } else if (err.code === '400.2') {
+          error.value = '密码错误，请重新输入'
+        } else {
+          error.value = err.message || '操作失败，请重试'
+        }
       } else {
         error.value = '网络错误，请检查网络连接'
       }

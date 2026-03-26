@@ -1,8 +1,10 @@
 import axios from 'axios'
 
 // 使用相对路径，让 Vite 代理处理请求
+// 生产环境使用实际的后端地址，开发环境使用空字符串（走代理）
+const baseURL = import.meta.env.VITE_API_URL || ''
 const apiClient = axios.create({
-  baseURL: '',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -84,7 +86,11 @@ export const chatAPI = {
       signal.addEventListener('abort', () => controller.abort())
     }
 
-    fetch('/api/v2/ai/stream', {
+    let url = '/api/v2/ai/stream'
+    if (baseURL) {
+      url = baseURL.replace(/\/$/, '') + url
+    }
+    fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
