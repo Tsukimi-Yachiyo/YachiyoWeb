@@ -1,7 +1,8 @@
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { userAPI } from '../services/api.js'
-import { useAuth } from './useAuth.js'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { userAPI } from '../services/api.js';
+import { useAuth } from './useAuth.js';
+import { processImageData } from './useImageData.js'
 
 export function useUserSettings() {
   const router = useRouter()
@@ -50,13 +51,9 @@ export function useUserSettings() {
       }
 
       if (avatarResult.success && avatarResult.data) {
-        const avatarData = avatarResult.data
-        if (avatarData.startsWith('data:')) {
-          userAvatar.value = avatarData
-        } else {
-          userAvatar.value = `data:image/png;base64,${avatarData}`
-        }
-        avatarPreview.value = userAvatar.value
+        const avatarData = avatarResult.data;
+        userAvatar.value = processImageData(avatarData);
+        avatarPreview.value = userAvatar.value;
       }
     } catch (error) {
       console.error('加载用户信息失败:', error)
