@@ -11,6 +11,12 @@ export default [
       'build/**',
       'node_modules/**',
       'public/**',
+      '.cache/**',
+      '.temp/**',
+      '.vscode/**',
+      '.idea/**',
+      '*.log',
+      '.DS_Store',
       '*.config.js',
       'vite.config.js',
     ],
@@ -82,6 +88,12 @@ export default [
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         structuredClone: 'readonly',
+        atob: 'readonly',
+        btoa: 'readonly',
+        alert: 'readonly',
+        confirm: 'readonly',
+        TextDecoder: 'readonly',
+        TextEncoder: 'readonly',
       },
     },
     rules: {
@@ -92,7 +104,7 @@ export default [
       'vue/require-prop-types': 'off',
       'vue/no-mutating-props': 'error',
       'vue/no-reserved-component-names': 'off',
-      'vue/component-tags-order': [
+      'vue/block-order': [
         'error',
         {
           order: ['script', 'template', 'style'],
