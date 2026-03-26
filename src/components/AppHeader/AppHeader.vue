@@ -1,9 +1,9 @@
 <script setup>
   import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+  // eslint-disable-next-line no-unused-vars
   import UserProfilePopover from '../UserProfilePopover/UserProfilePopover.vue'
 
-  const props = defineProps({
+  defineProps({
     currentPage: {
       type: String,
       required: true,
@@ -20,20 +20,11 @@
 
   const emit = defineEmits(['logout'])
 
-  const router = useRouter()
+  // eslint-disable-next-line no-unused-vars
   const userProfileIsVisible = ref(false)
 
-  // 切换到聊天界面
-  const goToChat = () => {
-    router.push('/chat/home')
-  }
-
-  // 切换到月读界面
-  const goToTsukuyomi = () => {
-    router.push('/tsukuyomi')
-  }
-
   // 处理登出
+  // eslint-disable-next-line no-unused-vars
   const handleLogout = () => {
     emit('logout')
   }
