@@ -5,6 +5,7 @@ import { useUserProfile } from '../../../composables/useUserProfile.js';
 import { useIconManager } from '../../../composables/useIconManager.js';
 import { postAPI, userAPI, commentAPI } from '../../../services/api.js';
 import { marked } from 'marked';
+import { processImageData } from '@/composables/useImageData.js';
 
 // 初始化图标管理器
 const { checkIconCache } = useIconManager();
@@ -341,31 +342,6 @@ const deleteComment = async (commentId) => {
 onMounted(() => {
   loadPostDetail();
 });
-
-// 处理图片数据，转换为 Base64 URL
-const processImageData = (imageData) => {
-  if (!imageData) {
-    return null;
-  }
-  
-  try {
-    let base64String = '';
-    
-    if (typeof imageData === 'string') {
-      // 如果已经是Base64字符串
-      base64String = imageData;
-    } else if (Array.isArray(imageData)) {
-      // 如果是数字数组
-      const uint8Array = new Uint8Array(imageData);
-      base64String = btoa(String.fromCharCode(...uint8Array));
-    }
-    
-    return `data:image/jpeg;base64,${base64String}`;
-  } catch (error) {
-    console.error('处理图片数据失败:', error);
-    return null;
-  }
-};
 
 // 将byte[]转换为图片URL
 const getImageUrl = (byteArray) => {

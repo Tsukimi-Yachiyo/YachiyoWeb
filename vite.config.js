@@ -51,6 +51,10 @@ export default defineConfig({
         target: 'http://47.98.229.211:8080',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '/api')
+      },
+      '/file': {
+        target: 'http://47.98.229.211:8080',
+        changeOrigin: true,
       }
     }
   },

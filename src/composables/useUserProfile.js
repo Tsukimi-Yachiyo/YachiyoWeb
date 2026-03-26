@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { userAPI } from '../services/api.js';
+import { processImageData } from './useImageData.js'
 
 // 缓存键名
 const USERNAME_CACHE_KEY = 'cached_username';
@@ -11,11 +12,6 @@ export function useUserProfile() {
   const userAvatar = ref(localStorage.getItem(AVATAR_CACHE_KEY) || '');
 
   const loadUserDetail = async () => {
-    // 如果缓存中已有数据，且不是空字符串，则不重新加载
-    if (username.value && userAvatar.value) {
-      return;
-    }
-
     try {
       const [detailResult, avatarResult] = await Promise.all([
         userAPI.getUserDetail(),
@@ -29,12 +25,7 @@ export function useUserProfile() {
 
       if (avatarResult.success && avatarResult.data) {
         const avatarData = avatarResult.data;
-        let avatarValue = '';
-        if (avatarData.startsWith('data:')) {
-          avatarValue = avatarData;
-        } else {
-          avatarValue = `data:image/png;base64,${avatarData}`;
-        }
+        const avatarValue = processImageData(avatarData);
         userAvatar.value = avatarValue;
         localStorage.setItem(AVATAR_CACHE_KEY, avatarValue);
       }
