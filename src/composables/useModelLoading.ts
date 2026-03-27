@@ -14,9 +14,10 @@ export function useModelLoading() {
   }
 
   const loadAndCheckTextures = async () => {
+    const resourceBase = `${import.meta.env.BASE_URL}resource/`
     const textureUrls = [
-      '/resource/八千代辉夜姬/八千代辉夜姬.8192/texture_00.png',
-      '/resource/八千代辉夜姬/八千代辉夜姬.8192/texture_01.png',
+      `${resourceBase}八千代辉夜姬/八千代辉夜姬.8192/texture_00.png`,
+      `${resourceBase}八千代辉夜姬/八千代辉夜姬.8192/texture_01.png`,
     ]
 
     let loadedSize = 0
