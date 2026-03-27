@@ -1,10 +1,29 @@
-import axios from 'axios'
-import { extractAssistantText } from '../utils/extractAssistantText.js'
+/// <reference lib="dom" />
+/* global AbortSignal */
+
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import { extractAssistantText } from '../utils/extractAssistantText'
+import type { ApiResponse, RawApiResponse, ChatResponseData, UserDetail } from '../types/api'
+
+// 扩展 Axios 请求配置，添加 metadata 字段
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    metadata?: {
+      startTime: number
+    }
+  }
+}
 
 // 使用相对路径，让 Vite 代理处理请求
 // 生产环境使用实际的后端地址，开发环境使用空字符串（走代理）
 const baseURL = import.meta.env.VITE_API_URL || ''
-const apiClient = axios.create({
+const apiClient: AxiosInstance = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
@@ -40,7 +59,7 @@ const performanceMonitor = {
 }
 
 apiClient.interceptors.request.use(
-  config => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -54,13 +73,13 @@ apiClient.interceptors.request.use(
     performanceMonitor.totalRequests++
     return config
   },
-  error => {
+  (error: any) => {
     return Promise.reject(error)
   }
 )
 
 apiClient.interceptors.response.use(
-  response => {
+  (response: AxiosResponse<RawApiResponse>) => {
     // 性能监控：计算响应时间
     const startTime = response.config.metadata?.startTime
     if (startTime) {
@@ -90,24 +109,26 @@ apiClient.interceptors.response.use(
           }
         }
 
-        return {
+        response.data = {
           success: true,
           code: responseData.code,
           message: responseData.message,
           data,
           detail: responseData.detail,
-        }
+        } as any
+        return response
       }
       // 如果没有code字段，将整个responseData作为data返回（兼容/chat接口）
       else if (responseData.code === undefined) {
         if (import.meta.env.DEV) console.log('兼容格式响应，无code字段，原始数据:', responseData)
-        return {
+        response.data = {
           success: true,
           code: '200',
           message: 'success',
           data: responseData,
           detail: null,
-        }
+        } as any
+        return response
       }
     }
     // 其他情况：code存在且不是200，或者responseData为空
@@ -120,7 +141,7 @@ apiClient.interceptors.response.use(
       detail: responseData?.detail || null,
     })
   },
-  error => {
+  (error: AxiosError) => {
     // 性能监控：记录失败请求
     performanceMonitor.failedRequests++
     const startTime = error.config?.metadata?.startTime
@@ -154,13 +175,17 @@ apiClient.interceptors.response.use(
 )
 
 export const chatAPI = {
-  chat(message, conversationId, signal) {
-    const config = {}
+  chat(
+    message: string,
+    conversationId: string | number,
+    signal?: AbortSignal
+  ): Promise<ApiResponse<ChatResponseData>> {
+    const config: AxiosRequestConfig = {}
     if (signal) {
       config.signal = signal
     }
     return apiClient
-      .post(
+      .post<ApiResponse<ChatResponseData>>(
         '/api/v2/ai/chat',
         {
           message,
@@ -168,7 +193,7 @@ export const chatAPI = {
         },
         config
       )
-      .then(response => {
+      .then((response: ApiResponse<ChatResponseData>) => {
         // response 是拦截器处理后的格式: { success, code, message, data, detail }
         const text = extractAssistantText(response.data)
         // 如果 data 是对象且没有 text 字段，添加 text 字段
@@ -183,37 +208,46 @@ export const chatAPI = {
       })
   },
 
-  createConversation() {
-    return apiClient.post('/api/v2/ai/create')
+  createConversation(): Promise<ApiResponse<any>> {
+    return apiClient.post<ApiResponse<any>>('/api/v2/ai/create') as Promise<ApiResponse<any>>
   },
 
-  getHistory(conversationId) {
-    return apiClient.get(`/api/v2/history/${conversationId}`)
+  getHistory(conversationId: string | number): Promise<ApiResponse<any>> {
+    return apiClient.get<ApiResponse<any>>(`/api/v2/history/${conversationId}`) as Promise<
+      ApiResponse<any>
+    >
   },
 
-  getConversationList() {
-    return apiClient.get('/api/v2/history/list')
+  getConversationList(): Promise<ApiResponse<any>> {
+    return apiClient.get<ApiResponse<any>>('/api/v2/history/list') as Promise<ApiResponse<any>>
   },
 
-  speak(text) {
-    return apiClient.post('/api/v2/ai/speak', { text }, {})
+  speak(text: string): Promise<ApiResponse<any>> {
+    return apiClient.post<ApiResponse<any>>('/api/v2/ai/speak', { text }, {}) as Promise<
+      ApiResponse<any>
+    >
   },
 
-  updateConversationTitle(conversationId, title) {
-    return apiClient.post('/api/v2/ai/title', {
+  updateConversationTitle(
+    conversationId: string | number,
+    title: string
+  ): Promise<ApiResponse<any>> {
+    return apiClient.post<ApiResponse<any>>('/api/v2/ai/title', {
       conversationId,
       title,
-    })
+    }) as Promise<ApiResponse<any>>
   },
 
-  deleteConversation(conversationId) {
-    return apiClient.get(`/api/v2/history/clear/${conversationId}`)
+  deleteConversation(conversationId: string | number): Promise<ApiResponse<any>> {
+    return apiClient.get<ApiResponse<any>>(`/api/v2/history/clear/${conversationId}`) as Promise<
+      ApiResponse<any>
+    >
   },
 }
 
 export const userAPI = {
-  getUserDetail() {
-    return apiClient.post('/api/v1/user/detail/detail/get')
+  getUserDetail(): Promise<ApiResponse<UserDetail>> {
+    return apiClient.post<ApiResponse<UserDetail>>('/api/v1/user/detail/detail/get')
   },
 
   updateUserDetail(userDetail) {
