@@ -4,6 +4,9 @@ import { userAPI } from '../services/api'
 import { useAuth } from './useAuth'
 import { processImageData } from './useImageData'
 
+const USERNAME_CACHE_KEY = 'cached_username'
+const AVATAR_CACHE_KEY = 'cached_avatar'
+
 export function useUserSettings() {
   const router = useRouter()
   const { token } = useAuth()
@@ -30,30 +33,58 @@ export function useUserSettings() {
   const MAX_FILE_SIZE = 5 * 1024 * 1024
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 
+  const fetchLatestAvatar = async (maxRetries = 3): Promise<string | null> => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const avatarResult = await userAPI.getAvatar().catch(() => null)
+      if (avatarResult?.success && avatarResult.data) {
+        return processImageData(avatarResult.data)
+      }
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 400))
+      }
+    }
+    return null
+  }
+
   const loadUserData = async () => {
     isLoading.value = true
     try {
-      const [detailResult, avatarResult] = await Promise.all([
-        userAPI.getUserDetail(),
-        userAPI.getAvatar(),
-      ])
+      // 详情和头像分开加载，避免头像不存在时影响其他信息展示
+      const detailResult = await userAPI.getUserDetail().catch(error => {
+        console.warn('获取用户详情失败:', error)
+        return null
+      })
+      const avatarResult = await userAPI.getAvatar().catch(error => {
+        if (error?.message === '404' || error?.detail?.includes?.('用户头像不存在')) {
+          return { success: false, data: null }
+        }
+        console.warn('获取用户头像失败:', error)
+        return null
+      })
 
-      if (detailResult.success) {
+      if (detailResult?.success && detailResult.data) {
         userName.value = detailResult.data.userName || ''
         userIntroduction.value = detailResult.data.userIntroduction || ''
         userCity.value = detailResult.data.userCity || ''
         userGender.value = detailResult.data.userGender || ''
         userPhone.value = detailResult.data.userPhone || ''
+        localStorage.setItem(USERNAME_CACHE_KEY, userName.value)
+
         if (detailResult.data.userBirthday) {
           const date = new Date(detailResult.data.userBirthday)
           userBirthday.value = date.toISOString().split('T')[0]
         }
       }
 
-      if (avatarResult.success && avatarResult.data) {
+      if (avatarResult?.success && avatarResult.data) {
         const avatarData = avatarResult.data
-        userAvatar.value = processImageData(avatarData)
+        userAvatar.value = processImageData(avatarData) || ''
         avatarPreview.value = userAvatar.value
+        localStorage.setItem(AVATAR_CACHE_KEY, userAvatar.value)
+      } else {
+        userAvatar.value = ''
+        avatarPreview.value = ''
+        localStorage.removeItem(AVATAR_CACHE_KEY)
       }
     } catch (error) {
       console.error('加载用户信息失败:', error)
@@ -119,7 +150,18 @@ export function useUserSettings() {
     try {
       const result = await userAPI.updateAvatar(selectedFile.value)
       if (result.success) {
+        // 上传成功先本地生效，避免因后端头像接口短暂延迟导致“看起来失败”
         userAvatar.value = avatarPreview.value
+        localStorage.setItem(AVATAR_CACHE_KEY, userAvatar.value)
+
+        // 异步重试回拉服务端头像地址，成功后再覆盖为服务端标准 URL
+        const latestAvatarUrl = await fetchLatestAvatar()
+        if (latestAvatarUrl) {
+          userAvatar.value = latestAvatarUrl
+          avatarPreview.value = latestAvatarUrl
+          localStorage.setItem(AVATAR_CACHE_KEY, latestAvatarUrl)
+        }
+
         selectedFile.value = null
         successMessage.value = '头像上传成功'
         setTimeout(() => {
@@ -166,7 +208,9 @@ export function useUserSettings() {
     try {
       const result = await userAPI.updateUserDetail(userDetailData)
       if (result.success) {
-        localStorage.setItem('username', userName.value.trim())
+        const latestUserName = userName.value.trim()
+        localStorage.setItem('username', latestUserName)
+        localStorage.setItem(USERNAME_CACHE_KEY, latestUserName)
         successMessage.value = '用户信息保存成功'
         setTimeout(() => {
           successMessage.value = ''

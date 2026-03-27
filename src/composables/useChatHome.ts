@@ -35,7 +35,7 @@ export function useChatHome() {
   const { isVoiceClickable, getVoiceStatus, playVoice } = useVoice()
   const { isSidebarOpen, sidebarRef, toggleSidebar, closeSidebar, onTouchStart, onTouchEnd } =
     useSidebar()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
+  const { username, userAvatar } = useUserProfile()
   const { isLoading: isModelLoading, loadProgress, loadStatus } = useModelLoading()
 
   onMounted(() => {
@@ -44,7 +44,6 @@ export function useChatHome() {
       return
     }
     loadConversations()
-    loadUserDetail()
   })
 
   watch(currentConversationId, newId => {

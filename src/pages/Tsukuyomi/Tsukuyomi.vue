@@ -1,9 +1,6 @@
 <script setup lang="ts">
-  import { ref, computed, watch } from 'vue'
+  import { ref, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import AppHeader from '../../components/AppHeader/AppHeader.vue'
-  import { useUserProfile } from '../../composables/useUserProfile'
-  import { useAuth } from '../../composables/useAuth'
   import { useIconManager } from '../../composables/useIconManager'
 
   // 初始化图标管理器
@@ -25,7 +22,6 @@
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
   })
 
-  const userProfileIsVisible = ref(false)
   const router = useRouter()
   const route = useRoute()
 
@@ -60,14 +56,6 @@
   const deactivateNav = () => {
     isNavActive.value = false
   }
-
-  // 获取用户信息
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
-  // 获取认证信息和登出方法
-  const { logout } = useAuth()
-
-  // 加载用户详情
-  loadUserDetail()
 </script>
 
 <template src="./templates/Tsukuyomi.html"></template>

@@ -28,10 +28,7 @@
 
   const router = useRouter()
   const route = useRoute()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
-
-  // 加载用户详情
-  loadUserDetail()
+  const { username, userAvatar } = useUserProfile()
 
   // 帖子数据
   const postData = ref(null)

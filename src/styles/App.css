@@ -9,3 +9,19 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
 }
+
+#app,
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  min-height: 0;
+}

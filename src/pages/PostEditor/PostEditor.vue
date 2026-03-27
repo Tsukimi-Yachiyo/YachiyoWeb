@@ -26,10 +26,7 @@
   })
 
   const router = useRouter()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
-
-  // 加载用户详情
-  loadUserDetail()
+  const { username, userAvatar } = useUserProfile()
 
   // 表单数据
   const title = ref('')

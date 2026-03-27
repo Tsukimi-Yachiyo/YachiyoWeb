@@ -2,7 +2,6 @@
   import { ref, computed } from 'vue'
   import { useChatHome } from '../../composables/useChatHome'
   import { useIconManager } from '../../composables/useIconManager'
-  import AppHeader from '../../components/AppHeader/AppHeader.vue'
   import Live2DModel from '../../components/Live2DModel/Live2DModel.vue'
 
   const enterIconUrl = `${import.meta.env.BASE_URL}icons/theme/ENTER.svg`
@@ -34,7 +33,6 @@
 
   const {
     username,
-    userAvatar,
     conversations,
     currentConversationId,
     messages,
@@ -58,7 +56,6 @@
     deleteConversation,
     sendMessage,
     playVoice,
-    logout,
     isModelLoading,
     loadProgress,
     loadStatus,

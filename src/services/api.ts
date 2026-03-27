@@ -281,13 +281,11 @@ export const userAPI = {
 
   updateAvatar(file: File): Promise<ApiResponse<boolean>> {
     const formData = new FormData()
+    // 兼容后端字段名差异：部分实现读取 avatar，部分读取 fileBytes
     formData.append('avatar', file)
+    formData.append('fileBytes', file)
     return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/avatar/update', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/avatar/update', formData)
     )
   },
 
