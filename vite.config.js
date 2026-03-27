@@ -64,5 +64,5 @@ export default defineConfig({
   },
   // 打包配置
   // 使用绝对根路径，避免 history 路由在子路径刷新时资源地址解析错误
-  base: './'
+  base: '/'
 })
