@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { extractAssistantText } from '../utils/extractAssistantText.js'
 
 // 使用相对路径，让 Vite 代理处理请求
 // 生产环境使用实际的后端地址，开发环境使用空字符串（走代理）
@@ -10,6 +11,34 @@ const apiClient = axios.create({
   },
 })
 
+// 性能监控
+const performanceMonitor = {
+  totalRequests: 0,
+  failedRequests: 0,
+  totalResponseTime: 0,
+
+  get successRate() {
+    return this.totalRequests > 0
+      ? (((this.totalRequests - this.failedRequests) / this.totalRequests) * 100).toFixed(2)
+      : 100
+  },
+
+  get averageResponseTime() {
+    return this.totalRequests > 0 ? (this.totalResponseTime / this.totalRequests).toFixed(2) : 0
+  },
+
+  logMetrics() {
+    if (import.meta.env.DEV) {
+      console.log(
+        `[API Performance] 总请求: ${this.totalRequests}, ` +
+          `失败: ${this.failedRequests}, ` +
+          `成功率: ${this.successRate}%, ` +
+          `平均响应时间: ${this.averageResponseTime}ms`
+      )
+    }
+  },
+}
+
 apiClient.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
@@ -20,6 +49,9 @@ apiClient.interceptors.request.use(
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     }
+    // 性能监控：记录请求开始时间
+    config.metadata = { startTime: Date.now() }
+    performanceMonitor.totalRequests++
     return config
   },
   error => {
@@ -29,16 +61,57 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   response => {
-    const responseData = response.data
-    if (responseData && responseData.code === '200') {
-      return {
-        success: true,
-        code: responseData.code,
-        message: responseData.message,
-        data: responseData.data,
-        detail: responseData.detail,
+    // 性能监控：计算响应时间
+    const startTime = response.config.metadata?.startTime
+    if (startTime) {
+      const duration = Date.now() - startTime
+      performanceMonitor.totalResponseTime += duration
+      if (import.meta.env.DEV) {
+        console.log(`[API Performance] 请求耗时: ${duration}ms, URL: ${response.config.url}`)
       }
     }
+    if (import.meta.env.DEV) console.log('API响应原始数据:', response.data)
+    if (import.meta.env.DEV) console.log('API响应状态:', response.status)
+    const responseData = response.data
+    if (responseData) {
+      // 如果有code字段且为200，使用标准格式
+      if (responseData.code === '200') {
+        if (import.meta.env.DEV) console.log('标准格式响应，code=200，数据:', responseData)
+
+        let data = responseData.data
+        // 如果data是字符串，尝试解析为JSON
+        if (typeof data === 'string') {
+          try {
+            const parsedData = JSON.parse(data)
+            if (import.meta.env.DEV) console.log('解析data字符串为对象:', parsedData)
+            data = parsedData
+          } catch (e) {
+            if (import.meta.env.DEV) console.warn('无法解析data字符串为JSON，保持原值:', e)
+          }
+        }
+
+        return {
+          success: true,
+          code: responseData.code,
+          message: responseData.message,
+          data,
+          detail: responseData.detail,
+        }
+      }
+      // 如果没有code字段，将整个responseData作为data返回（兼容/chat接口）
+      else if (responseData.code === undefined) {
+        if (import.meta.env.DEV) console.log('兼容格式响应，无code字段，原始数据:', responseData)
+        return {
+          success: true,
+          code: '200',
+          message: 'success',
+          data: responseData,
+          detail: null,
+        }
+      }
+    }
+    // 其他情况：code存在且不是200，或者responseData为空
+    if (import.meta.env.DEV) console.log('响应异常或错误:', responseData)
     return Promise.reject({
       success: false,
       code: responseData?.code || 400,
@@ -48,8 +121,19 @@ apiClient.interceptors.response.use(
     })
   },
   error => {
+    // 性能监控：记录失败请求
+    performanceMonitor.failedRequests++
+    const startTime = error.config?.metadata?.startTime
+    if (startTime) {
+      const duration = Date.now() - startTime
+      if (import.meta.env.DEV) {
+        console.log(`[API Performance] 请求失败，耗时: ${duration}ms, URL: ${error.config?.url}`)
+      }
+    }
+    if (import.meta.env.DEV) console.log('API请求错误:', error)
     if (error.response) {
       const responseData = error.response.data
+      if (import.meta.env.DEV) console.log('错误响应数据:', responseData)
       return Promise.reject({
         success: false,
         code: responseData?.code || error.response.status,
@@ -58,6 +142,7 @@ apiClient.interceptors.response.use(
         detail: responseData?.detail || error.message,
       })
     }
+    if (import.meta.env.DEV) console.log('网络错误，无响应')
     return Promise.reject({
       success: false,
       code: 500,
@@ -69,118 +154,32 @@ apiClient.interceptors.response.use(
 )
 
 export const chatAPI = {
-  chat(message, conversationId) {
-    return apiClient.post('/api/v2/ai/chat', {
-      message,
-      conversationId: String(conversationId),
-    })
-  },
-
-  streamChat(message, conversationId, onData, onComplete, onError, signal) {
-    const token = localStorage.getItem('token')
-
-    // 由于 EventSource 只支持 GET 请求，我们需要使用 fetch + ReadableStream
-    // 这是标准的 SSE 客户端实现方式
-    const controller = new AbortController()
+  chat(message, conversationId, signal) {
+    const config = {}
     if (signal) {
-      signal.addEventListener('abort', () => controller.abort())
+      config.signal = signal
     }
-
-    let url = '/api/v2/ai/stream'
-    if (baseURL) {
-      url = baseURL.replace(/\/$/, '') + url
-    }
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : '',
-      },
-      body: JSON.stringify({
-        message,
-        conversationId: String(conversationId),
-      }),
-      signal: controller.signal,
-    })
+    return apiClient
+      .post(
+        '/api/v2/ai/chat',
+        {
+          message,
+          conversationId: String(conversationId),
+        },
+        config
+      )
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+        // response 是拦截器处理后的格式: { success, code, message, data, detail }
+        const text = extractAssistantText(response.data)
+        // 如果 data 是对象且没有 text 字段，添加 text 字段
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          response.data.text === undefined
+        ) {
+          response.data.text = text
         }
-
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-
-        function processChunk() {
-          return reader
-            .read()
-            .then(({ done, value }) => {
-              if (done) {
-                console.log('SSE 流已结束')
-                // 当流结束时，即使没有收到 [DONE] 信号，也调用完成回调
-                onComplete && onComplete()
-                return
-              }
-
-              if (value) {
-                buffer += decoder.decode(value, { stream: true })
-                console.log('收到 SSE 数据:', buffer)
-
-                // 处理多个 data 块连在一起的情况，例如 data:嗨data:~
-                let processedBuffer = buffer
-                while (processedBuffer.includes('data:')) {
-                  const dataIndex = processedBuffer.indexOf('data:')
-                  if (dataIndex === -1) break
-
-                  // 找到下一个 data: 的位置或行尾
-                  const nextDataIndex = processedBuffer.indexOf('data:', dataIndex + 5)
-                  let dataChunk
-                  if (nextDataIndex === -1) {
-                    dataChunk = processedBuffer.slice(dataIndex + 5)
-                    processedBuffer = ''
-                  } else {
-                    dataChunk = processedBuffer.slice(dataIndex + 5, nextDataIndex)
-                    processedBuffer = processedBuffer.slice(nextDataIndex)
-                  }
-
-                  const dataStr = dataChunk.trim()
-                  if (dataStr === '[DONE]') {
-                    console.log('收到 [DONE] 信号')
-                    onComplete && onComplete()
-                    return
-                  }
-                  if (dataStr) {
-                    try {
-                      // 直接使用 dataStr，因为后端直接返回 SseEmitter 的内容
-                      // 即使只返回一个字，也直接追加
-                      onData && onData(dataStr)
-                    } catch (e) {
-                      console.error('解析 SSE 数据失败:', e)
-                    }
-                  }
-                }
-
-                // 保存剩余的未处理数据
-                buffer = processedBuffer
-              }
-
-              return processChunk()
-            })
-            .catch(error => {
-              console.error('读取 SSE 数据失败:', error)
-              // 即使发生错误，也要调用完成回调，确保 UI 状态正确更新
-              onComplete && onComplete()
-            })
-        }
-
-        return processChunk()
-      })
-      .catch(error => {
-        if (error.name === 'AbortError') {
-          return
-        }
-        console.error('SSE 连接错误:', error)
-        onError && onError(error)
+        return response
       })
   },
 
