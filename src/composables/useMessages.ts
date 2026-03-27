@@ -1,14 +1,35 @@
 import { ref, nextTick, watch } from 'vue'
 import { chatAPI } from '../services/api'
+import { extractAssistantText } from '../utils/extractAssistantText'
+
+interface ChatMessage {
+  type: 'user' | 'assistant'
+  content: string
+  isStreaming: boolean
+}
 
 export function useMessages(conversationId) {
-  const messages = ref([])
+  const messages = ref<ChatMessage[]>([])
   const inputMessage = ref('')
   const isLoading = ref(false)
   const isTyping = ref(false)
-  const messageListRef = ref(null)
-  const inputRef = ref(null)
-  const abortController = ref(null)
+  const messageListRef = ref<HTMLElement | null>(null)
+  const inputRef = ref<HTMLInputElement | null>(null)
+  const abortController = ref<AbortController | null>(null)
+
+  const normalizeMessageContent = (value: unknown): string => {
+    if (value == null) return ''
+    if (typeof value === 'string' || typeof value === 'object') {
+      return extractAssistantText(value)
+    }
+    return String(value)
+  }
+
+  const setAssistantMessage = (index: number, content: string) => {
+    if (!messages.value[index]) return
+    messages.value[index].content = content
+    messages.value[index].isStreaming = false
+  }
 
   watch(
     messages,
@@ -26,16 +47,20 @@ export function useMessages(conversationId) {
     })
   }
 
-  const loadMessages = async id => {
+  const loadMessages = async (id: string | number | null) => {
     if (!id) return
     stopStreaming()
     messages.value = []
     try {
       const result = await chatAPI.getHistory(id)
       if (result.success && Array.isArray(result.data)) {
-        messages.value = result.data.flatMap(item => [
-          { type: 'user', content: item.user, isStreaming: false },
-          { type: 'assistant', content: item.assistant, isStreaming: false },
+        messages.value = result.data.flatMap((item: { user?: unknown; assistant?: unknown }) => [
+          { type: 'user', content: normalizeMessageContent(item.user), isStreaming: false },
+          {
+            type: 'assistant',
+            content: normalizeMessageContent(item.assistant),
+            isStreaming: false,
+          },
         ])
       }
     } catch (error) {
@@ -53,7 +78,7 @@ export function useMessages(conversationId) {
     }
   }
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const message = inputMessage.value.trim()
     if (!message || isLoading.value || !conversationId.value) return
 
@@ -68,47 +93,19 @@ export function useMessages(conversationId) {
 
     abortController.value = new AbortController()
 
-    chatAPI
-      .chat(message, conversationId.value, abortController.value.signal)
-      .then(result => {
-        if (import.meta.env.DEV) console.log('聊天响应结果:', result)
-        if (messages.value[assistantMessageIndex]) {
-          // 拦截器返回的格式: { success, code, message, data, detail }
-          // 其中 data 字段包含 AI 回复，API层已确保包含 text 字段
-          const responseData = result.data // 这是拦截器返回的 data 字段
-          if (import.meta.env.DEV) console.log('响应数据:', responseData)
-
-          let assistantText = ''
-          if (responseData) {
-            // 优先使用 text 字段，如果不存在则使用字符串表示
-            if (responseData.text !== undefined) {
-              assistantText = responseData.text
-            } else if (typeof responseData === 'string') {
-              assistantText = responseData
-            } else {
-              assistantText = JSON.stringify(responseData)
-            }
-          }
-
-          if (import.meta.env.DEV) console.log('提取的文本:', assistantText)
-          messages.value[assistantMessageIndex].content = assistantText
-          messages.value[assistantMessageIndex].isStreaming = false
-        }
-        isLoading.value = false
-        isTyping.value = false
-        abortController.value = null
-      })
-      .catch(error => {
-        if (import.meta.env.DEV) console.error('聊天请求错误:', error)
-        if (messages.value[assistantMessageIndex]) {
-          messages.value[assistantMessageIndex].content =
-            `抱歉，发生了错误: ${error.message || '未知错误'}`
-          messages.value[assistantMessageIndex].isStreaming = false
-        }
-        isLoading.value = false
-        isTyping.value = false
-        abortController.value = null
-      })
+    try {
+      const result = await chatAPI.chat(message, conversationId.value, abortController.value.signal)
+      if (import.meta.env.DEV) console.log('聊天响应结果:', result)
+      setAssistantMessage(assistantMessageIndex, normalizeMessageContent(result.data))
+    } catch (error) {
+      if (import.meta.env.DEV) console.error('聊天请求错误:', error)
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
+      setAssistantMessage(assistantMessageIndex, `抱歉，发生了错误: ${errorMessage}`)
+    } finally {
+      isLoading.value = false
+      isTyping.value = false
+      abortController.value = null
+    }
   }
 
   return {
