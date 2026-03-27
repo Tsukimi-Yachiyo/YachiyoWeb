@@ -2,9 +2,9 @@
   import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import AppHeader from '../../components/AppHeader/AppHeader.vue'
-  import { useUserProfile } from '../../composables/useUserProfile.js'
-  import { useIconManager } from '../../composables/useIconManager.js'
-  import { postAPI } from '../../services/api.js'
+  import { useUserProfile } from '../../composables/useUserProfile'
+  import { useIconManager } from '../../composables/useIconManager'
+  import { postAPI } from '../../services/api'
 
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()

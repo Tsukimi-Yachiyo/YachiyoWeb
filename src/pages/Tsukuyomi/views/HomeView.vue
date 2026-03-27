@@ -1,8 +1,8 @@
 <script setup>
   import { useRouter } from 'vue-router'
-  import { useIconManager } from '../../../composables/useIconManager.js'
+  import { useIconManager } from '../../../composables/useIconManager'
   import { computed, onMounted, ref } from 'vue'
-  import { postAPI, userAPI } from '../../../services/api.js'
+  import { postAPI, userAPI } from '../../../services/api'
   import Post from '../../../components/Post/Post.vue'
 
   const router = useRouter()

@@ -87,6 +87,7 @@ export default [
         FormData: 'readonly',
         FileReader: 'readonly',
         Blob: 'readonly',
+        File: 'readonly',
         Request: 'readonly',
         Response: 'readonly',
         Headers: 'readonly',

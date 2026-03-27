@@ -1,10 +1,10 @@
 <script setup>
   import { ref, onMounted, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import { useUserProfile } from '@/composables/useUserProfile.js'
-  import { useIconManager } from '@/composables/useIconManager.js'
-  import { processImageData } from '@/composables/useImageData.js'
-  import { postAPI, userAPI, commentAPI } from '@/services/api.js'
+  import { useUserProfile } from '@/composables/useUserProfile'
+  import { useIconManager } from '@/composables/useIconManager'
+  import { processImageData } from '@/composables/useImageData'
+  import { postAPI, userAPI, commentAPI } from '@/services/api'
   import { marked } from 'marked'
 
   // 初始化图标管理器

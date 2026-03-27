@@ -14,3 +14,21 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+interface Window {
+  captchaText: string
+}
+
+declare module '@framework/live2dcubismframework' {
+  export const CubismFramework: any
+  export const Option: any
+  export const LogLevel: any
+}
+
+declare module '@demo/lappsubdelegate' {
+  export const LAppSubdelegate: any
+}
+
+declare module '@demo/lapppal' {
+  export const LAppPal: any
+}

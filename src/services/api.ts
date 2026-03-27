@@ -9,7 +9,17 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import { extractAssistantText } from '../utils/extractAssistantText'
-import type { ApiResponse, RawApiResponse, ChatResponseData, UserDetail } from '../types/api'
+import type {
+  ApiResponse,
+  RawApiResponse,
+  ChatResponseData,
+  UserDetailResponse,
+  PosterDetailResponse,
+  PostEncapsulateResponse,
+  GetPostingResponse,
+  CommentRequest,
+  Comment,
+} from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
 declare module 'axios' {
@@ -181,6 +191,10 @@ apiClient.interceptors.response.use(
   }
 )
 
+function unwrapData<T>(request: Promise<AxiosResponse<ApiResponse<T>>>): Promise<ApiResponse<T>> {
+  return request.then(response => response.data)
+}
+
 export const chatAPI = {
   chat(
     message: string,
@@ -216,168 +230,210 @@ export const chatAPI = {
   },
 
   createConversation(): Promise<ApiResponse<any>> {
-    return apiClient.post<ApiResponse<any>>('/api/v2/ai/create') as unknown as Promise<
-      ApiResponse<any>
-    >
+    return unwrapData(apiClient.post<ApiResponse<any>>('/api/v2/ai/create'))
   },
 
   getHistory(conversationId: string | number): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>(
-      `/api/v2/history/${conversationId}`
-    ) as unknown as Promise<ApiResponse<any>>
+    return unwrapData(apiClient.get<ApiResponse<any>>(`/api/v2/history/${conversationId}`))
   },
 
   getConversationList(): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>('/api/v2/history/list') as unknown as Promise<
-      ApiResponse<any>
-    >
+    return unwrapData(apiClient.get<ApiResponse<any>>('/api/v2/history/list'))
   },
 
   speak(text: string): Promise<ApiResponse<any>> {
-    return apiClient.post<ApiResponse<any>>('/api/v2/ai/speak', { text }, {}) as unknown as Promise<
-      ApiResponse<any>
-    >
+    return unwrapData(apiClient.post<ApiResponse<any>>('/api/v2/ai/speak', { text }, {}))
   },
 
   updateConversationTitle(
     conversationId: string | number,
     title: string
   ): Promise<ApiResponse<any>> {
-    return apiClient.post<ApiResponse<any>>('/api/v2/ai/title', {
-      conversationId,
-      title,
-    }) as unknown as Promise<ApiResponse<any>>
+    return unwrapData(
+      apiClient.post<ApiResponse<any>>('/api/v2/ai/title', {
+        conversationId,
+        title,
+      })
+    )
   },
 
   deleteConversation(conversationId: string | number): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>(
-      `/api/v2/history/clear/${conversationId}`
-    ) as unknown as Promise<ApiResponse<any>>
+    return unwrapData(apiClient.get<ApiResponse<any>>(`/api/v2/history/clear/${conversationId}`))
   },
 }
 
 export const userAPI = {
-  getUserDetail(): Promise<ApiResponse<UserDetail>> {
-    return apiClient.post<ApiResponse<UserDetail>>(
-      '/api/v1/user/detail/detail/get'
-    ) as unknown as Promise<ApiResponse<UserDetail>>
+  getUserDetail(): Promise<ApiResponse<UserDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<UserDetailResponse>>('/api/v1/user/detail/detail/get')
+    )
   },
 
-  updateUserDetail(userDetail) {
-    return apiClient.post('/api/v1/user/detail/detail/update', userDetail)
+  updateUserDetail(userDetail: Partial<UserDetailResponse>): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/detail/update', userDetail)
+    )
   },
 
-  getAvatar() {
-    return apiClient.post('/api/v1/user/detail/avatar/get')
+  getAvatar(): Promise<ApiResponse<string>> {
+    return unwrapData(apiClient.post<ApiResponse<string>>('/api/v1/user/detail/avatar/get'))
   },
 
-  updateAvatar(file) {
+  updateAvatar(file: File): Promise<ApiResponse<boolean>> {
     const formData = new FormData()
     formData.append('avatar', file)
-    return apiClient.post('/api/v1/user/detail/avatar/update', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/avatar/update', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    )
   },
 
-  getPosterDetail(userId) {
-    return apiClient.post(`/api/v1/user/detail/detail/get/user?userId=${userId}`)
+  getPosterDetail(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<PosterDetailResponse>>(
+        `/api/v1/user/detail/detail/get/user?userId=${userId}`
+      )
+    )
   },
 }
 
 export const postAPI = {
-  uploadPost(formData) {
-    return apiClient.post('/api/v2/posting/upload', formData)
+  uploadPost(formData: FormData): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/posting/upload', formData))
   },
 
-  searchPosting(keyword, pageNum, pageSize) {
-    return apiClient.post(
-      `/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}&pageNum=${encodeURIComponent(pageNum)}&pageSize=${encodeURIComponent(pageSize)}`
+  searchPosting(
+    keyword: string,
+    pageNum: number,
+    pageSize: number
+  ): Promise<ApiResponse<number[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number[]>>(
+        `/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}&pageNum=${encodeURIComponent(pageNum)}&pageSize=${encodeURIComponent(pageSize)}`
+      )
     )
   },
 
-  getPostingEncapsulate(postingId) {
-    return apiClient.post(`/api/v2/searching/encapsulate?postingId=${postingId}`)
+  getPostingEncapsulate(postingId: number): Promise<ApiResponse<PostEncapsulateResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<PostEncapsulateResponse>>(
+        `/api/v2/searching/encapsulate?postingId=${postingId}`
+      )
+    )
   },
 
-  getPosting(postingId) {
-    return apiClient.post(`/api/v2/posting/get?postingId=${postingId}`)
+  getPosting(postingId: number): Promise<ApiResponse<GetPostingResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<GetPostingResponse>>(`/api/v2/posting/get?postingId=${postingId}`)
+    )
   },
 
-  isLiked(postingId) {
-    return apiClient.post(`/api/v2/posting/isLiked?postingId=${postingId}`)
+  isLiked(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/isLiked?postingId=${postingId}`)
+    )
   },
 
-  isCollected(postingId) {
-    return apiClient.post(`/api/v2/posting/isCollected?postingId=${postingId}`)
+  isCollected(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/isCollected?postingId=${postingId}`)
+    )
   },
 
   // 点赞帖子
-  likePosting(postingId) {
-    return apiClient.post(`/api/v2/posting/like?postingId=${postingId}`)
+  likePosting(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/like?postingId=${postingId}`)
+    )
   },
 
   // 收藏帖子
-  collectionPosting(postingId) {
-    return apiClient.post(`/api/v2/posting/collection?postingId=${postingId}`)
+  collectionPosting(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/collection?postingId=${postingId}`)
+    )
   },
 
   // 取消点赞帖子
-  cancelLikePosting(postingId) {
-    return apiClient.post(`/api/v2/posting/cancelLike?postingId=${postingId}`)
+  cancelLikePosting(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/cancelLike?postingId=${postingId}`)
+    )
   },
 
   // 取消收藏帖子
-  cancelCollectionPosting(postingId) {
-    return apiClient.post(`/api/v2/posting/cancelCollection?postingId=${postingId}`)
+  cancelCollectionPosting(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v2/posting/cancelCollection?postingId=${postingId}`
+      )
+    )
   },
 
   // 获取帖子的收藏数
-  getCollectionCount(postingId) {
-    return apiClient.post(`/api/v2/posting/getCollectionCount?postingId=${postingId}`)
+  getCollectionCount(postingId: number): Promise<ApiResponse<number>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number>>(
+        `/api/v2/posting/getCollectionCount?postingId=${postingId}`
+      )
+    )
   },
 
   // 获取帖子的点赞数
-  getLikeCount(postingId) {
-    return apiClient.post(`/api/v2/posting/getLikeCount?postingId=${postingId}`)
+  getLikeCount(postingId: number): Promise<ApiResponse<number>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number>>(`/api/v2/posting/getLikeCount?postingId=${postingId}`)
+    )
   },
 
   // 获取自己的帖子
-  getMyPosting() {
-    return apiClient.post('/api/v2/posting/getMyPosting')
+  getMyPosting(): Promise<ApiResponse<number[]>> {
+    return unwrapData(apiClient.post<ApiResponse<number[]>>('/api/v2/posting/getMyPosting'))
   },
 
   // 删除帖子
-  deletePosting(postingId) {
-    return apiClient.post(`/api/v2/posting/delete?postingId=${postingId}`)
+  deletePosting(postingId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/delete?postingId=${postingId}`)
+    )
   },
 }
 
 export const adminAPI = {
-  uploadFiles(files) {
+  uploadFiles(files: File[]): Promise<ApiResponse<boolean>> {
     const formData = new FormData()
     files.forEach(file => {
       formData.append('files', file)
     })
-    return apiClient.post('/api/yachiyo/168/mini/admin/upload', formData)
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/upload', formData)
+    )
   },
 }
 
 export const commentAPI = {
   // 添加评论
-  addComment(commentRequest) {
-    return apiClient.post('/api/v1/auth/add-comment', commentRequest)
+  addComment(commentRequest: CommentRequest): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v1/auth/add-comment', commentRequest)
+    )
   },
 
   // 获取评论列表
-  getCommentList(postingId) {
-    return apiClient.post('/api/v1/auth/get-comment-list', postingId)
+  getCommentList(postingId: number): Promise<ApiResponse<Comment[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<Comment[]>>('/api/v1/auth/get-comment-list', postingId)
+    )
   },
 
   // 删除评论
-  deleteComment(commentId) {
-    return apiClient.post('/api/v1/auth/delete-comment', commentId)
+  deleteComment(commentId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v1/auth/delete-comment', commentId)
+    )
   },
 }
 

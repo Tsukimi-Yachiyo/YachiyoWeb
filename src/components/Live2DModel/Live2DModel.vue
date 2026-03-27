@@ -1,5 +1,5 @@
 <script setup>
-  import { useLive2D } from '../../composables/useLive2D.js'
+  import { useLive2D } from '../../composables/useLive2D'
 
   const { wrapperRef, canvasRef, onPointerBegan, onPointerMoved, onPointerEnded, onPointerCancel } =
     useLive2D()

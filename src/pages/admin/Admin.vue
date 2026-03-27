@@ -1,6 +1,6 @@
 <script setup>
   import { ref } from 'vue'
-  import { adminAPI } from '../../services/api.js'
+  import { adminAPI } from '../../services/api'
 
   const files = ref([])
   const isLoading = ref(false)

@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { chatAPI } from '../services/api.js'
+import { chatAPI } from '../services/api'
 
 export function useConversations() {
   const conversations = ref([])

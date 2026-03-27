@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserProfile } from './useUserProfile.js'
+import { useUserProfile } from './useUserProfile'
 
 export function useAuth() {
   const router = useRouter()

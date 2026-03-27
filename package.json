@@ -7,8 +7,8 @@
     "dev": "npm run format && npm run lint:fix && vite",
     "build": "npm run lint && npm run format:check && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.vue",
-    "lint:fix": "eslint . --ext .js,.vue --fix",
+    "lint": "eslint . --ext .js,.vue,.ts",
+    "lint:fix": "eslint . --ext .js,.vue,.ts --fix",
     "format": "prettier --write \"src/**/*.{js,vue,css,scss,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{js,vue,css,scss,json,md}\""
   },

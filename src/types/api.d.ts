@@ -50,10 +50,61 @@ export interface RawApiResponse {
 /**
  * 用户详情
  */
-export interface UserDetail {
-  id?: string
-  username?: string
-  avatar?: string
+export interface UserDetailResponse {
+  userName?: string
+  userIntroduction?: string
+  userCity?: string
+  userGender?: string
+  userPhone?: string
+  userBirthday?: string
+  [key: string]: any
+}
+
+/**
+ * 帖子简要信息
+ */
+export interface PostEncapsulateResponse {
+  title: string
+  posterId: number
+  coverImage: string
+  [key: string]: any
+}
+
+/**
+ * 帖子详情
+ */
+export interface GetPostingResponse {
+  content: string
+  filenames: string[]
+  files: string[]
+  [key: string]: any
+}
+
+/**
+ * 评论
+ */
+export interface Comment {
+  id: number
+  userId: number
+  postingId: number
+  content: string
+  [key: string]: any
+}
+
+/**
+ * 评论请求
+ */
+export interface CommentRequest {
+  postingId: number
+  content: string
+}
+
+/**
+ * 发帖者详情
+ */
+export interface PosterDetailResponse {
+  userName: string
+  userAvatar: string
   [key: string]: any
 }
 
@@ -63,15 +114,6 @@ export interface UserDetail {
 export interface Posting {
   id: string
   title: string
-  content: string
-  [key: string]: any
-}
-
-/**
- * 评论相关类型
- */
-export interface Comment {
-  id: string
   content: string
   [key: string]: any
 }

@@ -1,6 +1,6 @@
 <script setup>
   import { watch } from 'vue'
-  import { useUserProfilePopover } from '../../composables/useUserProfilePopover.js'
+  import { useUserProfilePopover } from '../../composables/useUserProfilePopover'
 
   const props = defineProps({
     username: {

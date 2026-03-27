@@ -2,9 +2,9 @@
   import { ref, computed, watch } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import AppHeader from '../../components/AppHeader/AppHeader.vue'
-  import { useUserProfile } from '../../composables/useUserProfile.js'
-  import { useAuth } from '../../composables/useAuth.js'
-  import { useIconManager } from '../../composables/useIconManager.js'
+  import { useUserProfile } from '../../composables/useUserProfile'
+  import { useAuth } from '../../composables/useAuth'
+  import { useIconManager } from '../../composables/useIconManager'
 
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()

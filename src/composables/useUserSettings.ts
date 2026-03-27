@@ -1,8 +1,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { userAPI } from '../services/api.js'
-import { useAuth } from './useAuth.js'
-import { processImageData } from './useImageData.js'
+import { userAPI } from '../services/api'
+import { useAuth } from './useAuth'
+import { processImageData } from './useImageData'
 
 export function useUserSettings() {
   const router = useRouter()
@@ -94,7 +94,8 @@ export function useUserSettings() {
 
     const reader = new FileReader()
     reader.onload = e => {
-      avatarPreview.value = e.target.result
+      const result = e.target?.result
+      avatarPreview.value = typeof result === 'string' ? result : ''
     }
     reader.readAsDataURL(file)
   }

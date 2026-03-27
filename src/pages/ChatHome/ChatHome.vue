@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed } from 'vue'
-  import { useChatHome } from '../../composables/useChatHome.js'
-  import { useIconManager } from '../../composables/useIconManager.js'
+  import { useChatHome } from '../../composables/useChatHome'
+  import { useIconManager } from '../../composables/useIconManager'
   import AppHeader from '../../components/AppHeader/AppHeader.vue'
   import Live2DModel from '../../components/Live2DModel/Live2DModel.vue'
 

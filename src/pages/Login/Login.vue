@@ -1,5 +1,5 @@
 <script setup>
-  import { useLogin } from '../../composables/useLogin.js'
+  import { useLogin } from '../../composables/useLogin'
 
   const {
     introVideo,
