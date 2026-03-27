@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import { useUserProfile } from '@/composables/useUserProfile.js'
-  import { useIconManager } from '@/composables/useIconManager.js'
-  import { processImageData } from '@/composables/useImageData.js'
-  import { postAPI, userAPI, commentAPI } from '@/services/api.js'
+  import { useUserProfile } from '@/composables/useUserProfile'
+  import { useIconManager } from '@/composables/useIconManager'
+  import { processImageData } from '@/composables/useImageData'
+  import { postAPI, userAPI, commentAPI } from '@/services/api'
   import { marked } from 'marked'
 
   // 初始化图标管理器
@@ -28,10 +28,7 @@
 
   const router = useRouter()
   const route = useRoute()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
-
-  // 加载用户详情
-  loadUserDetail()
+  const { username, userAvatar } = useUserProfile()
 
   // 帖子数据
   const postData = ref(null)
@@ -55,7 +52,7 @@
   const submittingComment = ref(false)
 
   // 获取帖子ID
-  const postId = computed(() => route.params.post_id)
+  const postId = computed<number>(() => Number(route.params.post_id))
 
   // 计算属性，用于渲染 markdown 内容并处理多媒体
   const renderedContent = computed(() => {

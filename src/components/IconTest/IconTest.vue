@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { useIconManager } from '../../composables/useIconManager'
   import { ref, computed } from 'vue'
 

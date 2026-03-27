@@ -1,12 +1,4 @@
 <div class="tsukuyomi-container">
-  <!-- 标题栏 -->
-  <AppHeader 
-    currentPage="tsukuyomi" 
-    :username="username" 
-    :userAvatar="userAvatar" 
-    @logout="logout" 
-  />
-
   <!-- 主内容区 -->
   <div class="main-content" @mouseenter="deactivateNav">
     <!-- 内容展示区域 - 使用 router-view 显示子路由 -->
@@ -22,16 +14,31 @@
   <!-- 底部圆形导航按钮组 -->
   <div v-if="!route.path.includes('/post/')" class="bottom-nav-container" @mouseenter="activateNav">
     <nav class="nav-buttons" :class="{ active: isNavActive }">
-      <div 
-        v-for="item in navItems" 
+      <div
+        v-for="item in navItems"
         :key="item.id"
         :class="['nav-button', { active: currentNavItem === item.id }]"
         @click="selectNavItem(item.path)"
       >
         <span class="nav-icon">
-          <img v-if="item.id === 'home' && homeIconUrl" :src="homeIconUrl" alt="主页" style="width: 20px; height: 20px;" />
-          <img v-else-if="item.id === 'follow' && followIconUrl" :src="followIconUrl" alt="关注" style="width: 20px; height: 20px;" />
-          <img v-else-if="item.id === 'column' && columnIconUrl" :src="columnIconUrl" alt="专栏" style="width: 20px; height: 20px;" />
+          <img
+            v-if="item.id === 'home' && homeIconUrl"
+            :src="homeIconUrl"
+            alt="主页"
+            style="width: 20px; height: 20px"
+          />
+          <img
+            v-else-if="item.id === 'follow' && followIconUrl"
+            :src="followIconUrl"
+            alt="关注"
+            style="width: 20px; height: 20px"
+          />
+          <img
+            v-else-if="item.id === 'column' && columnIconUrl"
+            :src="columnIconUrl"
+            alt="专栏"
+            style="width: 20px; height: 20px"
+          />
           <span v-else>{{ item.icon }}</span>
         </span>
         <!-- 悬停提示 -->

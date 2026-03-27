@@ -1,22 +1,11 @@
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import AppHeader from '../../components/AppHeader/AppHeader.vue'
 
   const router = useRouter()
   const route = useRoute()
 
   const activeTab = ref('post')
-
-  const username = ref(localStorage.getItem('username') || '用户')
-  const userAvatar = ref(localStorage.getItem('userAvatar') || null)
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('username')
-    localStorage.removeItem('userAvatar')
-    router.push('/')
-  }
 
   const switchTab = tab => {
     activeTab.value = tab
@@ -26,18 +15,18 @@
       router.push('/manager/user')
     }
   }
+
+  onMounted(() => {
+    if (route.path.includes('/manager/user')) {
+      activeTab.value = 'user'
+    } else {
+      activeTab.value = 'post'
+    }
+  })
 </script>
 
 <template>
   <div class="manager-container">
-    <!-- 标题栏 -->
-    <AppHeader
-      current-page="manager"
-      :username="username"
-      :user-avatar="userAvatar"
-      @logout="handleLogout"
-    />
-
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 侧边栏导航 -->
@@ -79,8 +68,8 @@
   .manager-container {
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: calc(100vh - 80px);
     background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
     overflow: hidden;
   }

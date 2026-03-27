@@ -1,12 +1,12 @@
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from './useAuth.js'
-import { useConversations } from './useConversations.js'
-import { useMessages } from './useMessages.js'
-import { useVoice } from './useVoice.js'
-import { useSidebar } from './useSidebar.js'
-import { useUserProfile } from './useUserProfile.js'
-import { useModelLoading } from './useModelLoading.js'
+import { useAuth } from './useAuth'
+import { useConversations } from './useConversations'
+import { useMessages } from './useMessages'
+import { useVoice } from './useVoice'
+import { useSidebar } from './useSidebar'
+import { useUserProfile } from './useUserProfile'
+import { useModelLoading } from './useModelLoading'
 
 export function useChatHome() {
   const router = useRouter()
@@ -35,7 +35,7 @@ export function useChatHome() {
   const { isVoiceClickable, getVoiceStatus, playVoice } = useVoice()
   const { isSidebarOpen, sidebarRef, toggleSidebar, closeSidebar, onTouchStart, onTouchEnd } =
     useSidebar()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
+  const { username, userAvatar } = useUserProfile()
   const { isLoading: isModelLoading, loadProgress, loadStatus } = useModelLoading()
 
   onMounted(() => {
@@ -44,7 +44,6 @@ export function useChatHome() {
       return
     }
     loadConversations()
-    loadUserDetail()
   })
 
   watch(currentConversationId, newId => {

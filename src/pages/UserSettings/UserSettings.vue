@@ -1,5 +1,5 @@
-<script setup>
-  import { useUserSettings } from '../../composables/useUserSettings.js'
+<script setup lang="ts">
+  import { useUserSettings } from '../../composables/useUserSettings'
 
   const {
     userName,

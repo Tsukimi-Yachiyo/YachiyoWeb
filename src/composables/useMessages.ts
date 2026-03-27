@@ -1,5 +1,5 @@
 import { ref, nextTick, watch } from 'vue'
-import { chatAPI } from '../services/api.js'
+import { chatAPI } from '../services/api'
 
 export function useMessages(conversationId) {
   const messages = ref([])

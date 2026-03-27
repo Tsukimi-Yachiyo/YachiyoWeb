@@ -2,6 +2,8 @@ import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import prettierConfig from 'eslint-config-prettier'
 import prettierPlugin from 'eslint-plugin-prettier'
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
 
 export default [
   // 忽略的文件
@@ -18,7 +20,8 @@ export default [
       '*.log',
       '.DS_Store',
       '*.config.js',
-      'vite.config.js',
+      'vite.config.ts',
+      'src/live2d-demo/**',
     ],
   },
 
@@ -27,6 +30,36 @@ export default [
 
   // Vue 3 推荐规则 (包含 'vue3-essential', 'vue3-strongly-recommended', 'vue3-recommended')
   ...pluginVue.configs['flat/recommended'],
+
+  // TypeScript 配置
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+
+  // Vue SFC 中的 TypeScript 解析
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tsParser,
+      },
+    },
+  },
 
   // Prettier 集成
   {
@@ -41,7 +74,7 @@ export default [
 
   // 自定义规则
   {
-    files: ['**/*.{js,mjs,cjs,vue}'],
+    files: ['**/*.{js,mjs,cjs,ts,tsx,vue}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -64,6 +97,7 @@ export default [
         FormData: 'readonly',
         FileReader: 'readonly',
         Blob: 'readonly',
+        File: 'readonly',
         Request: 'readonly',
         Response: 'readonly',
         Headers: 'readonly',
@@ -78,6 +112,7 @@ export default [
         SVGElement: 'readonly',
         Element: 'readonly',
         HTMLElement: 'readonly',
+        HTMLInputElement: 'readonly',
         NodeList: 'readonly',
         HTMLCollection: 'readonly',
         MutationObserver: 'readonly',
@@ -94,6 +129,7 @@ export default [
         confirm: 'readonly',
         TextDecoder: 'readonly',
         TextEncoder: 'readonly',
+        Event: 'readonly',
       },
     },
     rules: {

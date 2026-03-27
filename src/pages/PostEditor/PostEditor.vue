@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import AppHeader from '../../components/AppHeader/AppHeader.vue'
-  import { useUserProfile } from '../../composables/useUserProfile.js'
-  import { useIconManager } from '../../composables/useIconManager.js'
-  import { postAPI } from '../../services/api.js'
+  import { useUserProfile } from '../../composables/useUserProfile'
+  import { useIconManager } from '../../composables/useIconManager'
+  import { postAPI } from '../../services/api'
 
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()
@@ -26,10 +26,7 @@
   })
 
   const router = useRouter()
-  const { username, userAvatar, loadUserDetail } = useUserProfile()
-
-  // 加载用户详情
-  loadUserDetail()
+  const { username, userAvatar } = useUserProfile()
 
   // 表单数据
   const title = ref('')

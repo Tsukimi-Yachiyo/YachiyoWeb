@@ -1,8 +1,8 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: calc(100vh - 80px);
   background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
   overflow: hidden;
   position: relative;
@@ -19,10 +19,10 @@
 /* 模型加载覆盖层 */
 .model-loading-overlay {
   position: fixed;
-  top: 0;
+  top: 80px;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: calc(100vh - 80px);
   background: #000000;
   display: flex;
   align-items: center;
