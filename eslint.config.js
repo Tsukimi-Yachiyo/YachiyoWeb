@@ -51,6 +51,16 @@ export default [
     },
   },
 
+  // Vue SFC 中的 TypeScript 解析
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tsParser,
+      },
+    },
+  },
+
   // Prettier 集成
   {
     plugins: {
@@ -102,6 +112,7 @@ export default [
         SVGElement: 'readonly',
         Element: 'readonly',
         HTMLElement: 'readonly',
+        HTMLInputElement: 'readonly',
         NodeList: 'readonly',
         HTMLCollection: 'readonly',
         MutationObserver: 'readonly',
@@ -118,6 +129,7 @@ export default [
         confirm: 'readonly',
         TextDecoder: 'readonly',
         TextEncoder: 'readonly',
+        Event: 'readonly',
       },
     },
     rules: {

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { useUserSettings } from '../../composables/useUserSettings'
 
   const {

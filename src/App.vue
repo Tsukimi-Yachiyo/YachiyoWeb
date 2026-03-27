@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { useIconManager } from './composables/useIconManager'
 
   // 初始化图标管理器，自动预加载图标

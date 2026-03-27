@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useUserProfile } from '@/composables/useUserProfile'
@@ -55,7 +55,7 @@
   const submittingComment = ref(false)
 
   // 获取帖子ID
-  const postId = computed(() => route.params.post_id)
+  const postId = computed<number>(() => Number(route.params.post_id))
 
   // 计算属性，用于渲染 markdown 内容并处理多媒体
   const renderedContent = computed(() => {

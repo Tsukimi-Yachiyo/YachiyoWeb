@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { useRouter } from 'vue-router'
   import { useIconManager } from '../../../composables/useIconManager'
   import { computed, onMounted, ref } from 'vue'
@@ -22,12 +22,21 @@
   })
 
   // 帖子数据
-  const posts = ref([])
+  const posts = ref<number[]>([])
   const loading = ref(false)
   const error = ref('')
 
   // 帖子详情数据
-  const postDetails = ref([])
+  interface PostDetailItem {
+    id: number
+    title: string
+    posterId: number
+    coverImage: string
+    userName: string
+    userAvatar: string | null
+  }
+
+  const postDetails = ref<PostDetailItem[]>([])
   const detailsLoading = ref(false)
 
   // 搜索关键词
@@ -97,7 +106,7 @@
     loading.value = true
     error.value = ''
     try {
-      const response = await postAPI.searchPosting(searchKeyword.value)
+      const response = await postAPI.searchPosting(searchKeyword.value, 1, 12)
       if (response.success) {
         posts.value = response.data || []
         // 立即获取所有帖子的详情
@@ -118,7 +127,7 @@
   }
 
   // 进入帖子详情页
-  const goToPostDetail = postId => {
+  const goToPostDetail = (postId: number) => {
     router.push(`/tsukuyomi/post/${postId}`)
   }
 
@@ -185,9 +194,9 @@
         >
           <Post
             :user-name="post.userName"
-            :user-id="post.posterId"
+            :user-id="String(post.posterId)"
             :title="post.title"
-            :post-id="post.id"
+            :post-id="String(post.id)"
             :user-avatar="post.userAvatar"
             :cover-image="post.coverImage"
           />
@@ -203,9 +212,9 @@
         >
           <Post
             :user-name="post.userName"
-            :user-id="post.posterId"
+            :user-id="String(post.posterId)"
             :title="post.title"
-            :post-id="post.id"
+            :post-id="String(post.id)"
             :user-avatar="post.userAvatar"
             :cover-image="post.coverImage"
           />

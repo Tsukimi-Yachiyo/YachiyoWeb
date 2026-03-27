@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   // User management feature will be implemented here
 </script>
 

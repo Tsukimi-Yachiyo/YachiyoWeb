@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import AppHeader from '../../components/AppHeader/AppHeader.vue'

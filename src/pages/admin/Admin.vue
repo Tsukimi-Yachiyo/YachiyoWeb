@@ -1,14 +1,15 @@
-<script setup>
+<script setup lang="ts">
   import { ref } from 'vue'
   import { adminAPI } from '../../services/api'
 
-  const files = ref([])
+  const files = ref<File[]>([])
   const isLoading = ref(false)
   const successMessage = ref('')
   const errorMessage = ref('')
 
-  const handleFileChange = event => {
-    files.value = Array.from(event.target.files)
+  const handleFileChange = (event: Event) => {
+    const input = event.target as HTMLInputElement | null
+    files.value = input?.files ? Array.from(input.files) : []
   }
 
   const handleUpload = async () => {
@@ -27,7 +28,10 @@
         successMessage.value = '文件上传成功'
         files.value = []
         // 清空文件输入
-        document.getElementById('fileInput').value = ''
+        const fileInput = document.getElementById('fileInput') as HTMLInputElement | null
+        if (fileInput) {
+          fileInput.value = ''
+        }
       } else {
         errorMessage.value = response.message || '上传失败'
       }

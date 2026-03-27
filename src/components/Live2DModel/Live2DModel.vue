@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { useLive2D } from '../../composables/useLive2D'
 
   const { wrapperRef, canvasRef, onPointerBegan, onPointerMoved, onPointerEnded, onPointerCancel } =

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { ref } from 'vue'
   // eslint-disable-next-line no-unused-vars
   import UserProfilePopover from '../UserProfilePopover/UserProfilePopover.vue'

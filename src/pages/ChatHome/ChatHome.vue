@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
   import { ref, computed } from 'vue'
   import { useChatHome } from '../../composables/useChatHome'
   import { useIconManager } from '../../composables/useIconManager'
