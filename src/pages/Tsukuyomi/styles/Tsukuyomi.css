@@ -3,8 +3,6 @@
 .tsukuyomi-container {
   @apply flex flex-col w-full h-full overflow-hidden relative;
   background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
-  width: 100%;
-  height: calc(100vh - 80px);
 }
 
 /* 主内容区 */
@@ -15,6 +13,8 @@
 
 /* 内容展示区域 */
 .content-area {
+  width: 100%;
+  height: calc(100vh - 80px);
   padding: 20px;
   overflow-y: auto;
   display: flex;
