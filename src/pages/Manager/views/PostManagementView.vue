@@ -2,7 +2,13 @@
   import { ref, onMounted } from 'vue'
   import { postAPI } from '../../../services/api'
 
-  const posts = ref([])
+  interface ManagedPostItem {
+    id: number
+    title?: string
+    createdAt?: string
+  }
+
+  const posts = ref<ManagedPostItem[]>([])
   const loading = ref(false)
   const error = ref('')
   const successMessage = ref('')
@@ -14,19 +20,46 @@
     try {
       const response = await postAPI.getMyPosting()
       if (response.success) {
-        // 假设返回的数据是帖子列表，这里需要根据实际API返回结构调整
-        posts.value = response.data
+        const rawIds = response.data
+        const postIds = Array.isArray(rawIds) ? rawIds : typeof rawIds === 'number' ? [rawIds] : []
+
+        if (postIds.length === 0) {
+          posts.value = []
+          return
+        }
+
+        const detailResults = await Promise.allSettled(
+          postIds.map(async id => {
+            const encapsulateResponse = await postAPI.getPostingEncapsulate(id)
+            return {
+              id,
+              title: encapsulateResponse.data?.title || `作品 #${id}`,
+              createdAt: encapsulateResponse.data?.createdAt,
+            } as ManagedPostItem
+          })
+        )
+
+        posts.value = detailResults
+          .filter(
+            (result): result is PromiseFulfilledResult<ManagedPostItem> =>
+              result.status === 'fulfilled'
+          )
+          .map(result => result.value)
+
+        if (posts.value.length === 0 && postIds.length > 0) {
+          error.value = '作品加载失败，请稍后重试'
+        }
       } else {
         error.value = response.message || '获取帖子失败'
       }
-    } catch (err) {
-      error.value = err.message || '获取帖子失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取帖子失败'
     } finally {
       loading.value = false
     }
   }
 
-  const deletePost = async postingId => {
+  const deletePost = async (postingId: number) => {
     if (!confirm('确定要删除这个帖子吗？')) {
       return
     }
@@ -43,8 +76,8 @@
       } else {
         error.value = response.message || '删除帖子失败'
       }
-    } catch (err) {
-      error.value = err.message || '删除帖子失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '删除帖子失败'
     } finally {
       loading.value = false
     }

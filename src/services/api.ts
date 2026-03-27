@@ -1,4 +1,4 @@
-/// <reference lib="dom" />
+﻿/// <reference lib="dom" />
 /* global AbortSignal */
 
 import axios, {
@@ -394,8 +394,14 @@ export const postAPI = {
 
   // 删除帖子
   deletePosting(postingId: number): Promise<ApiResponse<boolean>> {
+    const formData = new URLSearchParams()
+    formData.append('postingId', String(postingId))
     return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/delete?postingId=${postingId}`)
+      apiClient.post<ApiResponse<boolean>>('/api/v2/posting/delete', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
     )
   },
 }
