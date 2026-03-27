@@ -37,6 +37,9 @@ export default defineConfig({
       'tsukimi-yachiyo.top' , // 建议同时添加不带 www 的主域名，避免遗漏
       'yachiyo.owo.vin', // 你需要允许的域名
       "www.yachiyo.owo.vin",
+        "yachiyocat.top",
+        "www.yachiyocat.top",
+        "60.205.212.25",
       // 3. 保留默认的本地主机（可选，Vite 会自动包含）
       "localhost",
       "127.0.0.1",
@@ -55,10 +58,11 @@ export default defineConfig({
       '/file': {
         target: 'http://47.98.229.211:8080',
         changeOrigin: true,
+        rewrite: (path) => path
       }
     }
   },
   // 打包配置
   // 使用绝对根路径，避免 history 路由在子路径刷新时资源地址解析错误
-  base: '/YachiyoWeb/'
+  base: '/'
 })
