@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { extractAssistantText } from '../utils/extractAssistantText.js'
 
 // 使用相对路径，让 Vite 代理处理请求
 // 生产环境使用实际的后端地址，开发环境使用空字符串（走代理）
@@ -10,6 +11,34 @@ const apiClient = axios.create({
   },
 })
 
+// 性能监控
+const performanceMonitor = {
+  totalRequests: 0,
+  failedRequests: 0,
+  totalResponseTime: 0,
+
+  get successRate() {
+    return this.totalRequests > 0
+      ? (((this.totalRequests - this.failedRequests) / this.totalRequests) * 100).toFixed(2)
+      : 100
+  },
+
+  get averageResponseTime() {
+    return this.totalRequests > 0 ? (this.totalResponseTime / this.totalRequests).toFixed(2) : 0
+  },
+
+  logMetrics() {
+    if (import.meta.env.DEV) {
+      console.log(
+        `[API Performance] 总请求: ${this.totalRequests}, ` +
+          `失败: ${this.failedRequests}, ` +
+          `成功率: ${this.successRate}%, ` +
+          `平均响应时间: ${this.averageResponseTime}ms`
+      )
+    }
+  },
+}
+
 apiClient.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
@@ -20,6 +49,9 @@ apiClient.interceptors.request.use(
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     }
+    // 性能监控：记录请求开始时间
+    config.metadata = { startTime: Date.now() }
+    performanceMonitor.totalRequests++
     return config
   },
   error => {
@@ -29,6 +61,15 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   response => {
+    // 性能监控：计算响应时间
+    const startTime = response.config.metadata?.startTime
+    if (startTime) {
+      const duration = Date.now() - startTime
+      performanceMonitor.totalResponseTime += duration
+      if (import.meta.env.DEV) {
+        console.log(`[API Performance] 请求耗时: ${duration}ms, URL: ${response.config.url}`)
+      }
+    }
     if (import.meta.env.DEV) console.log('API响应原始数据:', response.data)
     if (import.meta.env.DEV) console.log('API响应状态:', response.status)
     const responseData = response.data
@@ -80,6 +121,15 @@ apiClient.interceptors.response.use(
     })
   },
   error => {
+    // 性能监控：记录失败请求
+    performanceMonitor.failedRequests++
+    const startTime = error.config?.metadata?.startTime
+    if (startTime) {
+      const duration = Date.now() - startTime
+      if (import.meta.env.DEV) {
+        console.log(`[API Performance] 请求失败，耗时: ${duration}ms, URL: ${error.config?.url}`)
+      }
+    }
     if (import.meta.env.DEV) console.log('API请求错误:', error)
     if (error.response) {
       const responseData = error.response.data
@@ -109,22 +159,28 @@ export const chatAPI = {
     if (signal) {
       config.signal = signal
     }
-    return apiClient.post(
-      '/api/v2/ai/chat',
-      {
-        message,
-        conversationId: String(conversationId),
-      },
-      config
-    ).then(response => {
-      // response 是拦截器处理后的格式: { success, code, message, data, detail }
-      const text = extractAssistantText(response.data)
-      // 如果 data 是对象且没有 text 字段，添加 text 字段
-      if (response.data && typeof response.data === 'object' && response.data.text === undefined) {
-        response.data.text = text
-      }
-      return response
-    })
+    return apiClient
+      .post(
+        '/api/v2/ai/chat',
+        {
+          message,
+          conversationId: String(conversationId),
+        },
+        config
+      )
+      .then(response => {
+        // response 是拦截器处理后的格式: { success, code, message, data, detail }
+        const text = extractAssistantText(response.data)
+        // 如果 data 是对象且没有 text 字段，添加 text 字段
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          response.data.text === undefined
+        ) {
+          response.data.text = text
+        }
+        return response
+      })
   },
 
   createConversation() {
@@ -276,46 +332,6 @@ export const commentAPI = {
   deleteComment(commentId) {
     return apiClient.post('/api/v1/auth/delete-comment', commentId)
   },
-}
-
-/**
- * 从API响应数据中提取文本
- * @param {any} responseData - API响应数据
- * @returns {string} 提取的文本
- */
-function extractAssistantText(responseData) {
-  if (!responseData) return ''
-
-  let parsedData = responseData
-
-  // 如果 responseData 是字符串，尝试解析为JSON
-  if (typeof responseData === 'string') {
-    try {
-      parsedData = JSON.parse(responseData)
-    } catch (e) {
-      if (import.meta.env.DEV) console.warn('无法解析响应字符串为JSON:', e)
-      // 如果解析失败，使用原字符串
-      return responseData
-    }
-  }
-
-  // 此时 parsedData 应该是对象
-  if (parsedData && typeof parsedData === 'object') {
-    // 如果 parsedData 直接有 text 字段（例如 {think, text, motion}）
-    if (parsedData.text !== undefined) {
-      return parsedData.text
-    }
-    // 如果 parsedData 有 data 字段且包含 text（嵌套结构）
-    else if (parsedData.data && parsedData.data.text !== undefined) {
-      return parsedData.data.text
-    }
-    // 如果是其他对象格式
-    else {
-      return JSON.stringify(parsedData)
-    }
-  }
-
-  return ''
 }
 
 export default apiClient
