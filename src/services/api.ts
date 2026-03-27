@@ -100,12 +100,19 @@ apiClient.interceptors.response.use(
         let data = responseData.data
         // 如果data是字符串，尝试解析为JSON
         if (typeof data === 'string') {
-          try {
-            const parsedData = JSON.parse(data)
-            if (import.meta.env.DEV) console.log('解析data字符串为对象:', parsedData)
-            data = parsedData
-          } catch (e) {
-            if (import.meta.env.DEV) console.warn('无法解析data字符串为JSON，保持原值:', e)
+          // 检查字符串是否看起来像JSON（以{或[开头）
+          if (data.trim().startsWith('{') || data.trim().startsWith('[')) {
+            try {
+              const parsedData = JSON.parse(data)
+              if (import.meta.env.DEV) console.log('解析data字符串为对象:', parsedData)
+              data = parsedData
+            } catch (e) {
+              if (import.meta.env.DEV) console.warn('无法解析data字符串为JSON，保持原值:', e)
+            }
+          } else {
+            // 不是JSON格式的字符串，保持原值（如JWT令牌）
+            if (import.meta.env.DEV)
+              console.log('data字符串不是JSON格式，保持原值:', `${data.substring(0, 50)}...`)
           }
         }
 
@@ -153,7 +160,7 @@ apiClient.interceptors.response.use(
     }
     if (import.meta.env.DEV) console.log('API请求错误:', error)
     if (error.response) {
-      const responseData = error.response.data
+      const responseData = error.response.data as any
       if (import.meta.env.DEV) console.log('错误响应数据:', responseData)
       return Promise.reject({
         success: false,
@@ -193,37 +200,41 @@ export const chatAPI = {
         },
         config
       )
-      .then((response: ApiResponse<ChatResponseData>) => {
-        // response 是拦截器处理后的格式: { success, code, message, data, detail }
-        const text = extractAssistantText(response.data)
+      .then((response: AxiosResponse<ApiResponse<ChatResponseData>>) => {
+        // response.data 是拦截器处理后的格式: { success, code, message, data, detail }
+        const text = extractAssistantText(response.data.data)
         // 如果 data 是对象且没有 text 字段，添加 text 字段
         if (
-          response.data &&
-          typeof response.data === 'object' &&
-          response.data.text === undefined
+          response.data.data &&
+          typeof response.data.data === 'object' &&
+          response.data.data.text === undefined
         ) {
-          response.data.text = text
+          response.data.data.text = text
         }
-        return response
+        return response.data
       })
   },
 
   createConversation(): Promise<ApiResponse<any>> {
-    return apiClient.post<ApiResponse<any>>('/api/v2/ai/create') as Promise<ApiResponse<any>>
-  },
-
-  getHistory(conversationId: string | number): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>(`/api/v2/history/${conversationId}`) as Promise<
+    return apiClient.post<ApiResponse<any>>('/api/v2/ai/create') as unknown as Promise<
       ApiResponse<any>
     >
   },
 
+  getHistory(conversationId: string | number): Promise<ApiResponse<any>> {
+    return apiClient.get<ApiResponse<any>>(
+      `/api/v2/history/${conversationId}`
+    ) as unknown as Promise<ApiResponse<any>>
+  },
+
   getConversationList(): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>('/api/v2/history/list') as Promise<ApiResponse<any>>
+    return apiClient.get<ApiResponse<any>>('/api/v2/history/list') as unknown as Promise<
+      ApiResponse<any>
+    >
   },
 
   speak(text: string): Promise<ApiResponse<any>> {
-    return apiClient.post<ApiResponse<any>>('/api/v2/ai/speak', { text }, {}) as Promise<
+    return apiClient.post<ApiResponse<any>>('/api/v2/ai/speak', { text }, {}) as unknown as Promise<
       ApiResponse<any>
     >
   },
@@ -235,19 +246,21 @@ export const chatAPI = {
     return apiClient.post<ApiResponse<any>>('/api/v2/ai/title', {
       conversationId,
       title,
-    }) as Promise<ApiResponse<any>>
+    }) as unknown as Promise<ApiResponse<any>>
   },
 
   deleteConversation(conversationId: string | number): Promise<ApiResponse<any>> {
-    return apiClient.get<ApiResponse<any>>(`/api/v2/history/clear/${conversationId}`) as Promise<
-      ApiResponse<any>
-    >
+    return apiClient.get<ApiResponse<any>>(
+      `/api/v2/history/clear/${conversationId}`
+    ) as unknown as Promise<ApiResponse<any>>
   },
 }
 
 export const userAPI = {
   getUserDetail(): Promise<ApiResponse<UserDetail>> {
-    return apiClient.post<ApiResponse<UserDetail>>('/api/v1/user/detail/detail/get')
+    return apiClient.post<ApiResponse<UserDetail>>(
+      '/api/v1/user/detail/detail/get'
+    ) as unknown as Promise<ApiResponse<UserDetail>>
   },
 
   updateUserDetail(userDetail) {

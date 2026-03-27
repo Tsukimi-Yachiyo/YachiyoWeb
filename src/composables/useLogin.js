@@ -287,20 +287,20 @@ export function useLogin() {
         password: form.value.password,
       })
 
-      if (response.code === '200') {
-        login(response.data, form.value.username)
+      if (response.data && response.data.code === '200') {
+        login(response.data.data, form.value.username)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
         }, 1000)
       } else {
-        const errorCode = response.code
+        const errorCode = response.data?.code
         if (errorCode === '400.1') {
           error.value = '用户不存在，请先注册'
         } else if (errorCode === '400.2') {
           error.value = '密码错误，请重新输入'
         } else {
-          error.value = response.message || '操作失败，请重试'
+          error.value = response.data?.message || '操作失败，请重试'
         }
       }
     } catch (err) {
