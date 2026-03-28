@@ -390,7 +390,11 @@ export const postAPI = {
 
   // 获取自己的帖子
   getMyPosting(): Promise<ApiResponse<{ postingId: number; approved: boolean | null }[]>> {
-    return unwrapData(apiClient.post<ApiResponse<{ postingId: number; approved: boolean | null }[]>>('/api/v2/posting/getMyPosting'))
+    return unwrapData(
+      apiClient.post<ApiResponse<{ postingId: number; approved: boolean | null }[]>>(
+        '/api/v2/posting/getMyPosting'
+      )
+    )
   },
 
   // 删除帖子
