@@ -27,6 +27,7 @@
     handleSendVerificationCode,
     handleConfirmCaptcha,
     handleCloseCaptchaModal,
+    startVideoLoading,
   } = useLogin()
 
   // Splash screen logic
@@ -42,9 +43,11 @@
         clearInterval(countdownTimer)
         countdownTimer = null
       }
-      // 等待开屏动画的淡出效果(0.5s)结束后，再显示表单
+      // 等待开屏动画的淡出效果(0.5s)结束后，再显示表单并开始加载视频
       setTimeout(() => {
         showForm.value = true
+        // 图片消失后开始加载视频
+        startVideoLoading()
       }, 500) // 这个时间应与 .fade-leave-active 的 transition 时间匹配
     }
   }
@@ -72,20 +75,17 @@
 </script>
 
 <template>
-  <div class="login-container">
-    <!-- 开屏动画 -->
-    <transition name="fade">
-      <div v-if="showSplash" class="splash-screen">
-        <div v-if="!isVideoLoaded" class="loading-overlay">
-          <div class="loading-text">正在登录月读</div>
-        </div>
-        <div class="skip-container">
-          <div class="countdown-text">{{ countdown }}s</div>
-          <button class="skip-button" @click="skipSplash">跳 过</button>
-        </div>
+  <!-- 开屏动画 -->
+  <transition name="fade">
+    <div v-if="showSplash" class="splash-screen">
+      <div class="loading-text">正在登录月读</div>
+      <div class="skip-container">
+        <div class="countdown-text">{{ countdown }}s</div>
+        <button class="skip-button" @click="skipSplash">跳 过</button>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
+
   <div class="login-container">
     <!-- 初始动画 -->
     <video ref="introVideo" class="intro-video" muted @ended="onIntroEnd">
@@ -96,11 +96,6 @@
     <video ref="cycleVideo" class="cycle-video" muted loop style="display: none">
       您的浏览器不支持视频播放。
     </video>
-
-    <!-- 加载中显示 (暂时禁用以显示登录表单) -->
-    <!-- <div v-if="!isVideoLoaded" class="loading-overlay">
-      <div class="loading-text">正在登录月读</div>
-    </div> -->
 
     <!-- 登录/注册表单 -->
     <div class="login-form" :class="{ 'fade-in': showForm }">
@@ -222,7 +217,9 @@
     width: 100%;
     height: 100%;
     z-index: 2000;
-    background-size: cover;
+    background-color: white;
+    background-image: url('@/assets/images/loginani.png');
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
   }
@@ -269,8 +266,8 @@
   }
   .login-container {
     position: relative;
-    /* width: 100vw; */
-    /* height: 100%; */
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -278,37 +275,16 @@
     padding-top: 10vh;
   }
 
-  .loading-overlay {
+  .splash-screen .loading-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* z-index: 2; */
-    background-image: url('@/assets/images/loginani.png');
-    /* 默认使用 contain 来保证图片完整显示，这在宽屏上效果很好 */
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-
-  /* 当屏幕非常高时 (例如手机竖屏), contain 会让图片显得很小。
-     在这种情况下，我们切换策略，让图片填满宽度，并接受顶部和底部的裁剪。
-     这通常比 'cover' 的裁剪效果更好，也比 'contain' 的巨大空白要好。 */
-  @media (max-aspect-ratio: 4/5) {
-    .loading-overlay {
-      background-size: 100% auto;
-    }
-  }
-  .loading-text {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: white;
     font-size: 24px;
     font-weight: 500;
     animation: pulse 1.5s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
   }
 
   @keyframes pulse {

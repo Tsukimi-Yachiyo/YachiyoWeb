@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuth } from './useAuth'
@@ -23,6 +23,12 @@ export function useLogin() {
   const codeCountdown = ref(0)
   const isSendingCode = ref(false)
   const showCaptchaModal = ref(false)
+
+  // 控制视频延迟加载
+  const shouldLoadVideo = ref(false)
+  const startVideoLoading = () => {
+    shouldLoadVideo.value = true
+  }
 
   const form = ref({
     username: '',
@@ -57,37 +63,50 @@ export function useLogin() {
       }
     }
 
-    try {
-      // 加载初始视频
-      if (introVideo.value) {
-        await loadVideoWithMediaSource(
-          introVideo.value,
-          `${import.meta.env.BASE_URL}resource/login_show.mp4`
-        )
+    // 等待图片消失后再加载视频
+    const checkAndLoadVideo = async () => {
+      if (!shouldLoadVideo.value) return
+
+      try {
+        // 加载初始视频
+        if (introVideo.value) {
+          await loadVideoWithMediaSource(
+            introVideo.value,
+            `${import.meta.env.BASE_URL}resource/login_show.mp4`
+          )
+        }
+        // 加载循环视频
+        if (cycleVideo.value) {
+          await loadVideoWithMediaSource(
+            cycleVideo.value,
+            `${import.meta.env.BASE_URL}resource/login_show_cycle.mp4`
+          )
+        }
+        // 视频加载完成后显示表单
+        handleVideoLoaded()
+      } catch (error) {
+        console.error('视频加载失败:', error)
+        // 即使视频加载失败，也显示表单，确保用户可以登录
+        handleVideoLoaded()
       }
-      // 加载循环视频
-      if (cycleVideo.value) {
-        await loadVideoWithMediaSource(
-          cycleVideo.value,
-          `${import.meta.env.BASE_URL}resource/login_show_cycle.mp4`
-        )
-      }
-      // 视频加载完成后显示表单
-      handleVideoLoaded()
-    } catch (error) {
-      console.error('视频加载失败:', error)
-      // 即使视频加载失败，也显示表单，确保用户可以登录
-      handleVideoLoaded()
+
+      setTimeout(() => {
+        if (introVideo.value) {
+          introVideo.value.style.display = 'none'
+        }
+        if (cycleVideo.value) {
+          cycleVideo.value.style.display = 'block'
+        }
+      }, 3000)
     }
 
-    setTimeout(() => {
-      if (introVideo.value) {
-        introVideo.value.style.display = 'none'
+    // 监听 shouldLoadVideo 变化
+    const unwatch = watch(shouldLoadVideo, newValue => {
+      if (newValue) {
+        checkAndLoadVideo()
+        unwatch()
       }
-      if (cycleVideo.value) {
-        cycleVideo.value.style.display = 'block'
-      }
-    }, 3000)
+    })
   })
 
   const onIntroEnd = () => {
@@ -439,5 +458,6 @@ export function useLogin() {
     handleSendVerificationCode,
     handleConfirmCaptcha,
     handleCloseCaptchaModal,
+    startVideoLoading,
   }
 }
