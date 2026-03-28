@@ -19,6 +19,7 @@ import type {
   GetPostingResponse,
   CommentRequest,
   Comment,
+  AdminPosting,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -414,6 +415,12 @@ export const adminAPI = {
     })
     return unwrapData(
       apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/upload', formData)
+    )
+  },
+
+  getAllPosting(): Promise<ApiResponse<AdminPosting[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<AdminPosting[]>>('/api/yachiyo/168/mini/admin/get-all-posting')
     )
   },
 }

@@ -1,28 +1,24 @@
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
+
+  type ManagerTab = 'post' | 'user'
 
   const router = useRouter()
   const route = useRoute()
 
-  const activeTab = ref('post')
+  const activeTab = computed<ManagerTab>(() =>
+    route.path.includes('/manager/user') ? 'user' : 'post'
+  )
 
-  const switchTab = tab => {
-    activeTab.value = tab
+  const switchTab = (tab: ManagerTab) => {
     if (tab === 'post') {
-      router.push('/manager/post')
-    } else if (tab === 'user') {
-      router.push('/manager/user')
+      void router.push('/manager/post')
+      return
     }
-  }
 
-  onMounted(() => {
-    if (route.path.includes('/manager/user')) {
-      activeTab.value = 'user'
-    } else {
-      activeTab.value = 'post'
-    }
-  })
+    void router.push('/manager/user')
+  }
 </script>
 
 <template>
@@ -67,25 +63,28 @@
 <style scoped>
   .manager-container {
     display: flex;
-    flex-direction: column;
     width: 100%;
     height: calc(100vh - 80px);
+    min-height: calc(100vh - 80px);
     background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
     overflow: hidden;
   }
 
   .main-content {
-    flex: 1;
     display: flex;
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
   }
 
   .sidebar {
     width: 200px;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 20px 0;
+    overflow-y: auto;
   }
 
   .sidebar-header {
@@ -129,6 +128,7 @@
 
   .content-area {
     flex: 1;
+    min-width: 0;
     padding: 30px;
     overflow-y: auto;
   }

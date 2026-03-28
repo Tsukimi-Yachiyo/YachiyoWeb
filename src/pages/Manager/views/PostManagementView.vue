@@ -1,17 +1,35 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
-  import { postAPI } from '../../../services/api'
+  import { useRouter } from 'vue-router'
+  import { adminAPI, postAPI } from '../../../services/api'
+  import ApprovalStatusBadge, {
+    type ApprovalStatus,
+  } from '../../../components/ApprovalStatusBadge.vue'
 
   interface ManagedPostItem {
     id: number
     title?: string
     createdAt?: string
+    approvalStatus: ApprovalStatus
   }
 
+  const router = useRouter()
   const posts = ref<ManagedPostItem[]>([])
   const loading = ref(false)
   const error = ref('')
   const successMessage = ref('')
+
+  const getApprovalStatus = (isApproved: boolean | null | undefined): ApprovalStatus => {
+    if (isApproved === true) {
+      return 'approved'
+    }
+
+    if (isApproved === false) {
+      return 'pending'
+    }
+
+    return 'rejected'
+  }
 
   const fetchMyPosts = async () => {
     loading.value = true
@@ -28,13 +46,24 @@
           return
         }
 
+        const adminPostingsResponse = await adminAPI.getAllPosting()
+        if (!adminPostingsResponse.success) {
+          error.value = adminPostingsResponse.message || '获取审核状态失败'
+          return
+        }
+        const adminPostingMap = new Map(
+          (adminPostingsResponse.data || []).map(posting => [posting.id, posting])
+        )
+
         const detailResults = await Promise.allSettled(
           postIds.map(async id => {
             const encapsulateResponse = await postAPI.getPostingEncapsulate(id)
+            const adminPosting = adminPostingMap.get(id)
             return {
               id,
               title: encapsulateResponse.data?.title || `作品 #${id}`,
               createdAt: encapsulateResponse.data?.createdAt,
+              approvalStatus: getApprovalStatus(adminPosting?.isApproved),
             } as ManagedPostItem
           })
         )
@@ -83,6 +112,10 @@
     }
   }
 
+  const viewPost = (postingId: number) => {
+    void router.push(`/tsukuyomi/post/${postingId}`)
+  }
+
   onMounted(() => {
     fetchMyPosts()
   })
@@ -119,12 +152,16 @@
       <div v-else class="posts-list">
         <div v-for="post in posts" :key="post.id" class="post-item">
           <div class="post-info">
-            <h3 class="post-title">{{ post.title || '无标题' }}</h3>
+            <h3 class="post-title">
+              {{ post.title || '无标题' }}
+              <ApprovalStatusBadge :status="post.approvalStatus" />
+            </h3>
             <p class="post-meta">
               <span v-if="post.createdAt">{{ new Date(post.createdAt).toLocaleString() }}</span>
             </p>
           </div>
           <div class="post-actions">
+            <button class="action-btn view-btn" @click="viewPost(post.id)">查看</button>
             <button class="action-btn delete-btn" @click="deletePost(post.id)">删除</button>
           </div>
         </div>
@@ -269,6 +306,9 @@
     font-size: 16px;
     font-weight: 500;
     margin: 0 0 8px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .post-meta {
@@ -289,6 +329,16 @@
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+  }
+
+  .view-btn {
+    background: rgba(33, 150, 243, 0.2);
+    color: #64b5f6;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+  }
+
+  .view-btn:hover {
+    background: rgba(33, 150, 243, 0.3);
   }
 
   .delete-btn {
