@@ -19,16 +19,20 @@
   const error = ref('')
   const successMessage = ref('')
 
+  // 根据后端三态审核逻辑：
+  // - true: 已通过
+  // - false: 已拒绝
+  // - null/undefined: 未审核（等待审核）
   const getApprovalStatus = (isApproved: boolean | null | undefined): ApprovalStatus => {
     if (isApproved === true) {
       return 'approved'
     }
 
     if (isApproved === false) {
-      return 'pending'
+      return 'rejected'
     }
 
-    return 'rejected'
+    return 'pending' // null 或 undefined
   }
 
   const fetchMyPosts = async () => {
