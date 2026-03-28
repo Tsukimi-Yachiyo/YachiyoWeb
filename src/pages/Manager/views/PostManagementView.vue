@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
-  import { adminAPI, postAPI } from '../../../services/api'
+  import { postAPI } from '../../../services/api'
   import ApprovalStatusBadge, {
     type ApprovalStatus,
   } from '../../../components/ApprovalStatusBadge.vue'
@@ -42,32 +42,23 @@
     try {
       const response = await postAPI.getMyPosting()
       if (response.success) {
-        const rawIds = response.data
-        const postIds = Array.isArray(rawIds) ? rawIds : typeof rawIds === 'number' ? [rawIds] : []
+        const rawPosts = response.data
+        const selfPosts = Array.isArray(rawPosts) ? rawPosts : []
 
-        if (postIds.length === 0) {
+        if (selfPosts.length === 0) {
           posts.value = []
           return
         }
 
-        const adminPostingsResponse = await adminAPI.getAllPosting()
-        if (!adminPostingsResponse.success) {
-          error.value = adminPostingsResponse.message || '获取审核状态失败'
-          return
-        }
-        const adminPostingMap = new Map(
-          (adminPostingsResponse.data || []).map(posting => [posting.id, posting])
-        )
-
         const detailResults = await Promise.allSettled(
-          postIds.map(async id => {
+          selfPosts.map(async post => {
+            const id = post.postingId
             const encapsulateResponse = await postAPI.getPostingEncapsulate(id)
-            const adminPosting = adminPostingMap.get(id)
             return {
               id,
               title: encapsulateResponse.data?.title || `作品 #${id}`,
               createdAt: encapsulateResponse.data?.createdAt,
-              approvalStatus: getApprovalStatus(adminPosting?.isApproved),
+              approvalStatus: getApprovalStatus(post.approved),
             } as ManagedPostItem
           })
         )
@@ -79,7 +70,7 @@
           )
           .map(result => result.value)
 
-        if (posts.value.length === 0 && postIds.length > 0) {
+        if (posts.value.length === 0 && selfPosts.length > 0) {
           error.value = '作品加载失败，请稍后重试'
         }
       } else {
