@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     path: '/chat/home',
     name: 'Home',
     // 懒加载聊天主页组件
-    component: () => import('../pages/ChatHome/ChatHome.vue') as Promise<any>,
+    component: () => import('../pages/ChatHome.vue') as Promise<any>,
     // 路由守卫，需要登录才能访问
     meta: {
       requiresAuth: true,

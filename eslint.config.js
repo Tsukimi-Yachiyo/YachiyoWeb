@@ -130,6 +130,7 @@ export default [
         TextDecoder: 'readonly',
         TextEncoder: 'readonly',
         Event: 'readonly',
+        TouchEvent: 'readonly',
       },
     },
     rules: {
