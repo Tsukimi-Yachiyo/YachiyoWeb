@@ -119,6 +119,19 @@ export interface Posting {
 }
 
 /**
+ * 管理端帖子信息
+ */
+export interface AdminPosting {
+  id: number
+  userId?: number
+  title?: string
+  content?: string
+  type?: string
+  isApproved?: boolean | null
+  [key: string]: any
+}
+
+/**
  * 会话历史
  */
 export interface Conversation {

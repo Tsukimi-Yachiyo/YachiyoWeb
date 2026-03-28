@@ -1,11 +1,39 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue'
-  import { postAPI } from '../../../services/api'
+  import { useRouter } from 'vue-router'
+  import { adminAPI, postAPI } from '../../../services/api'
+  import ApprovalStatusBadge, {
+    type ApprovalStatus,
+  } from '../../../components/ApprovalStatusBadge.vue'
 
-  const posts = ref([])
+  interface ManagedPostItem {
+    id: number
+    title?: string
+    createdAt?: string
+    approvalStatus: ApprovalStatus
+  }
+
+  const router = useRouter()
+  const posts = ref<ManagedPostItem[]>([])
   const loading = ref(false)
   const error = ref('')
   const successMessage = ref('')
+
+  // 根据后端三态审核逻辑：
+  // - true: 已通过
+  // - false: 已拒绝
+  // - null/undefined: 未审核（等待审核）
+  const getApprovalStatus = (isApproved: boolean | null | undefined): ApprovalStatus => {
+    if (isApproved === true) {
+      return 'approved'
+    }
+
+    if (isApproved === false) {
+      return 'rejected'
+    }
+
+    return 'pending' // null 或 undefined
+  }
 
   const fetchMyPosts = async () => {
     loading.value = true
@@ -14,19 +42,57 @@
     try {
       const response = await postAPI.getMyPosting()
       if (response.success) {
-        // 假设返回的数据是帖子列表，这里需要根据实际API返回结构调整
-        posts.value = response.data
+        const rawIds = response.data
+        const postIds = Array.isArray(rawIds) ? rawIds : typeof rawIds === 'number' ? [rawIds] : []
+
+        if (postIds.length === 0) {
+          posts.value = []
+          return
+        }
+
+        const adminPostingsResponse = await adminAPI.getAllPosting()
+        if (!adminPostingsResponse.success) {
+          error.value = adminPostingsResponse.message || '获取审核状态失败'
+          return
+        }
+        const adminPostingMap = new Map(
+          (adminPostingsResponse.data || []).map(posting => [posting.id, posting])
+        )
+
+        const detailResults = await Promise.allSettled(
+          postIds.map(async id => {
+            const encapsulateResponse = await postAPI.getPostingEncapsulate(id)
+            const adminPosting = adminPostingMap.get(id)
+            return {
+              id,
+              title: encapsulateResponse.data?.title || `作品 #${id}`,
+              createdAt: encapsulateResponse.data?.createdAt,
+              approvalStatus: getApprovalStatus(adminPosting?.isApproved),
+            } as ManagedPostItem
+          })
+        )
+
+        posts.value = detailResults
+          .filter(
+            (result): result is PromiseFulfilledResult<ManagedPostItem> =>
+              result.status === 'fulfilled'
+          )
+          .map(result => result.value)
+
+        if (posts.value.length === 0 && postIds.length > 0) {
+          error.value = '作品加载失败，请稍后重试'
+        }
       } else {
         error.value = response.message || '获取帖子失败'
       }
-    } catch (err) {
-      error.value = err.message || '获取帖子失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '获取帖子失败'
     } finally {
       loading.value = false
     }
   }
 
-  const deletePost = async postingId => {
+  const deletePost = async (postingId: number) => {
     if (!confirm('确定要删除这个帖子吗？')) {
       return
     }
@@ -43,11 +109,15 @@
       } else {
         error.value = response.message || '删除帖子失败'
       }
-    } catch (err) {
-      error.value = err.message || '删除帖子失败'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : '删除帖子失败'
     } finally {
       loading.value = false
     }
+  }
+
+  const viewPost = (postingId: number) => {
+    void router.push(`/tsukuyomi/post/${postingId}`)
   }
 
   onMounted(() => {
@@ -86,12 +156,16 @@
       <div v-else class="posts-list">
         <div v-for="post in posts" :key="post.id" class="post-item">
           <div class="post-info">
-            <h3 class="post-title">{{ post.title || '无标题' }}</h3>
+            <h3 class="post-title">
+              {{ post.title || '无标题' }}
+              <ApprovalStatusBadge :status="post.approvalStatus" />
+            </h3>
             <p class="post-meta">
               <span v-if="post.createdAt">{{ new Date(post.createdAt).toLocaleString() }}</span>
             </p>
           </div>
           <div class="post-actions">
+            <button class="action-btn view-btn" @click="viewPost(post.id)">查看</button>
             <button class="action-btn delete-btn" @click="deletePost(post.id)">删除</button>
           </div>
         </div>
@@ -236,6 +310,9 @@
     font-size: 16px;
     font-weight: 500;
     margin: 0 0 8px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .post-meta {
@@ -256,6 +333,16 @@
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+  }
+
+  .view-btn {
+    background: rgba(33, 150, 243, 0.2);
+    color: #64b5f6;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+  }
+
+  .view-btn:hover {
+    background: rgba(33, 150, 243, 0.3);
   }
 
   .delete-btn {
