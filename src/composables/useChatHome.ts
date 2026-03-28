@@ -33,8 +33,21 @@ export function useChatHome() {
     stopStreaming,
   } = useMessages(currentConversationId)
   const { isVoiceClickable, getVoiceStatus, playVoice } = useVoice()
-  const { isSidebarOpen, sidebarRef, toggleSidebar, closeSidebar, onTouchStart, onTouchEnd } =
-    useSidebar()
+  const {
+    isSidebarOpen,
+    sidebarRef,
+    toggleSidebar,
+    closeSidebar,
+    onTouchStart: onSidebarTouchStart,
+    onTouchEnd,
+  } = useSidebar()
+
+  const onTouchStart = (e: TouchEvent, callback?: () => void) => {
+    onSidebarTouchStart(e)
+    if (callback) {
+      callback()
+    }
+  }
   const { username, userAvatar } = useUserProfile()
   const { isLoading: isModelLoading, loadProgress, loadStatus } = useModelLoading()
 

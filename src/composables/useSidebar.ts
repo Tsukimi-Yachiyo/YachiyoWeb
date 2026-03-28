@@ -14,11 +14,11 @@ export function useSidebar() {
     isSidebarOpen.value = false
   }
 
-  const onTouchStart = e => {
+  const onTouchStart = (e: TouchEvent) => {
     touchStartX.value = e.touches[0].clientX
   }
 
-  const onTouchEnd = e => {
+  const onTouchEnd = (e: TouchEvent) => {
     touchEndX.value = e.changedTouches[0].clientX
     const diff = touchEndX.value - touchStartX.value
 
