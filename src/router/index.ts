@@ -80,7 +80,7 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     name: 'Admin',
     // 懒加载admin页面组件
-    component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+    component: () => import('../pages/Admin.vue') as Promise<any>,
     // 路由守卫，需要管理员登录才能访问
     meta: {
       requiresAdmin: true,
@@ -89,22 +89,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'dashboard',
         name: 'AdminDashboard',
-        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+        component: () => import('../pages/Admin.vue') as Promise<any>,
       },
       {
         path: 'posts',
         name: 'AdminPosts',
-        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+        component: () => import('../pages/Admin.vue') as Promise<any>,
       },
       {
         path: 'upload',
         name: 'AdminUpload',
-        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+        component: () => import('../pages/Admin.vue') as Promise<any>,
       },
       {
         path: 'settings',
         name: 'AdminSettings',
-        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+        component: () => import('../pages/Admin.vue') as Promise<any>,
       },
     ],
   },
