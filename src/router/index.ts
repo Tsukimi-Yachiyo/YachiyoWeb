@@ -67,6 +67,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../components/IconTest/IconTest.vue') as Promise<any>,
   },
   {
+    path: '/message',
+    name: 'MessageCenter',
+    // 懒加载消息中心页面组件
+    component: () => import('../pages/MessageCenter.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/tsukuyomi/post-editor',
     name: 'PostEditor',
     // 懒加载帖子编辑上传界面组件
