@@ -39,14 +39,9 @@
           <span v-else>登录</span>
         </button>
       </div>
-      
       <!-- 消息提示 -->
-      <div v-if="successMessage" class="message success-message">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage" class="message error-message">
-        {{ errorMessage }}
-      </div>
+      <Message v-if="successMessage" type="success" :message="successMessage" :autoClose="3000" @close="successMessage = ''" />
+      <Message v-if="errorMessage" type="error" :message="errorMessage" :autoClose="3000" @close="errorMessage = ''" />
     </div>
   </div>
 
@@ -118,7 +113,7 @@
           <div v-else v-for="post in pendingPosts" :key="post.id" class="post-item">
             <div class="post-info" @click="goToPostDetail(post.id)">
               <h3 class="post-title">{{ post.title }}</h3>
-              <p class="post-content">{{ post.content.substring(0, 100) }}...</p>
+              <p class="post-content">{{ post.content ? (post.content.length > 200 ? post.content.substring(0, 200) + '...' : post.content) : '（无内容）' }}</p>
               <div class="post-meta">
                 <span>用户 ID: {{ post.userId }}</span>
                 <span>{{ post.createTime }}</span>
@@ -177,12 +172,8 @@
       </div>
 
       <!-- 消息提示 -->
-      <div v-if="successMessage" class="message success-message">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage" class="message error-message">
-        {{ errorMessage }}
-      </div>
+      <Message v-if="successMessage" type="success" :message="successMessage" :autoClose="3000" @close="successMessage = ''" />
+      <Message v-if="errorMessage" type="error" :message="errorMessage" :autoClose="3000" @close="errorMessage = ''" />
     </div>
 
     <!-- 底部导航按钮组 -->
@@ -198,6 +189,42 @@
           <span class="nav-tooltip">{{ item.label }}</span>
         </div>
       </nav>
+    </div>
+
+    <!-- 帖子详情模态框 -->
+    <div v-if="showPostDetail && selectedPost" class="post-detail-modal">
+      <div class="modal-overlay" @click="closePostDetail"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>{{ selectedPost.title }}</h2>
+          <button class="close-btn" @click="closePostDetail">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="post-content-full">
+            <p v-if="selectedPost.content">{{ selectedPost.content }}</p>
+            <p v-else class="empty-content">（无内容）</p>
+          </div>
+          <div class="post-meta-detail">
+            <p><strong>帖子ID:</strong> {{ selectedPost.id }}</p>
+            <p><strong>用户ID:</strong> {{ selectedPost.userId }}</p>
+            <p><strong>创建时间:</strong> {{ selectedPost.createTime }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="reviewPost(selectedPost.id, 'APPROVE')" class="action-btn approve-btn" :disabled="isLoading">
+            通过审核
+          </button>
+          <button @click="reviewPost(selectedPost.id, 'REJECT')" class="action-btn reject-btn" :disabled="isLoading">
+            拒绝审核
+          </button>
+          <button @click="reviewPost(selectedPost.id, 'DELETE')" class="action-btn delete-btn" :disabled="isLoading">
+            删除帖子
+          </button>
+          <button @click="closePostDetail" class="action-btn cancel-btn">
+            关闭
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

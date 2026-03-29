@@ -85,7 +85,6 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAdmin: true,
     },
-    redirect: '/admin/dashboard',
     children: [
       {
         path: 'dashboard',
@@ -100,6 +99,11 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'upload',
         name: 'AdminUpload',
+        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+      },
+      {
+        path: 'settings',
+        name: 'AdminSettings',
         component: () => import('../pages/admin/Admin.vue') as Promise<any>,
       },
     ],
@@ -140,9 +144,23 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     // 检查是否存在管理员token
     const adminToken = localStorage.getItem('adminToken')
+
+    // 处理/admin根路径
+    if (to.path === '/admin' || to.path === '/admin/') {
+      if (adminToken) {
+        // 已登录，重定向到仪表板
+        next({ path: '/admin/dashboard' })
+      } else {
+        // 未登录，显示登录界面
+        next()
+      }
+      return
+    }
+
+    // 处理其他需要管理员认证的路由
     if (!adminToken) {
-      // 没有管理员token，重定向到登录页
-      next({ name: 'Login' })
+      // 没有管理员token，重定向到/admin显示登录界面
+      next({ path: '/admin' })
     } else {
       // 有管理员token，继续访问
       next()

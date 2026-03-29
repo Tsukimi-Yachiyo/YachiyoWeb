@@ -36,6 +36,8 @@
   const files = ref<File[]>([])
   const pendingPosts = ref<any[]>([])
   const isLoadingPosts = ref(false)
+  const showPostDetail = ref(false)
+  const selectedPost = ref<any>(null)
 
   // 导航项
   const navItems = [
@@ -173,9 +175,19 @@
     }
   }
 
-  // 跳转到帖子详情
+  // 显示帖子详情
   const goToPostDetail = (postingId: number) => {
-    router.push(`/tsukuyomi/post/${postingId}`)
+    const post = pendingPosts.value.find(p => p.id === postingId)
+    if (post) {
+      selectedPost.value = post
+      showPostDetail.value = true
+    }
+  }
+
+  // 关闭帖子详情
+  const closePostDetail = () => {
+    showPostDetail.value = false
+    selectedPost.value = null
   }
 
   // 切换导航项
