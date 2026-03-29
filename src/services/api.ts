@@ -1,4 +1,4 @@
-﻿/// <reference lib="dom" />
+/// <reference lib="dom" />
 /* global AbortSignal */
 
 import axios, {
@@ -71,7 +71,13 @@ const performanceMonitor = {
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token')
+    // 根据请求路径选择使用普通token还是管理员token
+    let token
+    if (config.url?.includes('/api/yachiyo/168/mini/admin')) {
+      token = localStorage.getItem('adminToken')
+    } else {
+      token = localStorage.getItem('token')
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -415,6 +421,88 @@ export const adminAPI = {
     })
     return unwrapData(
       apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/upload', formData)
+    )
+  },
+
+  runCommand(command: string): Promise<ApiResponse<string>> {
+    const formData = new URLSearchParams()
+    formData.append('command', command)
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>('/api/yachiyo/168/mini/admin/run-command', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    )
+  },
+
+  getRemainingToken(): Promise<ApiResponse<number>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number>>('/api/yachiyo/168/mini/admin/get-remaining-token')
+    )
+  },
+
+  changeApiKey(apiKey: string, model: string): Promise<ApiResponse<void>> {
+    const formData = new URLSearchParams()
+    formData.append('apiKey', apiKey)
+    formData.append('model', model)
+    return unwrapData(
+      apiClient.post<ApiResponse<void>>('/api/yachiyo/168/mini/admin/change-api-key', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    )
+  },
+
+  login(username: string, password: string): Promise<ApiResponse<string>> {
+    const formData = new URLSearchParams()
+    formData.append('username', username)
+    formData.append('password', password)
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>('/api/yachiyo/168/mini/admin/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    )
+  },
+
+  reviewPost(postingId: number, action: string, reason?: string): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/review', {
+        postingId,
+        action,
+        reason,
+      })
+    )
+  },
+
+  getPendingPosts(
+    status?: string,
+    keyword?: string,
+    pageNum?: number,
+    pageSize?: number
+  ): Promise<ApiResponse<AdminPosting[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<AdminPosting[]>>('/api/yachiyo/168/mini/admin/query-postings', {
+        status: status || 'PENDING',
+        keyword,
+        pageNum: pageNum || 1,
+        pageSize: pageSize || 20,
+      })
+    )
+  },
+
+  deletePosting(postingId: number): Promise<ApiResponse<boolean>> {
+    const formData = new URLSearchParams()
+    formData.append('postingId', String(postingId))
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/delete-posting', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
     )
   },
 
