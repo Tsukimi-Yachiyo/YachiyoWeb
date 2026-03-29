@@ -2,51 +2,371 @@
   <!-- 主内容区 -->
   <div class="main-content">
     <div class="admin-panel">
-      <div class="admin-header">
-        <h1>Admin 页面</h1>
-        <p>文件上传管理</p>
-      </div>
-      
-      <div class="upload-section">
-        <div class="upload-area">
-          <input 
-            type="file" 
-            id="fileInput"
-            multiple 
-            @change="handleFileChange"
-            class="file-input"
-          />
-          <label for="fileInput" class="file-label">
-            <div class="upload-icon">📁</div>
-            <div class="upload-text">
-              <p>点击或拖拽文件到此处</p>
-              <p class="upload-hint">支持上传多个文件</p>
-            </div>
-            <div v-if="files.length > 0" class="file-list">
-              <div v-for="(file, index) in files" :key="index" class="file-item">
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">{{ (file.size / 1024).toFixed(2) }} KB</span>
-              </div>
-            </div>
-          </label>
+      <!-- 登录表单 -->
+      <div v-if="!isLoggedIn && showLoginForm" class="login-container">
+        <div class="admin-header">
+          <h1>管理员登录</h1>
+          <p>请登录后访问管理功能</p>
         </div>
         
-        <button 
-          @click="handleUpload" 
-          class="upload-btn"
-          :disabled="isLoading || files.length === 0"
-        >
-          <span v-if="isLoading" class="loading-spinner"></span>
-          <span v-else>上传文件</span>
-        </button>
+        <div class="login-section">
+          <div class="form-group">
+            <label for="usernameInput">用户名</label>
+            <input 
+              type="text" 
+              id="usernameInput"
+              v-model="loginForm.username"
+              placeholder="输入用户名"
+              class="form-control"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="passwordInput">密码</label>
+            <input 
+              type="password" 
+              id="passwordInput"
+              v-model="loginForm.password"
+              placeholder="输入密码"
+              class="form-control"
+            />
+          </div>
+          
+          <button 
+            @click="handleAdminLogin" 
+            class="action-btn"
+            :disabled="isLoading || !loginForm.username.trim() || !loginForm.password.trim()"
+          >
+            <span v-if="isLoading" class="loading-spinner"></span>
+            <span v-else>登录</span>
+          </button>
+        </div>
+        
+        <!-- 消息提示 -->
+        <div v-if="successMessage" class="message success-message">
+          {{ successMessage }}
+        </div>
+        <div v-if="errorMessage" class="message error-message">
+          {{ errorMessage }}
+        </div>
       </div>
       
-      <!-- 消息提示 -->
-      <div v-if="successMessage" class="message success-message">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage" class="message error-message">
-        {{ errorMessage }}
+      <!-- 管理功能 -->
+      <div v-else-if="isLoggedIn">
+        <div class="admin-header">
+          <h1>Admin 管理后台</h1>
+          <p>系统管理功能</p>
+        </div>
+        
+        <!-- 标签页导航 -->
+        <div class="tab-navigation">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.id"
+            :class="['tab-btn', { active: activeTab === tab.id }]"
+            @click="switchTab(tab.id)"
+          >
+            {{ tab.name }}
+          </button>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="tab-content">
+          <!-- 文件上传 -->
+          <div v-if="activeTab === 'upload'" class="tab-pane">
+            <div class="section-header">
+              <h2>文件上传</h2>
+              <p>上传资源文件到 RAG 知识库</p>
+            </div>
+            
+            <div class="upload-section">
+              <div class="upload-area">
+                <input 
+                  type="file" 
+                  id="fileInput"
+                  multiple 
+                  @change="handleFileChange"
+                  class="file-input"
+                />
+                <label for="fileInput" class="file-label">
+                  <div class="upload-icon">📁</div>
+                  <div class="upload-text">
+                    <p>点击或拖拽文件到此处</p>
+                    <p class="upload-hint">支持上传多个文件</p>
+                  </div>
+                  <div v-if="files.length > 0" class="file-list">
+                    <div v-for="(file, index) in files" :key="index" class="file-item">
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-size">{{ (file.size / 1024).toFixed(2) }} KB</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+              
+              <button 
+                @click="handleUpload" 
+                class="upload-btn"
+                :disabled="isLoading || files.length === 0"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>上传文件</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 命令执行 -->
+          <div v-if="activeTab === 'command'" class="tab-pane">
+            <div class="section-header">
+              <h2>命令执行</h2>
+              <p>执行系统命令</p>
+            </div>
+            
+            <div class="command-section">
+              <div class="form-group">
+                <label for="commandInput">命令</label>
+                <input 
+                  type="text" 
+                  id="commandInput"
+                  v-model="command"
+                  placeholder="输入要执行的命令"
+                  class="form-control"
+                />
+              </div>
+              
+              <button 
+                @click="handleRunCommand" 
+                class="action-btn"
+                :disabled="isLoading || !command.trim()"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>执行命令</span>
+              </button>
+              
+              <div v-if="commandResult" class="result-section">
+                <h3>执行结果</h3>
+                <div class="result-content">{{ commandResult }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Token 管理 -->
+          <div v-if="activeTab === 'token'" class="tab-pane">
+            <div class="section-header">
+              <h2>Token 管理</h2>
+              <p>查看剩余的 AI 模型 token</p>
+            </div>
+            
+            <div class="token-section">
+              <button 
+                @click="handleGetRemainingToken" 
+                class="action-btn"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>获取剩余 Token</span>
+              </button>
+              
+              <div v-if="remainingToken !== null" class="token-info">
+                <h3>剩余 Token</h3>
+                <div class="token-value">{{ remainingToken }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- API 密钥管理 -->
+          <div v-if="activeTab === 'api'" class="tab-pane">
+            <div class="section-header">
+              <h2>API 密钥管理</h2>
+              <p>更新 AI 模型的 API 密钥</p>
+            </div>
+            
+            <div class="api-section">
+              <div class="form-group">
+                <label for="apiKeyInput">API 密钥</label>
+                <input 
+                  type="text" 
+                  id="apiKeyInput"
+                  v-model="apiKeyForm.apiKey"
+                  placeholder="输入新的 API 密钥"
+                  class="form-control"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="modelSelect">模型</label>
+                <select 
+                  id="modelSelect"
+                  v-model="apiKeyForm.model"
+                  class="form-control"
+                >
+                  <option value="qwen-max">qwen-max</option>
+                  <option value="qwen-turbo">qwen-turbo</option>
+                  <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                  <option value="gpt-4">gpt-4</option>
+                </select>
+              </div>
+              
+              <button 
+                @click="handleChangeApiKey" 
+                class="action-btn"
+                :disabled="isLoading || !apiKeyForm.apiKey.trim()"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>更新 API 密钥</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 帖子审核 -->
+          <div v-if="activeTab === 'review'" class="tab-pane">
+            <div class="section-header">
+              <h2>帖子审核</h2>
+              <p>审核用户发布的帖子</p>
+            </div>
+            
+            <div class="review-section">
+              <div class="form-group">
+                <label for="postingIdInput">帖子 ID</label>
+                <input 
+                  type="number" 
+                  id="postingIdInput"
+                  v-model="reviewForm.postingId"
+                  placeholder="输入帖子 ID"
+                  class="form-control"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="actionSelect">操作</label>
+                <select 
+                  id="actionSelect"
+                  v-model="reviewForm.action"
+                  class="form-control"
+                >
+                  <option value="APPROVE">通过</option>
+                  <option value="REJECT">拒绝</option>
+                  <option value="DELETE">删除</option>
+                </select>
+              </div>
+              
+              <div class="form-group" v-if="reviewForm.action === 'REJECT'">
+                <label for="reasonInput">拒绝原因</label>
+                <input 
+                  type="text" 
+                  id="reasonInput"
+                  v-model="reviewForm.reason"
+                  placeholder="输入拒绝原因"
+                  class="form-control"
+                />
+              </div>
+              
+              <button 
+                @click="handleReviewPosting" 
+                class="action-btn"
+                :disabled="isLoading || !reviewForm.postingId"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>审核</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 帖子查询 -->
+          <div v-if="activeTab === 'query'" class="tab-pane">
+            <div class="section-header">
+              <h2>帖子查询</h2>
+              <p>查询和管理帖子</p>
+            </div>
+            
+            <div class="query-section">
+              <div class="form-group">
+                <label for="statusSelect">状态</label>
+                <select 
+                  id="statusSelect"
+                  v-model="queryForm.status"
+                  class="form-control"
+                >
+                  <option value="">全部</option>
+                  <option value="PENDING">待审核</option>
+                  <option value="APPROVED">已通过</option>
+                  <option value="REJECTED">已拒绝</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="keywordInput">关键词</label>
+                <input 
+                  type="text" 
+                  id="keywordInput"
+                  v-model="queryForm.keyword"
+                  placeholder="输入搜索关键词"
+                  class="form-control"
+                />
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pageNumInput">页码</label>
+                  <input 
+                    type="number" 
+                    id="pageNumInput"
+                    v-model="queryForm.pageNum"
+                    min="1"
+                    class="form-control"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="pageSizeInput">每页大小</label>
+                  <input 
+                    type="number" 
+                    id="pageSizeInput"
+                    v-model="queryForm.pageSize"
+                    min="1"
+                    max="100"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+              
+              <button 
+                @click="handleQueryPostings" 
+                class="action-btn"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>查询</span>
+              </button>
+              
+              <div v-if="postings.length > 0" class="postings-list">
+                <h3>查询结果</h3>
+                <div class="posting-item" v-for="posting in postings" :key="posting.id">
+                  <div class="posting-info">
+                    <div class="posting-title">{{ posting.title }}</div>
+                    <div class="posting-meta">
+                      <span>ID: {{ posting.id }}</span>
+                      <span>用户: {{ posting.userId }}</span>
+                      <span>状态: {{ posting.status }}</span>
+                      <span>时间: {{ posting.createTime }}</span>
+                    </div>
+                    <div class="posting-content">{{ posting.content }}</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else-if="postings.length === 0 && successMessage" class="empty-result">
+                没有找到帖子
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 消息提示 -->
+        <div v-if="successMessage" class="message success-message">
+          {{ successMessage }}
+        </div>
+        <div v-if="errorMessage" class="message error-message">
+          {{ errorMessage }}
+        </div>
       </div>
     </div>
   </div>

@@ -25,10 +25,12 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 40px;
-  max-width: 600px;
+  max-width: 800px;
   width: 100%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.5s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 /* Admin 标题 */
@@ -54,7 +56,119 @@
   margin: 0;
 }
 
-/* 上传区域 */
+/* 标签页导航 */
+.tab-navigation {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border-color: #2196f3;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+/* 内容区域 */
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-pane {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 区域标题 */
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 5px 0;
+}
+
+.section-header p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* 表单样式 */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #2196f3;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 15px rgba(33, 150, 243, 0.3);
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-control:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 文件上传区域 */
 .upload-section {
   display: flex;
   flex-direction: column;
@@ -151,29 +265,33 @@
   font-size: 12px;
 }
 
-/* 上传按钮 */
-.upload-btn {
-  padding: 15px 30px;
+/* 按钮样式 */
+.upload-btn,
+.action-btn {
+  padding: 12px 24px;
   background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: white;
   border: none;
   border-radius: 25px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(33, 150, 243, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
+  align-self: flex-start;
 }
 
-.upload-btn:hover:not(:disabled) {
+.upload-btn:hover:not(:disabled),
+.action-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(33, 150, 243, 0.5);
 }
 
-.upload-btn:disabled {
+.upload-btn:disabled,
+.action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -218,6 +336,149 @@
   border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
+/* 命令执行区域 */
+.command-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.result-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-section h3 {
+  color: #fff;
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+.result-content {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+/* Token 管理区域 */
+.token-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.token-info {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.token-info h3 {
+  color: #fff;
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+.token-value {
+  color: #2196f3;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* API 密钥管理区域 */
+.api-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 管理员登录区域 */
+.login-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 帖子审核区域 */
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 帖子查询区域 */
+.query-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.postings-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.posting-item {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.posting-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.posting-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.posting-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.posting-meta span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.posting-content {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.empty-result {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+}
+
 /* 动画 */
 @keyframes fadeIn {
   from {
@@ -235,10 +496,25 @@
   .admin-panel {
     padding: 30px 20px;
     margin: 20px;
+    max-height: 85vh;
   }
 
   .admin-header h1 {
     font-size: 24px;
+  }
+
+  .tab-navigation {
+    gap: 8px;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
   }
 
   .file-label {
@@ -253,11 +529,18 @@
   .upload-text p {
     font-size: 14px;
   }
+
+  .posting-meta {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
 }
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
