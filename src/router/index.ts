@@ -81,10 +81,28 @@ const routes: RouteRecordRaw[] = [
     name: 'Admin',
     // 懒加载admin页面组件
     component: () => import('../pages/admin/Admin.vue') as Promise<any>,
-    // 路由守卫，需要登录才能访问
+    // 路由守卫，需要管理员登录才能访问
     meta: {
-      requiresAuth: true,
+      requiresAdmin: true,
     },
+    redirect: '/admin/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+      },
+      {
+        path: 'posts',
+        name: 'AdminPosts',
+        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+      },
+      {
+        path: 'upload',
+        name: 'AdminUpload',
+        component: () => import('../pages/admin/Admin.vue') as Promise<any>,
+      },
+    ],
   },
   {
     path: '/manager',
@@ -118,8 +136,20 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  // 检查路由是否需要认证
-  if (to.matched.some(record => record.meta.requiresAuth)) {
+  // 检查路由是否需要管理员认证
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    // 检查是否存在管理员token
+    const adminToken = localStorage.getItem('adminToken')
+    if (!adminToken) {
+      // 没有管理员token，重定向到登录页
+      next({ name: 'Login' })
+    } else {
+      // 有管理员token，继续访问
+      next()
+    }
+  }
+  // 检查路由是否需要普通用户认证
+  else if (to.matched.some(record => record.meta.requiresAuth)) {
     // 检查是否存在token
     const token = localStorage.getItem('token')
     if (!token) {
