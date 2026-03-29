@@ -155,7 +155,13 @@
             </p>
           </div>
           <div class="post-actions">
-            <button class="action-btn view-btn" @click="viewPost(post.id)">查看</button>
+            <button
+              v-if="post.approvalStatus === 'approved'"
+              class="action-btn view-btn"
+              @click="viewPost(post.id)"
+            >
+              查看
+            </button>
             <button class="action-btn delete-btn" @click="deletePost(post.id)">删除</button>
           </div>
         </div>

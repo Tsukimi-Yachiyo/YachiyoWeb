@@ -398,7 +398,9 @@ export const postAPI = {
 
   // 获取自己的帖子
   getMyPosting(): Promise<ApiResponse<SelfPostResponse[]>> {
-    return unwrapData(apiClient.post<ApiResponse<SelfPostResponse[]>>('/api/v2/posting/getMyPosting'))
+    return unwrapData(
+      apiClient.post<ApiResponse<SelfPostResponse[]>>('/api/v2/posting/getMyPosting')
+    )
   },
 
   // 帖子互动（合并接口，替代点赞/收藏相关接口）
