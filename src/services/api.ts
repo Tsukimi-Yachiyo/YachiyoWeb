@@ -21,6 +21,7 @@ import type {
   CommentRequest,
   Comment,
   AdminPosting,
+  SelfPostResponse,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -396,8 +397,8 @@ export const postAPI = {
   },
 
   // 获取自己的帖子
-  getMyPosting(): Promise<ApiResponse<number[]>> {
-    return unwrapData(apiClient.post<ApiResponse<number[]>>('/api/v2/posting/getMyPosting'))
+  getMyPosting(): Promise<ApiResponse<SelfPostResponse[]>> {
+    return unwrapData(apiClient.post<ApiResponse<SelfPostResponse[]>>('/api/v2/posting/getMyPosting'))
   },
 
   // 帖子互动（合并接口，替代点赞/收藏相关接口）
