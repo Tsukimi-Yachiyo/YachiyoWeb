@@ -17,6 +17,7 @@ import type {
   PosterDetailResponse,
   PostEncapsulateResponse,
   GetPostingResponse,
+  PostStatsResponse,
   CommentRequest,
   Comment,
   AdminPosting,
@@ -337,66 +338,88 @@ export const postAPI = {
   },
 
   isLiked(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/isLiked?postingId=${postingId}`)
-    )
+    return this.getPostStats(postingId).then(response => {
+      return {
+        ...response,
+        data: response.data?.liked || false,
+      }
+    })
   },
 
   isCollected(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/isCollected?postingId=${postingId}`)
-    )
+    return this.getPostStats(postingId).then(response => {
+      return {
+        ...response,
+        data: response.data?.collected || false,
+      }
+    })
   },
 
   // 点赞帖子
   likePosting(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/like?postingId=${postingId}`)
-    )
+    return this.interaction(postingId, 'LIKE', 'ADD')
   },
 
   // 收藏帖子
   collectionPosting(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/collection?postingId=${postingId}`)
-    )
+    return this.interaction(postingId, 'COLLECTION', 'ADD')
   },
 
   // 取消点赞帖子
   cancelLikePosting(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(`/api/v2/posting/cancelLike?postingId=${postingId}`)
-    )
+    return this.interaction(postingId, 'LIKE', 'REMOVE')
   },
 
   // 取消收藏帖子
   cancelCollectionPosting(postingId: number): Promise<ApiResponse<boolean>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>(
-        `/api/v2/posting/cancelCollection?postingId=${postingId}`
-      )
-    )
+    return this.interaction(postingId, 'COLLECTION', 'REMOVE')
   },
 
   // 获取帖子的收藏数
   getCollectionCount(postingId: number): Promise<ApiResponse<number>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<number>>(
-        `/api/v2/posting/getCollectionCount?postingId=${postingId}`
-      )
-    )
+    return this.getPostStats(postingId).then(response => {
+      return {
+        ...response,
+        data: response.data?.collectionCount || 0,
+      }
+    })
   },
 
   // 获取帖子的点赞数
   getLikeCount(postingId: number): Promise<ApiResponse<number>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<number>>(`/api/v2/posting/getLikeCount?postingId=${postingId}`)
-    )
+    return this.getPostStats(postingId).then(response => {
+      return {
+        ...response,
+        data: response.data?.likeCount || 0,
+      }
+    })
   },
 
   // 获取自己的帖子
   getMyPosting(): Promise<ApiResponse<number[]>> {
     return unwrapData(apiClient.post<ApiResponse<number[]>>('/api/v2/posting/getMyPosting'))
+  },
+
+  // 帖子互动（合并接口，替代点赞/收藏相关接口）
+  interaction(
+    postingId: number,
+    type: 'LIKE' | 'COLLECTION',
+    action: 'ADD' | 'REMOVE' | 'TOGGLE'
+  ): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v2/posting/interaction', {
+        postingId,
+        type,
+        action,
+      })
+    )
+  },
+
+  // 获取帖子统计信息（合并接口，替代单个统计接口）
+  getPostStats(postingId: number): Promise<ApiResponse<PostStatsResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<PostStatsResponse>>(`/api/v2/posting/stats?postingId=${postingId}`)
+    )
   },
 
   // 删除帖子
@@ -495,21 +518,11 @@ export const adminAPI = {
   },
 
   deletePosting(postingId: number): Promise<ApiResponse<boolean>> {
-    const formData = new URLSearchParams()
-    formData.append('postingId', String(postingId))
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/yachiyo/168/mini/admin/delete-posting', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      })
-    )
+    return this.reviewPost(postingId, 'DELETE')
   },
 
   getAllPosting(): Promise<ApiResponse<AdminPosting[]>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<AdminPosting[]>>('/api/yachiyo/168/mini/admin/get-all-posting')
-    )
+    return this.getPendingPosts(undefined, undefined, 1, 1000)
   },
 }
 

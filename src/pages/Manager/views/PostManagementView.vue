@@ -50,7 +50,7 @@
           return
         }
 
-        const adminPostingsResponse = await adminAPI.getAllPosting()
+        const adminPostingsResponse = await adminAPI.getPendingPosts(undefined, undefined, 1, 1000)
         if (!adminPostingsResponse.success) {
           error.value = adminPostingsResponse.message || '获取审核状态失败'
           return
