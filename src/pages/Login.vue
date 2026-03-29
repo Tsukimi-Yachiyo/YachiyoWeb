@@ -32,7 +32,7 @@
 
   // Splash screen logic
   const showSplash = ref(true)
-  const countdown = ref(3)
+  const countdown = ref(1)
   let countdownTimer: ReturnType<typeof setInterval> | null = null
 
   const hideSplashScreen = () => {
@@ -52,18 +52,15 @@
     }
   }
 
-  const skipSplash = () => {
-    hideSplashScreen()
-  }
-
   onMounted(() => {
     countdownTimer = setInterval(() => {
-      if (countdown.value > 1) {
-        countdown.value--
+      if (countdown.value > 0) {
+        countdown.value -= 0.5
+        console.log('倒计时:', countdown.value)
       } else {
         hideSplashScreen()
       }
-    }, 1000)
+    }, 500)
   })
 
   // 在组件卸载时清除定时器，防止内存泄漏
@@ -79,10 +76,6 @@
   <transition name="fade">
     <div v-if="showSplash" class="splash-screen">
       <div class="loading-text">正在登录月读</div>
-      <div class="skip-container">
-        <div class="countdown-text">{{ countdown }}s</div>
-        <button class="skip-button" @click="skipSplash">跳 过</button>
-      </div>
     </div>
   </transition>
 
@@ -217,45 +210,12 @@
     width: 100%;
     height: 100%;
     z-index: 2000;
-    background-color: white;
+    background-color: #2c3e50;
     background-image: url('@/assets/images/loginani.png');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
   }
-
-  .skip-container {
-    position: absolute;
-    bottom: 30px;
-    right: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .countdown-text {
-    font-size: 18px;
-    color: white;
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-  }
-
-  .skip-button {
-    margin-top: 5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
-    padding: 8px 25px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-  }
-
-  .skip-button:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-
   /* Vue 过渡动画 */
   .fade-leave-active {
     transition: opacity 0.5s ease;
@@ -275,13 +235,13 @@
     padding-top: 10vh;
   }
 
-  .splash-screen .loading-text {
+  .loading-text {
     position: absolute;
-    top: 50%;
+    top: 87%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 500;
     animation: pulse 1.5s ease-in-out infinite;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
