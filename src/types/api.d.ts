@@ -160,3 +160,12 @@ export interface Conversation {
   title?: string
   [key: string]: any
 }
+
+/**
+ * 用户自己的帖子响应
+ */
+export interface SelfPostResponse {
+  postingId: number
+  approved?: boolean | null
+  [key: string]: any
+}
