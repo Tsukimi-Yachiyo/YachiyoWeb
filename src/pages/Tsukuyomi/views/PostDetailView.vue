@@ -157,31 +157,18 @@
     }
   }
 
-  // 加载帖子的点赞数、收藏数和状态
+  // 加载帖子的点赞数、收藏数和状态（使用合并接口）
   const loadPostStats = async () => {
     try {
-      // 获取点赞数
-      const likeResponse = await postAPI.getLikeCount(postId.value)
-      if (likeResponse.success) {
-        likeCount.value = likeResponse.data || 0
-      }
-
-      // 获取收藏数
-      const collectionResponse = await postAPI.getCollectionCount(postId.value)
-      if (collectionResponse.success) {
-        collectionCount.value = collectionResponse.data || 0
-      }
-
-      // 获取点赞状态
-      const likeStatusResponse = await postAPI.isLiked(postId.value)
-      if (likeStatusResponse.success) {
-        isLiked.value = likeStatusResponse.data || false
-      }
-
-      // 获取收藏状态
-      const collectStatusResponse = await postAPI.isCollected(postId.value)
-      if (collectStatusResponse.success) {
-        isCollected.value = collectStatusResponse.data || false
+      // 使用合并接口获取所有统计信息
+      const statsResponse = await postAPI.getPostStats(postId.value)
+      if (statsResponse.success && statsResponse.data) {
+        const stats = statsResponse.data
+        likeCount.value = stats.likeCount || 0
+        collectionCount.value = stats.collectionCount || 0
+        isLiked.value = stats.liked || false
+        isCollected.value = stats.collected || false
+        // 注意：这里还可以获取readingCount和coinCount，如果需要可以添加对应的ref
       }
     } catch (err) {
       console.error('加载帖子统计数据失败:', err)
@@ -199,20 +186,11 @@
 
     actionLoading.value = true
     try {
-      if (isLiked.value) {
-        // 取消点赞
-        const response = await postAPI.cancelLikePosting(postId.value)
-        if (response.success) {
-          isLiked.value = false
-          likeCount.value = Math.max(0, likeCount.value - 1)
-        }
-      } else {
-        // 点赞
-        const response = await postAPI.likePosting(postId.value)
-        if (response.success) {
-          isLiked.value = true
-          likeCount.value += 1
-        }
+      const action = isLiked.value ? 'REMOVE' : 'ADD'
+      const response = await postAPI.interaction(postId.value, 'LIKE', action)
+      if (response.success) {
+        isLiked.value = !isLiked.value
+        likeCount.value = isLiked.value ? likeCount.value + 1 : Math.max(0, likeCount.value - 1)
       }
     } catch (err) {
       console.error('处理点赞失败:', err)
@@ -227,20 +205,13 @@
 
     actionLoading.value = true
     try {
-      if (isCollected.value) {
-        // 取消收藏
-        const response = await postAPI.cancelCollectionPosting(postId.value)
-        if (response.success) {
-          isCollected.value = false
-          collectionCount.value = Math.max(0, collectionCount.value - 1)
-        }
-      } else {
-        // 收藏
-        const response = await postAPI.collectionPosting(postId.value)
-        if (response.success) {
-          isCollected.value = true
-          collectionCount.value += 1
-        }
+      const action = isCollected.value ? 'REMOVE' : 'ADD'
+      const response = await postAPI.interaction(postId.value, 'COLLECTION', action)
+      if (response.success) {
+        isCollected.value = !isCollected.value
+        collectionCount.value = isCollected.value
+          ? collectionCount.value + 1
+          : Math.max(0, collectionCount.value - 1)
       }
     } catch (err) {
       console.error('处理收藏失败:', err)
