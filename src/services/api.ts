@@ -555,7 +555,6 @@ export const commentAPI = {
 // ==========================================
 // 新增的邮件/消息接口，为你专门定制的模拟数据
 // ==========================================
-export const mailAPI = {
   getMailList(type: string): Promise<ApiResponse<any[]>> {
     return new Promise((resolve) => {
       // 模拟 600ms 的网络加载延迟，让加载动画显示出来
@@ -584,5 +583,26 @@ export const mailAPI = {
     })
   }
 }
+// 定义邮件列表的“档案”类型，解决机器人报错
+export interface MailItem {
+  id: number;
+  title: string;
+  content: string;
+  sender: string;
+  time: string;
+  isRead: boolean;
+  status: string; // 关键的 status 就在这里
+}
 
+// 确保 mailAPI 使用了这个类型
+export const mailAPI = {
+  getMailList(type: string): Promise<ApiResponse<MailItem[]>> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // ... 这里是你之前的模拟数据 ...
+        resolve({ success: true, code: '200', message: 'success', data: [] })
+      }, 600)
+    })
+  }
+}
 export default apiClient
