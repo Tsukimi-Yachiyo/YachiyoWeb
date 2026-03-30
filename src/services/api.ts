@@ -552,4 +552,37 @@ export const commentAPI = {
   },
 }
 
+// ==========================================
+// 新增的邮件/消息接口，为你专门定制的模拟数据
+// ==========================================
+export const mailAPI = {
+  getMailList(type: string): Promise<ApiResponse<any[]>> {
+    return new Promise((resolve) => {
+      // 模拟 600ms 的网络加载延迟，让加载动画显示出来
+      setTimeout(() => {
+        let mockData: any[] = []
+        if (type === 'LIKE') {
+          mockData = [
+            { id: 1, title: '赞了你的视频', content: '《Vue 3 从入门到精通》', sender: '小说家', time: '10 分钟前', isRead: false },
+            { id: 2, title: '赞了你的专栏', content: '《深入理解 TypeScript 泛型》', sender: '前端达人', time: '1 小时前', isRead: false },
+            { id: 3, title: '赞了你的动态', content: '今天完成了一个大项目！', sender: '代码艺术家', time: '3 小时前', isRead: true }
+          ]
+        } else if (type === 'REPLY') {
+          mockData = [
+            { id: 4, title: '回复了你的动态', content: '设定太棒了，期待后续！', sender: '热心读者', time: '刚才', isRead: false }
+          ]
+        }
+        
+        resolve({
+          success: true,
+          code: '200',
+          message: 'success',
+          data: mockData,
+          detail: null
+        })
+      }, 600)
+    })
+  }
+}
+
 export default apiClient
