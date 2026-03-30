@@ -144,7 +144,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   // 检查路由是否需要管理员认证
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     // 检查是否存在管理员token
@@ -154,21 +154,20 @@ router.beforeEach((to, from, next) => {
     if (to.path === '/admin' || to.path === '/admin/') {
       if (adminToken) {
         // 已登录，重定向到仪表板
-        next({ path: '/admin/dashboard' })
+        return { path: '/admin/dashboard' }
       } else {
         // 未登录，显示登录界面
-        next()
+        return true
       }
-      return
     }
 
     // 处理其他需要管理员认证的路由
     if (!adminToken) {
       // 没有管理员token，重定向到/admin显示登录界面
-      next({ path: '/admin' })
+      return { path: '/admin' }
     } else {
       // 有管理员token，继续访问
-      next()
+      return true
     }
   }
   // 检查路由是否需要普通用户认证
@@ -177,14 +176,14 @@ router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token')
     if (!token) {
       // 没有token，重定向到登录页
-      next({ name: 'Login' })
+      return { name: 'Login' }
     } else {
       // 有token，继续访问
-      next()
+      return true
     }
   } else {
     // 不需要认证的路由，直接访问
-    next()
+    return true
   }
 })
 
