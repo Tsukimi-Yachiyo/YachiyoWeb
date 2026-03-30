@@ -13,6 +13,7 @@ export function useLogin() {
   const showForm = ref(false)
   const isLoading = ref(false)
   const error = ref('')
+  const successMessage = ref('')
   const loginSuccess = ref(false)
   const isVideoLoaded = ref(false)
   const isRegisterMode = ref(false)
@@ -123,19 +124,97 @@ export function useLogin() {
   const toggleMode = () => {
     isRegisterMode.value = !isRegisterMode.value
     isEmailLoginMode.value = false
-    error.value = '' // 切换模式时清空错误信息
+    error.value = ''
+    successMessage.value = ''
   }
 
-  const toggleLoginMode = () => {
-    isEmailLoginMode.value = !isEmailLoginMode.value
+  const setLoginMode = (mode: 'username' | 'email') => {
+    isEmailLoginMode.value = mode === 'email'
     isForgotPasswordMode.value = false
-    error.value = '' // 切换模式时清空错误信息
+    error.value = ''
+    successMessage.value = ''
   }
 
   const toggleForgotPasswordMode = () => {
     isForgotPasswordMode.value = !isForgotPasswordMode.value
     isEmailLoginMode.value = false
-    error.value = '' // 切换模式时清空错误信息
+    error.value = ''
+    successMessage.value = ''
+  }
+
+  // 提取错误码
+  const extractErrorCode = (err: any): string => {
+    if (!err || typeof err !== 'object') return ''
+    return (
+      err.code ||
+      err.Code ||
+      err.response?.data?.code ||
+      err.response?.data?.Code ||
+      err.data?.code ||
+      err.data?.Code ||
+      ''
+    )
+  }
+
+  // 提取错误消息
+  const extractErrorMessage = (err: any): string => {
+    if (!err || typeof err !== 'object') return ''
+    return (
+      err.message ||
+      err.Message ||
+      err.response?.data?.message ||
+      err.response?.data?.Message ||
+      err.data?.message ||
+      err.data?.Message ||
+      err.response?.data?.detail ||
+      ''
+    )
+  }
+
+  // 特定错误码映射表
+  const errorCodeMap: Record<string, string> = {
+    '400.1': '用户不存在，请先注册',
+    '400.2': '密码错误，请重新输入',
+  }
+
+  // 检查特定错误详情
+  const getSpecificErrorMessage = (message: string): string | null => {
+    if (message.includes('already exists')) {
+      return '该邮箱已被注册，请使用其他邮箱或直接登录'
+    }
+    if (message.includes('duplicate key')) {
+      return '该用户名或邮箱已被注册'
+    }
+    if (message.includes('验证码已发送，请稍后再试')) {
+      return '验证码可能已发送，请检查邮箱。发送过于频繁，请稍后再试'
+    }
+    if (message.includes('Local address contains illegal character')) {
+      return '邮箱地址格式不正确，请检查后重试'
+    }
+    return null
+  }
+
+  // 统一处理API错误
+  const handleApiError = (err: any, defaultMsg: string): string => {
+    const code = extractErrorCode(err)
+    const message = extractErrorMessage(err)
+
+    // 优先检查特定错误码映射
+    if (code && errorCodeMap[code]) {
+      return errorCodeMap[code]
+    }
+
+    // 检查特定错误详情（如 already exists, duplicate key 等）
+    const specificMessage = getSpecificErrorMessage(message)
+    if (specificMessage) {
+      return specificMessage
+    }
+
+    // 返回服务器返回的错误消息或默认消息
+    if (message) return message
+    if (err?.message) return err.message
+
+    return '网络错误，请检查网络连接'
   }
 
   // 前端生成验证码
@@ -194,7 +273,7 @@ export function useLogin() {
   }
 
   const startCodeCountdown = () => {
-    codeCountdown.value = 600 // 10分钟，600秒
+    codeCountdown.value = 60 // 1分钟，60秒
     const timer = setInterval(() => {
       if (codeCountdown.value > 0) {
         codeCountdown.value--
@@ -269,7 +348,7 @@ export function useLogin() {
       })
 
       if (codeResponse.data && codeResponse.data.success) {
-        error.value = '验证码已发送，请查收'
+        successMessage.value = '验证码已发送，请查收'
         startCodeCountdown()
         showCaptchaModal.value = false
         captchaInput.value = ''
@@ -279,47 +358,19 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('发送验证码失败:', err)
-      console.error('错误对象详情:', JSON.stringify(err, null, 2))
 
-      // 尝试从不同位置提取错误信息
-      let errCode = ''
-      let errMessage = ''
-
-      // 检查错误对象的多种可能结构
-      if (err && typeof err === 'object') {
-        // 方式1: 直接属性（api拦截器返回的对象）
-        errCode = err.code || err.Code || ''
-        errMessage = err.message || err.Message || ''
-
-        // 方式2: 如果是Axios错误，检查response.data
-        if (!errCode && err.response && err.response.data) {
-          errCode = err.response.data.code || err.response.data.Code || ''
-          errMessage = err.response.data.message || err.response.data.Message || ''
-        }
-
-        // 方式3: 检查data属性
-        if (!errCode && err.data) {
-          errCode = err.data.code || err.data.Code || ''
-          errMessage = err.data.message || err.data.Message || ''
-        }
-      }
-
-      console.log('提取的错误信息 - code:', errCode, 'message:', errMessage)
+      const errCode = extractErrorCode(err)
+      const errMessage = extractErrorMessage(err)
 
       // 对于400错误"验证码已发送，请稍后再试"，也视为成功处理
       if (errCode === '400' && errMessage.includes('验证码已发送，请稍后再试')) {
-        error.value = '验证码可能已发送，请检查邮箱。发送过于频繁，请稍后再试'
+        successMessage.value = '验证码可能已发送，请检查邮箱。发送过于频繁，请稍后再试'
         // 即使频繁发送，也启动倒计时防止用户重复点击
         startCodeCountdown()
         showCaptchaModal.value = false
         captchaInput.value = ''
-      } else if (
-        errCode === '500' &&
-        errMessage.includes('Local address contains illegal character')
-      ) {
-        error.value = '邮箱地址格式不正确，请检查后重试'
       } else {
-        error.value = errMessage || '网络错误，请检查网络连接'
+        error.value = handleApiError(err, '发送验证码失败，请重试')
       }
     } finally {
       isSendingCode.value = false
@@ -330,25 +381,24 @@ export function useLogin() {
     showCaptchaModal.value = false
     captchaInput.value = ''
     error.value = ''
+    successMessage.value = ''
   }
 
   const handleRegister = async () => {
     error.value = ''
-    isLoading.value = true
 
     // 验证邮箱和验证码
     if (!email.value) {
       error.value = '请输入邮箱'
-      isLoading.value = false
       return
     }
 
     if (!code.value) {
       error.value = '请输入验证码'
-      isLoading.value = false
       return
     }
 
+    isLoading.value = true
     try {
       const response = await apiClient.post('/api/v1/auth/register', {
         username: form.value.username,
@@ -368,15 +418,7 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('[Register] 注册失败:', err)
-      if (err.response && err.response.data) {
-        const errorCode = err.response.data.code
-        const errorMessage = err.response.data.message
-        error.value = errorMessage || '注册失败，请重试'
-      } else if (err.code) {
-        error.value = err.message || '注册失败，请重试'
-      } else {
-        error.value = '网络错误，请检查网络连接'
-      }
+      error.value = handleApiError(err, '注册失败，请重试')
     } finally {
       isLoading.value = false
     }
@@ -410,30 +452,7 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('[Login] 登录失败:', err)
-
-      if (err.response && err.response.data) {
-        const errorCode = err.response.data.code
-        const errorMessage = err.response.data.message
-        // 根据错误码设置错误信息
-        if (errorCode === '400.1') {
-          error.value = '用户不存在，请先注册'
-        } else if (errorCode === '400.2') {
-          error.value = '密码错误，请重新输入'
-        } else {
-          error.value = errorMessage || '操作失败，请重试'
-        }
-      } else if (err.code) {
-        // 处理 apiClient 拦截器返回的自定义错误对象
-        if (err.code === '400.1') {
-          error.value = '用户不存在，请先注册'
-        } else if (err.code === '400.2') {
-          error.value = '密码错误，请重新输入'
-        } else {
-          error.value = err.message || '操作失败，请重试'
-        }
-      } else {
-        error.value = '网络错误，请检查网络连接'
-      }
+      error.value = handleApiError(err, '登录失败，请重试')
     } finally {
       isLoading.value = false
     }
@@ -441,21 +460,19 @@ export function useLogin() {
 
   const handleEmailLogin = async () => {
     error.value = ''
-    isLoading.value = true
 
     // 验证邮箱和验证码
     if (!email.value) {
       error.value = '请输入邮箱'
-      isLoading.value = false
       return
     }
 
     if (!code.value) {
       error.value = '请输入验证码'
-      isLoading.value = false
       return
     }
 
+    isLoading.value = true
     try {
       const response = await apiClient.post('/api/v1/auth/login-by-email', {
         email: email.value,
@@ -473,15 +490,7 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('[EmailLogin] 登录失败:', err)
-
-      if (err.response && err.response.data) {
-        const errorMessage = err.response.data.message
-        error.value = errorMessage || '邮箱登录失败，请重试'
-      } else if (err.code) {
-        error.value = err.message || '邮箱登录失败，请重试'
-      } else {
-        error.value = '网络错误，请检查网络连接'
-      }
+      error.value = handleApiError(err, '邮箱登录失败，请重试')
     } finally {
       isLoading.value = false
     }
@@ -489,33 +498,29 @@ export function useLogin() {
 
   const handleForgotPassword = async () => {
     error.value = ''
-    isLoading.value = true
 
     // 验证用户名、邮箱、验证码和密码
     if (!form.value.username) {
       error.value = '请输入用户名'
-      isLoading.value = false
       return
     }
 
     if (!email.value) {
       error.value = '请输入邮箱'
-      isLoading.value = false
       return
     }
 
     if (!code.value) {
       error.value = '请输入验证码'
-      isLoading.value = false
       return
     }
 
     if (!form.value.password) {
       error.value = '请输入新密码'
-      isLoading.value = false
       return
     }
 
+    isLoading.value = true
     try {
       const response = await apiClient.post('/api/v1/auth/change-password', {
         username: form.value.username,
@@ -525,7 +530,7 @@ export function useLogin() {
       })
 
       if (response.data && response.data.code === '200') {
-        error.value = '密码重置成功，请使用新密码登录'
+        successMessage.value = '密码重置成功，请使用新密码登录'
         // 重置表单并切换回登录模式
         setTimeout(() => {
           isForgotPasswordMode.value = false
@@ -541,15 +546,7 @@ export function useLogin() {
       }
     } catch (err) {
       console.error('[ForgotPassword] 密码重置失败:', err)
-
-      if (err.response && err.response.data) {
-        const errorMessage = err.response.data.message
-        error.value = errorMessage || '密码重置失败，请重试'
-      } else if (err.code) {
-        error.value = err.message || '密码重置失败，请重试'
-      } else {
-        error.value = '网络错误，请检查网络连接'
-      }
+      error.value = handleApiError(err, '密码重置失败，请重试')
     } finally {
       isLoading.value = false
     }
@@ -573,6 +570,7 @@ export function useLogin() {
     showForm,
     isLoading,
     error,
+    successMessage,
     loginSuccess,
     isVideoLoaded,
     isRegisterMode,
@@ -593,7 +591,7 @@ export function useLogin() {
     handleForgotPassword,
     handleFormSubmit,
     toggleMode,
-    toggleLoginMode,
+    setLoginMode,
     toggleForgotPasswordMode,
     refreshCaptcha,
     handleSendVerificationCode,

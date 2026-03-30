@@ -8,6 +8,7 @@
     showForm,
     isLoading,
     error,
+    successMessage,
     loginSuccess,
     isVideoLoaded,
     isRegisterMode,
@@ -28,7 +29,7 @@
     handleForgotPassword,
     handleFormSubmit,
     toggleMode,
-    toggleLoginMode,
+    setLoginMode,
     toggleForgotPasswordMode,
     refreshCaptcha,
     handleSendVerificationCode,
@@ -129,7 +130,7 @@
             class="toggle-btn"
             :class="{ active: isEmailLoginMode }"
             title="邮箱登录"
-            @click="toggleLoginMode"
+            @click="setLoginMode('email')"
           >
             <img v-if="messageIconUrl" :src="messageIconUrl" alt="邮箱登录" class="toggle-icon" />
             <span v-else>📧</span>
@@ -139,7 +140,7 @@
             class="toggle-btn"
             :class="{ active: !isEmailLoginMode }"
             title="用户名登录"
-            @click="toggleLoginMode"
+            @click="setLoginMode('username')"
           >
             <img v-if="desktopIconUrl" :src="desktopIconUrl" alt="用户名登录" class="toggle-icon" />
             <span v-else>💻</span>
@@ -319,8 +320,6 @@
           </button>
         </div>
 
-        <div v-if="error" class="error-message">{{ error }}</div>
-
         <div class="form-footer">
           <p>
             {{ isRegisterMode ? '已有账号？' : '还没有账号？' }}
@@ -336,6 +335,16 @@
           </template>
         </div>
       </form>
+
+      <!-- 消息提示 -->
+      <Message
+        v-if="successMessage"
+        type="success"
+        :message="successMessage"
+        :auto-close="3000"
+        @close="successMessage = ''"
+      />
+      <Message v-if="error" type="error" :message="error" :auto-close="3000" @close="error = ''" />
     </div>
 
     <!-- 登录成功背景过渡 -->
@@ -351,7 +360,6 @@
             <input v-model="captchaInput" type="text" placeholder="请输入图形验证码" required />
             <img :src="captchaUrl" alt="验证码" class="captcha-image" @click="refreshCaptcha" />
           </div>
-          <div v-if="error" class="error-message">{{ error }}</div>
           <div class="captcha-modal-actions">
             <button type="button" class="cancel-btn" @click="handleCloseCaptchaModal">取消</button>
             <button
@@ -363,6 +371,14 @@
               {{ isSendingCode ? '发送中...' : '确认' }}
             </button>
           </div>
+          <!-- 验证码弹窗消息提示 -->
+          <Message
+            v-if="error"
+            type="error"
+            :message="error"
+            :auto-close="3000"
+            @close="error = ''"
+          />
         </div>
       </div>
     </div>
@@ -639,15 +655,6 @@
     cursor: not-allowed;
   }
 
-  .error-message {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #ffebee;
-    color: #c62828;
-    border-radius: 5px;
-    text-align: center;
-  }
-
   .success-overlay {
     position: absolute;
     top: 0;
@@ -717,10 +724,6 @@
 
   .captcha-modal-form .captcha-container {
     margin-bottom: 10px;
-  }
-
-  .captcha-modal-form .error-message {
-    margin-top: 0;
   }
 
   .captcha-modal-actions {
