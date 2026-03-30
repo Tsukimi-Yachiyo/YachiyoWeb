@@ -9,9 +9,7 @@
       <div class="placeholder"></div>
     </div>
 
-    <div v-if="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
+    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
 
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -38,9 +36,7 @@
                 @change="handleFileSelect"
                 class="file-input"
               />
-              <label for="avatar-input" class="file-input-label">
-                选择图片
-              </label>
+              <label for="avatar-input" class="file-input-label"> 选择图片 </label>
             </div>
             <button
               class="upload-btn"
@@ -61,7 +57,7 @@
       <!-- 用户详情 -->
       <div class="settings-section">
         <h2 class="section-title">基本信息</h2>
-        
+
         <div class="form-group">
           <label class="form-label">昵称</label>
           <input
@@ -94,43 +90,25 @@
 
           <div class="form-group">
             <label class="form-label">生日</label>
-            <input
-              v-model="userBirthday"
-              type="date"
-              class="form-input"
-            />
+            <input v-model="userBirthday" type="date" class="form-input" />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">城市</label>
-            <input
-              v-model="userCity"
-              type="text"
-              placeholder="所在城市"
-              class="form-input"
-            />
+            <input v-model="userCity" type="text" placeholder="所在城市" class="form-input" />
           </div>
 
           <div class="form-group">
             <label class="form-label">电话</label>
-            <input
-              v-model="userPhone"
-              type="tel"
-              placeholder="联系电话"
-              class="form-input"
-            />
+            <input v-model="userPhone" type="tel" placeholder="联系电话" class="form-input" />
           </div>
         </div>
 
         <div class="save-section">
           <p v-if="detailError" class="error-text">{{ detailError }}</p>
-          <button
-            class="save-btn"
-            @click="saveUserDetail"
-            :disabled="isSavingDetail"
-          >
+          <button class="save-btn" @click="saveUserDetail" :disabled="isSavingDetail">
             <span v-if="isSavingDetail" class="btn-spinner"></span>
             <span v-else>保存信息</span>
           </button>
