@@ -60,12 +60,7 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
   },
-  {
-    path: '/icon-test',
-    name: 'IconTest',
-    // 懒加载图标测试组件
-    component: () => import('../components/IconTest/IconTest.vue') as Promise<any>,
-  },
+
   {
     path: '/message',
     name: 'MessageCenter',
