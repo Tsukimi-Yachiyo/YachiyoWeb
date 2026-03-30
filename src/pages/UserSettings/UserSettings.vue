@@ -171,8 +171,44 @@
       <el-tabs :tab-position="tabPosition" type="card" class="demo-tabs">
         <el-tab-pane label="我的信息">
           <el-form label-width="180px" style="margin-top: 30px">
+            <div class="Settings-section">
+              <div class="Avatar-section">
+                <div class="Avatar-preview-container">
+                  <div class="Avatar-preview">
+                    <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
+                    <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+                  </div>
+                </div>
+                <div class="Avatar-actions">
+                  <div class="File-input-wrapper">
+                    <input
+                      id="Avatar-input"
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif"
+                      class="file-input"
+                      @change="handleFileSelect"
+                    />
+                    <label for="Avatar-input" class="File-input-label"> 选择图片 </label>
+                  </div>
+                  <button
+                    class="Upload-btn"
+                    :disabled="isUploading || !selectedFile"
+                    @click="uploadAvatar"
+                  >
+                    <span v-if="isUploading" class="Btn-spinner"></span>
+                    <span v-else>上传头像</span>
+                  </button>
+                </div>
+              </div>
+            </div>
             <el-form-item label="昵称">
-              <el-input v-model="userName" style="width: auto" />
+              <el-input
+                v-model="userName"
+                maxlength="8"
+                show-word-limit
+                placeholder="昵称最多允许八个字哦QAQ"
+                style="width: auto"
+              />
             </el-form-item>
             <el-form-item label="个人签名" style="margin-top: 40px">
               <el-input
@@ -182,7 +218,7 @@
                 maxlength="40"
                 show-word-limit
                 type="textarea"
-                placeholder="简单介绍下自己吧♡( •ॢ◡-ॢ)✧"
+                placeholder="  简单介绍下自己吧♡( •ॢ◡-ॢ)✧"
                 style="width: 70%; height: auto"
               />
             </el-form-item>
@@ -213,12 +249,47 @@
                 </el-form-item>
               </el-col>
             </el-row>
-            <el-form-item label-width="0" style="display: flex; margin-top: 50px; margin-left: 35%">
-              <el-button type="primary" @click="saveUserDetail">保存</el-button>
+            <el-form-item label-width="0" style="display: flex; margin-top: 50px; margin-left: 38%">
+              <el-button type="primary" style="width: 150px" @click="saveUserDetail"
+                >保存</el-button
+              >
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="我的头像"></el-tab-pane>
+        <!-- <el-tab-pane label="我的头像">
+          <div class="Settings-section">
+            <h2 class="Section-title">头像设置</h2>
+            <div class="Avatar-divider"></div>
+            <div class="Avatar-section">
+              <div class="Avatar-preview-container">
+                <div class="Avatar-preview">
+                  <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
+                  <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+                </div>
+              </div>
+              <div class="Avatar-actions">
+                <div class="File-input-wrapper">
+                  <input
+                    id="Avatar-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    class="file-input"
+                    @change="handleFileSelect"
+                  />
+                  <label for="Avatar-input" class="File-input-label"> 选择图片 </label>
+                </div>
+                <button
+                  class="Upload-btn"
+                  :disabled="isUploading || !selectedFile"
+                  @click="uploadAvatar"
+                >
+                  <span v-if="isUploading" class="Btn-spinner"></span>
+                  <span v-else>上传头像</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane> -->
         <el-tab-pane label="账号安全"></el-tab-pane>
         <el-tab-pane label="黑名单管理"></el-tab-pane>
       </el-tabs>
@@ -276,7 +347,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     color: #fff;
-    font-size: 14px;
+    font-size: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
   }
@@ -628,8 +699,6 @@
     justify-content: center;
     width: 80%;
     margin-top: 10%;
-    height: 80vh;
-    /* max-width: 600px; */
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -651,5 +720,112 @@
     font-size: 20px !important;
 
     /* color: rgba(255, 255, 255, 0.85); */
+  }
+  :deep(.ela_input__inner),
+  :deep(.el-textarea__inner) {
+    font-size: 20px; /* 修改这里的值来调整输入文字的大小 */
+  }
+
+  /* 修改 Element Plus 输入框 (ela_input, el-textarea) 的 placeholder 字体大小 */
+  :deep(.ela_input__inner)::placeholder,
+  :deep(.el-textarea__inner)::placeholder {
+    font-size: 20px; /* 修改这里的值来调整 placeholder 文字的大小 */
+  }
+  .Settings-section {
+    height: 80%;
+  }
+  .Section-title {
+    color: #1976d2;
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 20px;
+    margin-left: 40%;
+  }
+  .Avatar-divider {
+    margin-top: 20px;
+    height: 1px;
+    background-color: rgba(20, 68, 86, 0.2);
+  }
+  .Avatar-preview-container {
+    margin-top: 40px;
+  }
+  .Avatar-preview {
+    margin-left: 38%;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 40px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .Avatar-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    /* justify-content: center; */
+    margin-left: 33%;
+    margin-bottom: 20px;
+  }
+
+  .File-input-wrapper {
+    position: relative;
+  }
+
+  .File-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .File-input-label {
+    display: block;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #2196f3;
+    font-size: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .File-input-label:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(33, 150, 243, 0.5);
+  }
+  .Upload-btn {
+    padding: 12px 24px;
+    /* background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); */
+    background: rgba(145, 68, 152, 0.397);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+  }
+
+  .Upload-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+  }
+
+  .Upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 </style>
