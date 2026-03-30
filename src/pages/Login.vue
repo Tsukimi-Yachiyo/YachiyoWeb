@@ -1,15 +1,19 @@
 <script setup lang="ts">
   import { useLogin } from '../composables/useLogin'
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { ref, onMounted, onUnmounted, computed } from 'vue'
+  import { useIconManager } from '../composables/useIconManager'
   const {
     introVideo,
     cycleVideo,
     showForm,
     isLoading,
     error,
+    successMessage,
     loginSuccess,
     isVideoLoaded,
     isRegisterMode,
+    isEmailLoginMode,
+    isForgotPasswordMode,
     captchaUrl,
     captchaInput,
     email,
@@ -21,14 +25,30 @@
     onIntroEnd,
     handleSubmit,
     handleRegister,
+    handleEmailLogin,
+    handleForgotPassword,
     handleFormSubmit,
     toggleMode,
+    setLoginMode,
+    toggleForgotPasswordMode,
     refreshCaptcha,
     handleSendVerificationCode,
     handleConfirmCaptcha,
     handleCloseCaptchaModal,
     startVideoLoading,
   } = useLogin()
+
+  const { checkIconCache } = useIconManager()
+
+  const messageIconUrl = computed(() => {
+    const iconData = checkIconCache('message.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
+
+  const desktopIconUrl = computed(() => {
+    const iconData = checkIconCache('desktop.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
 
   // Splash screen logic
   const showSplash = ref(true)
@@ -93,35 +113,170 @@
     <!-- 登录/注册表单 -->
     <div class="login-form" :class="{ 'fade-in': showForm }">
       <div class="form-header">
-        <h2>{{ isRegisterMode ? '注册' : '登录' }}</h2>
+        <h2>
+          {{
+            isRegisterMode
+              ? '注册'
+              : isEmailLoginMode
+                ? '邮箱登录'
+                : isForgotPasswordMode
+                  ? '找回密码'
+                  : '登录'
+          }}
+        </h2>
+        <div v-if="!isRegisterMode && !isForgotPasswordMode" class="login-mode-toggle">
+          <button
+            type="button"
+            class="toggle-btn"
+            :class="{ active: isEmailLoginMode }"
+            title="邮箱登录"
+            @click="setLoginMode('email')"
+          >
+            <img v-if="messageIconUrl" :src="messageIconUrl" alt="邮箱登录" class="toggle-icon" />
+            <span v-else>📧</span>
+          </button>
+          <button
+            type="button"
+            class="toggle-btn"
+            :class="{ active: !isEmailLoginMode }"
+            title="用户名登录"
+            @click="setLoginMode('username')"
+          >
+            <img v-if="desktopIconUrl" :src="desktopIconUrl" alt="用户名登录" class="toggle-icon" />
+            <span v-else>💻</span>
+          </button>
+        </div>
       </div>
 
       <form @submit.prevent="handleFormSubmit">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input
-            id="username"
-            v-model="form.username"
-            type="text"
-            placeholder="请输入用户名"
-            required
-          />
-        </div>
+        <!-- 用户名登录模式 -->
+        <template v-if="!isRegisterMode && !isEmailLoginMode && !isForgotPasswordMode">
+          <div class="form-group">
+            <label for="username">用户名</label>
+            <input
+              id="username"
+              v-model="form.username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+            />
+          </div>
 
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            required
-            autocomplete="current-password"
-          />
-        </div>
+          <div class="form-group">
+            <label for="password">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+        </template>
 
-        <!-- 注册模式下显示邮箱、验证码和图形验证码 -->
-        <div v-if="isRegisterMode">
+        <!-- 邮箱登录模式 -->
+        <template v-else-if="!isRegisterMode && isEmailLoginMode && !isForgotPasswordMode">
+          <div class="form-group">
+            <label for="email">邮箱</label>
+            <input id="email" v-model="email" type="email" placeholder="请输入邮箱" required />
+          </div>
+
+          <div class="form-group">
+            <label for="code">验证码</label>
+            <div class="code-container">
+              <input id="code" v-model="code" type="text" placeholder="请输入邮箱验证码" required />
+              <button
+                type="button"
+                class="code-btn"
+                :disabled="isSendingCode || codeCountdown > 0"
+                @click="handleSendVerificationCode"
+              >
+                <span v-if="isSendingCode">发送中...</span>
+                <span v-else-if="codeCountdown > 0"
+                  >{{ Math.floor(codeCountdown / 60) }}分{{ codeCountdown % 60 }}秒后重发</span
+                >
+                <span v-else>获取验证码</span>
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- 找回密码模式 -->
+        <template v-else-if="!isRegisterMode && !isEmailLoginMode && isForgotPasswordMode">
+          <div class="form-group">
+            <label for="username">用户名</label>
+            <input
+              id="username"
+              v-model="form.username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">邮箱</label>
+            <input id="email" v-model="email" type="email" placeholder="请输入邮箱" required />
+          </div>
+
+          <div class="form-group">
+            <label for="code">验证码</label>
+            <div class="code-container">
+              <input id="code" v-model="code" type="text" placeholder="请输入邮箱验证码" required />
+              <button
+                type="button"
+                class="code-btn"
+                :disabled="isSendingCode || codeCountdown > 0"
+                @click="handleSendVerificationCode"
+              >
+                <span v-if="isSendingCode">发送中...</span>
+                <span v-else-if="codeCountdown > 0"
+                  >{{ Math.floor(codeCountdown / 60) }}分{{ codeCountdown % 60 }}秒后重发</span
+                >
+                <span v-else>获取验证码</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">新密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              type="password"
+              placeholder="请输入新密码"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+        </template>
+
+        <!-- 注册模式 -->
+        <div v-else>
+          <div class="form-group">
+            <label for="username">用户名</label>
+            <input
+              id="username"
+              v-model="form.username"
+              type="text"
+              placeholder="请输入用户名"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">密码</label>
+            <input
+              id="password"
+              v-model="form.password"
+              type="password"
+              placeholder="请输入密码"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
           <div class="form-group">
             <label for="email">邮箱</label>
             <input id="email" v-model="email" type="email" placeholder="请输入邮箱" required />
@@ -153,23 +308,43 @@
               isLoading
                 ? isRegisterMode
                   ? '注册中...'
-                  : '登录中...'
+                  : isForgotPasswordMode
+                    ? '重置中...'
+                    : '登录中...'
                 : isRegisterMode
                   ? '注册'
-                  : '登录'
+                  : isForgotPasswordMode
+                    ? '重置密码'
+                    : '登录'
             }}
           </button>
         </div>
-
-        <div v-if="error" class="error-message">{{ error }}</div>
 
         <div class="form-footer">
           <p>
             {{ isRegisterMode ? '已有账号？' : '还没有账号？' }}
             <a href="#" @click.prevent="toggleMode">{{ isRegisterMode ? '登录' : '注册' }}</a>
           </p>
+          <template v-if="!isRegisterMode">
+            <p v-if="!isForgotPasswordMode">
+              <a href="#" @click.prevent="toggleForgotPasswordMode">忘记密码？</a>
+            </p>
+            <p v-else>
+              <a href="#" @click.prevent="toggleForgotPasswordMode">返回登录</a>
+            </p>
+          </template>
         </div>
       </form>
+
+      <!-- 消息提示 -->
+      <Message
+        v-if="successMessage"
+        type="success"
+        :message="successMessage"
+        :auto-close="3000"
+        @close="successMessage = ''"
+      />
+      <Message v-if="error" type="error" :message="error" :auto-close="3000" @close="error = ''" />
     </div>
 
     <!-- 登录成功背景过渡 -->
@@ -185,7 +360,6 @@
             <input v-model="captchaInput" type="text" placeholder="请输入图形验证码" required />
             <img :src="captchaUrl" alt="验证码" class="captcha-image" @click="refreshCaptcha" />
           </div>
-          <div v-if="error" class="error-message">{{ error }}</div>
           <div class="captcha-modal-actions">
             <button type="button" class="cancel-btn" @click="handleCloseCaptchaModal">取消</button>
             <button
@@ -197,6 +371,14 @@
               {{ isSendingCode ? '发送中...' : '确认' }}
             </button>
           </div>
+          <!-- 验证码弹窗消息提示 -->
+          <Message
+            v-if="error"
+            type="error"
+            :message="error"
+            :auto-close="3000"
+            @close="error = ''"
+          />
         </div>
       </div>
     </div>
@@ -290,7 +472,9 @@
   }
 
   .form-header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
   }
 
@@ -299,6 +483,37 @@
     color: #333;
     font-size: 24px;
     margin-bottom: 10px;
+  }
+
+  .login-mode-toggle {
+    display: flex;
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toggle-btn:hover {
+    background-color: #f5f5f5;
+  }
+
+  .toggle-btn.active {
+    background-color: #64b5f6;
+    border-color: #64b5f6;
+  }
+
+  .toggle-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .form-subtitle {
@@ -440,15 +655,6 @@
     cursor: not-allowed;
   }
 
-  .error-message {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #ffebee;
-    color: #c62828;
-    border-radius: 5px;
-    text-align: center;
-  }
-
   .success-overlay {
     position: absolute;
     top: 0;
@@ -518,10 +724,6 @@
 
   .captcha-modal-form .captcha-container {
     margin-bottom: 10px;
-  }
-
-  .captcha-modal-form .error-message {
-    margin-top: 0;
   }
 
   .captcha-modal-actions {
