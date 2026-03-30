@@ -16,6 +16,8 @@ export function useLogin() {
   const loginSuccess = ref(false)
   const isVideoLoaded = ref(false)
   const isRegisterMode = ref(false)
+  const isEmailLoginMode = ref(false)
+  const isForgotPasswordMode = ref(false)
   const captchaUrl = ref('')
   const captchaInput = ref('')
   const email = ref('')
@@ -120,6 +122,19 @@ export function useLogin() {
 
   const toggleMode = () => {
     isRegisterMode.value = !isRegisterMode.value
+    isEmailLoginMode.value = false
+    error.value = '' // 切换模式时清空错误信息
+  }
+
+  const toggleLoginMode = () => {
+    isEmailLoginMode.value = !isEmailLoginMode.value
+    isForgotPasswordMode.value = false
+    error.value = '' // 切换模式时清空错误信息
+  }
+
+  const toggleForgotPasswordMode = () => {
+    isForgotPasswordMode.value = !isForgotPasswordMode.value
+    isEmailLoginMode.value = false
     error.value = '' // 切换模式时清空错误信息
   }
 
@@ -424,9 +439,129 @@ export function useLogin() {
     }
   }
 
+  const handleEmailLogin = async () => {
+    error.value = ''
+    isLoading.value = true
+
+    // 验证邮箱和验证码
+    if (!email.value) {
+      error.value = '请输入邮箱'
+      isLoading.value = false
+      return
+    }
+
+    if (!code.value) {
+      error.value = '请输入验证码'
+      isLoading.value = false
+      return
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/auth/login-by-email', {
+        email: email.value,
+        code: code.value,
+      })
+
+      if (response.data && response.data.code === '200') {
+        login(response.data.data, email.value.split('@')[0])
+        loginSuccess.value = true
+        setTimeout(() => {
+          router.push('/chat/home')
+        }, 1000)
+      } else {
+        error.value = response.data?.message || '邮箱登录失败，请重试'
+      }
+    } catch (err) {
+      console.error('[EmailLogin] 登录失败:', err)
+
+      if (err.response && err.response.data) {
+        const errorMessage = err.response.data.message
+        error.value = errorMessage || '邮箱登录失败，请重试'
+      } else if (err.code) {
+        error.value = err.message || '邮箱登录失败，请重试'
+      } else {
+        error.value = '网络错误，请检查网络连接'
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    error.value = ''
+    isLoading.value = true
+
+    // 验证用户名、邮箱、验证码和密码
+    if (!form.value.username) {
+      error.value = '请输入用户名'
+      isLoading.value = false
+      return
+    }
+
+    if (!email.value) {
+      error.value = '请输入邮箱'
+      isLoading.value = false
+      return
+    }
+
+    if (!code.value) {
+      error.value = '请输入验证码'
+      isLoading.value = false
+      return
+    }
+
+    if (!form.value.password) {
+      error.value = '请输入新密码'
+      isLoading.value = false
+      return
+    }
+
+    try {
+      const response = await apiClient.post('/api/v1/auth/change-password', {
+        username: form.value.username,
+        password: form.value.password,
+        email: email.value,
+        code: code.value,
+      })
+
+      if (response.data && response.data.code === '200') {
+        error.value = '密码重置成功，请使用新密码登录'
+        // 重置表单并切换回登录模式
+        setTimeout(() => {
+          isForgotPasswordMode.value = false
+          form.value = {
+            username: '',
+            password: '',
+          }
+          email.value = ''
+          code.value = ''
+        }, 2000)
+      } else {
+        error.value = response.data?.message || '密码重置失败，请重试'
+      }
+    } catch (err) {
+      console.error('[ForgotPassword] 密码重置失败:', err)
+
+      if (err.response && err.response.data) {
+        const errorMessage = err.response.data.message
+        error.value = errorMessage || '密码重置失败，请重试'
+      } else if (err.code) {
+        error.value = err.message || '密码重置失败，请重试'
+      } else {
+        error.value = '网络错误，请检查网络连接'
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const handleFormSubmit = async () => {
     if (isRegisterMode.value) {
       await handleRegister()
+    } else if (isEmailLoginMode.value) {
+      await handleEmailLogin()
+    } else if (isForgotPasswordMode.value) {
+      await handleForgotPassword()
     } else {
       await handleSubmit()
     }
@@ -441,6 +576,8 @@ export function useLogin() {
     loginSuccess,
     isVideoLoaded,
     isRegisterMode,
+    isEmailLoginMode,
+    isForgotPasswordMode,
     captchaUrl,
     captchaInput,
     email,
@@ -452,8 +589,12 @@ export function useLogin() {
     onIntroEnd,
     handleSubmit,
     handleRegister,
+    handleEmailLogin,
+    handleForgotPassword,
     handleFormSubmit,
     toggleMode,
+    toggleLoginMode,
+    toggleForgotPasswordMode,
     refreshCaptcha,
     handleSendVerificationCode,
     handleConfirmCaptcha,

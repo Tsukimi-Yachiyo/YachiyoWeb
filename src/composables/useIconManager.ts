@@ -454,5 +454,7 @@ export function useIconManager() {
     replaceEmojis,
     clearIconCache,
     checkIconCache,
+    iconFiles,
+    emojiMap,
   }
 }
