@@ -20,6 +20,7 @@ export function useUserSettings() {
   const userCity = ref('')
   const userGender = ref('')
   const userPhone = ref('')
+  const userQQ = ref('')
   const userBirthday = ref('')
 
   const isLoading = ref(false)
