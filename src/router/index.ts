@@ -60,7 +60,6 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
   },
-
   {
     path: '/message',
     name: 'MessageCenter',
