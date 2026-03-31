@@ -784,7 +784,7 @@
   }
 
   .change-password-card {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(81, 7, 7, 0.021);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -803,7 +803,7 @@
   }
 
   .card-header {
-    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(25, 118, 210, 0.1));
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.5), rgba(25, 118, 210, 0.4));
     padding: 30px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -1207,7 +1207,7 @@
       display: flex;
       gap: 24px;
       /* justify-content: center; */
-      margin-left: 30%;
+      margin-left: 31.8%;
       margin-bottom: 20px;
     }
     .el-form {
@@ -1294,7 +1294,7 @@
     }
 
     .about-content {
-      background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(25, 111, 210, 0.919));
+      background: linear-gradient(135deg, rgba(25, 111, 210, 0.919), rgba(33, 150, 243, 0.1));
       /* border: 1px solid rgba(255, 255, 255, 0.1); */
       border-radius: 12px;
       padding: 20px;
@@ -1311,7 +1311,7 @@
     }
 
     .disclaimer-content {
-      background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(25, 118, 210, 0.919));
+      background: linear-gradient(135deg, rgba(25, 118, 210, 0.919), rgba(33, 150, 243, 0.4));
       /* border: 1px solid rgba(21, 75, 119, 0.233); */
       border-radius: 12px;
       padding: 30px;
