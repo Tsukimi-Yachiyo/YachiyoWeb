@@ -19,8 +19,8 @@ export function useUserSettings() {
   const userIntroduction = ref('')
   const userCity = ref('')
   const userGender = ref('')
-  const userPhone = ref('')
   const userBirthday = ref('')
+  const userQQ = ref('')
 
   const isLoading = ref(false)
   const isUploading = ref(false)
@@ -67,7 +67,7 @@ export function useUserSettings() {
         userIntroduction.value = detailResult.data.userIntroduction || ''
         userCity.value = detailResult.data.userCity || ''
         userGender.value = detailResult.data.userGender || ''
-        userPhone.value = detailResult.data.userPhone || ''
+        userQQ.value = detailResult.data.userQQ || ''
         localStorage.setItem(USERNAME_CACHE_KEY, userName.value)
 
         if (detailResult.data.userBirthday) {
@@ -201,7 +201,7 @@ export function useUserSettings() {
       userIntroduction: userIntroduction.value.trim(),
       userCity: userCity.value.trim(),
       userGender: userGender.value,
-      userPhone: userPhone.value.trim(),
+      userQQ: userQQ.value.trim(),
       userBirthday: userBirthday.value ? new Date(userBirthday.value).toISOString() : null,
     }
 
@@ -246,8 +246,8 @@ export function useUserSettings() {
     userIntroduction,
     userCity,
     userGender,
-    userPhone,
     userBirthday,
+    userQQ,
     isLoading,
     isUploading,
     isSavingDetail,
