@@ -306,20 +306,10 @@
     justify-content: center;
     padding: 20px;
   }
-  .settings-container-mobileOnly {
-    display: block;
-  }
   .settings-container-pcOnly {
     display: none;
   }
-  @media screen and (min-width: 768px) {
-    .settings-container-mobileOnly {
-      display: none;
-    }
-    .settings-container-pcOnly {
-      display: block;
-    }
-  }
+
   .settings-card {
     width: 100%;
     /* max-width: 600px; */
@@ -674,158 +664,164 @@
       flex-direction: column;
     }
   }
-  .demo-tabs > .el-tabs__content {
-    padding: 32px;
-    color: #6b778c;
-    font-size: 32px;
-    font-weight: 600;
-  }
-  .demo-tabs {
-    height: 100%;
-  }
-  .el-tabs--right .el-tabs__content,
-  .el-tabs--left .el-tabs__content {
-    height: 100%;
-  }
-  .settings-container-pcOnly {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .Setting-Card {
-    align-items: center;
-    justify-content: center;
-    width: 80%;
-    margin-top: 10%;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  }
-  :deep(.el-tabs__item) {
-    width: 150px;
-    height: 60px;
-    font-size: 20px;
-    text-align: center;
-    transition: background-color 1s ease-in-out;
-  }
-  :deep(.el-tabs__item:hover) {
-    background-color: aliceblue;
-  }
-  :deep(.el-form-item__label) {
-    font-size: 20px !important;
+  @media screen and (min-width: 768px) {
+    .settings-container-mobileOnly {
+      display: none;
+    }
 
-    /* color: rgba(255, 255, 255, 0.85); */
-  }
-  :deep(.ela_input__inner),
-  :deep(.el-textarea__inner) {
-    font-size: 20px; /* 修改这里的值来调整输入文字的大小 */
-  }
+    .demo-tabs > .el-tabs__content {
+      padding: 32px;
+      color: #6b778c;
+      font-size: 32px;
+      font-weight: 600;
+    }
+    .demo-tabs {
+      height: 100%;
+    }
+    .el-tabs--right .el-tabs__content,
+    .el-tabs--left .el-tabs__content {
+      height: 100%;
+    }
+    .settings-container-pcOnly {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .Setting-Card {
+      align-items: center;
+      justify-content: center;
+      width: 80%;
+      margin-top: 10%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    :deep(.el-tabs__item) {
+      width: 150px;
+      height: 60px;
+      font-size: 20px;
+      text-align: center;
+      transition: background-color 1s ease-in-out;
+    }
+    :deep(.el-tabs__item:hover) {
+      background-color: aliceblue;
+    }
+    :deep(.el-form-item__label) {
+      font-size: 20px !important;
 
-  /* 修改 Element Plus 输入框 (ela_input, el-textarea) 的 placeholder 字体大小 */
-  :deep(.ela_input__inner)::placeholder,
-  :deep(.el-textarea__inner)::placeholder {
-    font-size: 20px; /* 修改这里的值来调整 placeholder 文字的大小 */
-  }
-  .Settings-section {
-    height: 80%;
-  }
-  .Section-title {
-    color: #1976d2;
-    font-size: 22px;
-    font-weight: 500;
-    margin-top: 20px;
-    margin-left: 40%;
-  }
-  .Avatar-divider {
-    margin-top: 20px;
-    height: 1px;
-    background-color: rgba(20, 68, 86, 0.2);
-  }
-  .Avatar-preview-container {
-    margin-top: 40px;
-  }
-  .Avatar-preview {
-    margin-left: 38%;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 40px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-  .Avatar-actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 20px;
-    /* justify-content: center; */
-    margin-left: 33%;
-    margin-bottom: 20px;
-  }
+      /* color: rgba(255, 255, 255, 0.85); */
+    }
+    :deep(.ela_input__inner),
+    :deep(.el-textarea__inner) {
+      font-size: 20px; /* 修改这里的值来调整输入文字的大小 */
+    }
 
-  .File-input-wrapper {
-    position: relative;
-  }
+    /* 修改 Element Plus 输入框 (ela_input, el-textarea) 的 placeholder 字体大小 */
+    :deep(.ela_input__inner)::placeholder,
+    :deep(.el-textarea__inner)::placeholder {
+      font-size: 20px; /* 修改这里的值来调整 placeholder 文字的大小 */
+    }
+    .Settings-section {
+      height: 80%;
+    }
+    .Section-title {
+      color: #1976d2;
+      font-size: 22px;
+      font-weight: 500;
+      margin-top: 20px;
+      margin-left: 40%;
+    }
+    .Avatar-divider {
+      margin-top: 20px;
+      height: 1px;
+      background-color: rgba(20, 68, 86, 0.2);
+    }
+    .Avatar-preview-container {
+      margin-top: 40px;
+    }
+    .Avatar-preview {
+      margin-left: 38%;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 40px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .Avatar-actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      /* justify-content: center; */
+      margin-left: 33%;
+      margin-bottom: 20px;
+    }
 
-  .File-input {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-  }
+    .File-input-wrapper {
+      position: relative;
+    }
 
-  .File-input-label {
-    display: block;
-    padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    color: #2196f3;
-    font-size: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
+    .File-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
 
-  .File-input-label:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(33, 150, 243, 0.5);
-  }
-  .Upload-btn {
-    padding: 12px 24px;
-    /* background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); */
-    background: rgba(145, 68, 152, 0.397);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-  }
+    .File-input-label {
+      display: block;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #2196f3;
+      font-size: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-  .Upload-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
-  }
+    .File-input-label:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(33, 150, 243, 0.5);
+    }
+    .Upload-btn {
+      padding: 12px 24px;
+      /* background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); */
+      background: rgba(145, 68, 152, 0.397);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+    }
 
-  .Upload-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    .Upload-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+    }
+
+    .Upload-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 </style>
