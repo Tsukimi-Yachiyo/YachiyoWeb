@@ -1,0 +1,16 @@
+<div class="post-container">
+  <div class="post-content">
+    <div class="post-header">
+      <h3 class="post-title">{{ title }}</h3>
+      <span class="post-username">{{ userName }}</span>
+    </div>
+    <div class="post-cover">
+      <img v-if="coverImageSrc" :src="coverImageSrc" alt="帖子封面" loading="lazy" />
+      <div v-else class="cover-placeholder"></div>
+    </div>
+  </div>
+  <div class="post-avatar">
+    <img v-if="userAvatarSrc" :src="userAvatarSrc" alt="用户头像" loading="lazy" />
+    <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+  </div>
+</div>

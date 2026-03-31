@@ -1,0 +1,44 @@
+<header class="title-bar">
+  <div class="title-bar-content">
+    <div class="title-section">
+      <router-link class="app-title-button" to="/chat/home">
+        <img :src="appLogoUrl" alt="月见八千代" width="64" height="64" />
+      </router-link>
+      <div class="nav-buttons">
+        <router-link
+          class="nav-button"
+          :class="{ active: currentPage === 'tsukuyomi' }"
+          to="/tsukuyomi"
+        >
+          <img :src="tsukuyomiLogoUrl" alt="月读空间" width="64" height="64" />
+        </router-link>
+      </div>
+    </div>
+    <div class="user-info-header">
+      <span class="username-header" :class="{ 'avatar-active': userProfileIsVisible }"
+        >{{ resolvedUsername }}</span
+      >
+      <UserProfilePopover
+        :username="resolvedUsername"
+        :userAvatar="resolvedUserAvatar"
+        @logout="handleLogout"
+        @update:isVisible="value => userProfileIsVisible = value"
+      >
+        <template #trigger="{ showPopover, hidePopover, isVisible }">
+          <div
+            class="user-avatar-header"
+            :class="{ 'avatar-active': isVisible }"
+            @mouseenter="showPopover"
+            @mouseleave="hidePopover"
+          >
+            <img v-if="resolvedUserAvatar" :src="resolvedUserAvatar" alt="用户头像" />
+            <span v-else
+              >{{ resolvedUsername && resolvedUsername.length > 0 ?
+              resolvedUsername.charAt(0).toUpperCase() : 'U' }}</span
+            >
+          </div>
+        </template>
+      </UserProfilePopover>
+    </div>
+  </div>
+</header>
