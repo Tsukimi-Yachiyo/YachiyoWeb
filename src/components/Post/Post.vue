@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import { ref, watch, onMounted } from 'vue'
   import { processImageData } from '@/composables/useImageData'
+  import defaultIcon from '@/assets/images/default_icon.gif'
+  import defaultCover from '@/assets/images/default_cover.gif'
 
   const props = defineProps({
     userName: {
@@ -42,7 +44,7 @@
     } else {
       // 实际项目中，这里应该从缓存或本地存储中获取头像
       // 这里使用模拟数据
-      userAvatarSrc.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%20portrait&image_size=square`
+      userAvatarSrc.value = defaultIcon
     }
   }
 
@@ -53,7 +55,7 @@
     } else {
       // 实际项目中，这里应该从缓存或本地存储中获取封面
       // 这里使用模拟数据
-      coverImageSrc.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=post%20cover%20image&image_size=landscape_16_9`
+      coverImageSrc.value = defaultCover
     }
   }
 
