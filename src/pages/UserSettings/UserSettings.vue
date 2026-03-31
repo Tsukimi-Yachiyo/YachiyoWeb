@@ -27,7 +27,6 @@
     userIntroduction,
     userCity,
     userGender,
-    userPhone,
     userBirthday,
     isLoading,
     isUploading,
@@ -149,8 +148,8 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">电话</label>
-              <input v-model="userPhone" type="tel" placeholder="联系电话" class="form-input" />
+              <label class="form-label">QQ</label>
+              <input v-model="userQQ" type="text" placeholder="QQ号" class="form-input" />
             </div>
           </div>
 
@@ -168,7 +167,16 @@
   <!-- PC端界面 -->
   <div class="settings-container-pcOnly">
     <div class="Setting-Card">
-      <el-tabs :tab-position="tabPosition" type="card" class="demo-tabs">
+      <div v-if="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+
+      <div v-if="isLoading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <span>加载中...</span>
+      </div>
+
+      <el-tabs v-else :tab-position="tabPosition" type="card" class="demo-tabs">
         <el-tab-pane label="我的信息">
           <el-form label-width="180px" style="margin-top: 30px">
             <div class="Settings-section">
@@ -200,13 +208,15 @@
                   </button>
                 </div>
               </div>
+              <p v-if="avatarError" class="error-text">{{ avatarError }}</p>
+              <p class="help-text">支持 JPG、PNG、GIF 格式，最大 5MB</p>
             </div>
             <el-form-item label="昵称">
               <el-input
                 v-model="userName"
-                maxlength="8"
+                maxlength="20"
                 show-word-limit
-                placeholder="昵称最多允许八个字哦QAQ"
+                placeholder="昵称最多允许20个字符"
                 style="width: auto"
               />
             </el-form-item>
@@ -249,9 +259,17 @@
                 </el-form-item>
               </el-col>
             </el-row>
-            <el-form-item label-width="0" style="display: flex; margin-top: 50px; margin-left: 38%">
-              <el-button type="primary" style="width: 150px" @click="saveUserDetail"
-                >保存</el-button
+            <el-form-item label-width="0" style="display: flex; margin-top: 40px; margin-left: 38%">
+              <p v-if="detailError" class="error-text">{{ detailError }}</p>
+            </el-form-item>
+            <el-form-item label-width="0" style="display: flex; margin-top: 20px; margin-left: 38%">
+              <el-button
+                type="primary"
+                style="width: 150px"
+                :disabled="isSavingDetail"
+                @click="saveUserDetail"
+                ><span v-if="isSavingDetail" class="Btn-spinner"></span>
+                <span v-else>保存</span></el-button
               >
             </el-form-item>
           </el-form>
