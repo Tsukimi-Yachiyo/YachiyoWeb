@@ -2,6 +2,7 @@
   import { computed, ref, onMounted } from 'vue'
   // eslint-disable-next-line no-unused-vars
   import UserProfilePopover from '../UserProfilePopover/UserProfilePopover.vue'
+  import WaveEffect from '../WaveEffect.vue'
   import { useUserProfile } from '../../composables/useUserProfile'
 
   const props = defineProps({
