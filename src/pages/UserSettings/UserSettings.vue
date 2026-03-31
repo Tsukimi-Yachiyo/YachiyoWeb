@@ -309,7 +309,48 @@
           </div>
         </el-tab-pane> -->
         <el-tab-pane label="账号安全"></el-tab-pane>
-        <el-tab-pane label="黑名单管理"></el-tab-pane>
+        <el-tab-pane label="黑名单管理">
+          <div class="about-container">
+            <h3 class="about-title">关于我们</h3>
+            <div class="about-content">
+              <p>欢迎使用我们的服务，我们致力于为您提供优质的用户体验。</p>
+              <p>我们的团队不断努力改进产品，为您带来更好的服务。</p>
+            </div>
+
+            <h3 class="disclaimer-title">免责声明</h3>
+            <div class="disclaimer-content">
+              <div class="language-section">
+                <h4>当サイトについて</h4>
+                <p>
+                  当サイトは、アニメーション作品『超かぐや姫！』（以下「本作品」といいます）の二次創作ファンサイトであり、本作品の公式サイト、製作者、著作権者とは一切関係ございません。
+                </p>
+                <p>
+                  当サイトは非営利目的で運営されており、収益を目的とした広告、アフィリエイト、有料コンテンツなどは一切行っておりません。
+                </p>
+                <p>
+                  当サイトで使用している画像・イラスト・名称などの著作権は、それぞれの権利者に帰属します。権利者の皆様には深く敬意を表します。
+                </p>
+                <p>
+                  本作品の権利者からご連絡をいただいた場合、当サイトの内容について速やかに対応（修正・削除など）いたします。
+                </p>
+                <p>© 超かぐや姫！製作委員会</p>
+              </div>
+
+              <div class="language-section">
+                <h4>关于本网站</h4>
+                <p>
+                  本网站为动画作品《超时空辉夜姬》（以下简称“本作品”）的二次创作粉丝网站，与本作品的官方网站、制作方、版权方无任何关联。
+                </p>
+                <p>本网站为非营利性质，不包含任何形式的广告、返利链接、付费内容或商业推广。</p>
+                <p>
+                  本网站所使用的图片、插图、名称等版权均归其各自权利人所有。我们对所有权利人表示诚挚的敬意。
+                </p>
+                <p>如本作品的版权方提出要求，我们将立即对网站内容进行修正或删除。</p>
+                <p>© 超时空辉夜姬 制作委员会</p>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -840,6 +881,76 @@
     .Upload-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    /* 关于我们和免责声明样式 */
+    .about-container {
+      padding: 30px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .about-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #2196f3;
+    }
+
+    .about-content {
+      background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(25, 111, 210, 0.919));
+      /* border: 1px solid rgba(255, 255, 255, 0.1); */
+      border-radius: 12px;
+      padding: 20px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .disclaimer-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #f30404;
+    }
+
+    .disclaimer-content {
+      background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(25, 118, 210, 0.919));
+      /* border: 1px solid rgba(21, 75, 119, 0.233); */
+      border-radius: 12px;
+      padding: 30px;
+      line-height: 1.6;
+      box-shadow: 0 4px 20px rgba(33, 150, 243, 0.1);
+    }
+
+    .language-section {
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .language-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .language-section h4 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #4fc3f7;
+    }
+
+    .language-section p {
+      margin-bottom: 12px;
+      text-align: justify;
+      font-weight: 500;
+    }
+
+    .language-section p:last-child {
+      margin-top: 20px;
+      font-weight: 700;
+      color: #f5f5f5;
     }
   }
 </style>
