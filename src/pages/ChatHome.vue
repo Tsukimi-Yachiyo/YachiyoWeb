@@ -233,14 +233,25 @@
           </div>
         </div>
 
-        <!-- 消息列表 -->
+        <!-- 消息列表  -  修复版-->
         <div v-else-if="!isModelLoading" ref="messageListRef" class="message-list">
           <transition-group name="message">
-            <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.type]">
+            <div
+              v-for="msg in messages"
+              :key="msg.id || JSON.stringify(msg)"
+              :class="['message', msg.type]"
+            >
               <div class="message-bubble">
                 <span v-if="msg.type === 'assistant' && msg.isStreaming && !msg.content"
-                  >思考中...</span
-                >
+                  >思考中
+                  <div v-if="isTyping" class="typing-indicator">
+                    <div class="typing-bubbles">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </span>
                 <span v-else>{{ msg.content }}</span>
                 <div v-if="msg.type === 'assistant' && !msg.isStreaming" class="message-actions">
                   <button
@@ -266,17 +277,7 @@
               </div>
             </div>
           </transition-group>
-
-          <!-- AI 输入中动画 -->
-          <div v-if="isTyping" class="typing-indicator">
-            <div class="typing-bubbles">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
         </div>
-
         <!-- 输入区 -->
         <div v-if="currentConversationId && !isModelLoading" class="input-area">
           <div class="input-wrapper">
@@ -373,6 +374,7 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
@@ -382,9 +384,11 @@
     0% {
       opacity: 0.7;
     }
+
     50% {
       opacity: 1;
     }
+
     100% {
       opacity: 0.7;
     }
@@ -802,17 +806,18 @@
   /* 输入中动画 */
   .typing-indicator {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
   .typing-bubbles {
     display: flex;
     gap: 6px;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    border-bottom-left-radius: 4px;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    margin-top: 15px;
   }
 
   .typing-bubbles span {
@@ -838,7 +843,6 @@
       transform: scale(0);
       opacity: 0.5;
     }
-
     40% {
       transform: scale(1);
       opacity: 1;
