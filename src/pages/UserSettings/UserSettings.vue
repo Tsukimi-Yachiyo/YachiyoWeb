@@ -308,71 +308,73 @@
         <el-tab-pane label="账号安全">
           <div class="security-container">
             <div class="change-password-card">
-              <div class="card-header">
-                <h3 class="section-title">修改密码</h3>
-                <p class="section-description">通过邮箱验证码修改您的登录密码</p>
-              </div>
-              <div class="card-body">
-                <el-form label-width="120px">
-                  <el-form-item label="邮箱" class="form-item">
-                    <el-input
-                      v-model="changePasswordEmail"
-                      placeholder="请输入您的邮箱地址"
-                      style="width: 400px"
-                      type="email"
-                    />
-                  </el-form-item>
-
-                  <el-form-item label="验证码" class="form-item">
-                    <div class="code-input-wrapper">
+              <div class="card-content">
+                <div class="card-header">
+                  <h3 class="section-title">修改密码</h3>
+                  <p class="section-description">通过邮箱验证码修改您的登录密码</p>
+                </div>
+                <div class="card-body">
+                  <el-form label-width="120px">
+                    <el-form-item label="邮箱" class="form-item">
                       <el-input
-                        v-model="changePasswordCode"
-                        placeholder="请输入邮箱验证码"
-                        style="width: 280px"
+                        v-model="changePasswordEmail"
+                        placeholder="请输入您的邮箱地址"
+                        style="width: 400px"
+                        type="email"
                       />
+                    </el-form-item>
+
+                    <el-form-item label="验证码" class="form-item">
+                      <div class="code-input-wrapper">
+                        <el-input
+                          v-model="changePasswordCode"
+                          placeholder="请输入邮箱验证码"
+                          style="width: 280px"
+                        />
+                        <el-button
+                          type="primary"
+                          :disabled="isSendingChangePasswordCode || changePasswordCodeCountdown > 0"
+                          style="margin-left: 10px"
+                          @click="handleSendChangePasswordCode"
+                        >
+                          <span v-if="isSendingChangePasswordCode">发送中...</span>
+                          <span v-else-if="changePasswordCodeCountdown > 0">
+                            {{ Math.floor(changePasswordCodeCountdown / 60) }}分{{
+                              changePasswordCodeCountdown % 60
+                            }}秒后重发
+                          </span>
+                          <span v-else>获取验证码</span>
+                        </el-button>
+                      </div>
+                    </el-form-item>
+
+                    <el-form-item label="新密码" class="form-item">
+                      <el-input
+                        v-model="changePasswordNewPassword"
+                        type="password"
+                        placeholder="请输入新密码（至少6位）"
+                        style="width: 400px"
+                        show-password
+                      />
+                    </el-form-item>
+
+                    <div class="form-actions">
+                      <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
+                      <p v-if="changePasswordSuccess" class="success-text">
+                        {{ changePasswordSuccess }}
+                      </p>
                       <el-button
                         type="primary"
-                        :disabled="isSendingChangePasswordCode || changePasswordCodeCountdown > 0"
-                        style="margin-left: 10px"
-                        @click="handleSendChangePasswordCode"
+                        style="width: 150px"
+                        :disabled="isChangingPassword"
+                        @click="handleChangePassword"
                       >
-                        <span v-if="isSendingChangePasswordCode">发送中...</span>
-                        <span v-else-if="changePasswordCodeCountdown > 0">
-                          {{ Math.floor(changePasswordCodeCountdown / 60) }}分{{
-                            changePasswordCodeCountdown % 60
-                          }}秒后重发
-                        </span>
-                        <span v-else>获取验证码</span>
+                        <span v-if="isChangingPassword">修改中...</span>
+                        <span v-else>确认修改</span>
                       </el-button>
                     </div>
-                  </el-form-item>
-
-                  <el-form-item label="新密码" class="form-item">
-                    <el-input
-                      v-model="changePasswordNewPassword"
-                      type="password"
-                      placeholder="请输入新密码（至少6位）"
-                      style="width: 400px"
-                      show-password
-                    />
-                  </el-form-item>
-
-                  <div class="form-actions">
-                    <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
-                    <p v-if="changePasswordSuccess" class="success-text">
-                      {{ changePasswordSuccess }}
-                    </p>
-                    <el-button
-                      type="primary"
-                      style="width: 150px"
-                      :disabled="isChangingPassword"
-                      @click="handleChangePassword"
-                    >
-                      <span v-if="isChangingPassword">修改中...</span>
-                      <span v-else>确认修改</span>
-                    </el-button>
-                  </div>
-                </el-form>
+                  </el-form>
+                </div>
               </div>
             </div>
           </div>
@@ -787,56 +789,107 @@
   .security-container {
     display: flex;
     justify-content: center;
-    padding: 40px 20px;
-    margin-left: -10%;
+    padding: 20px;
   }
 
   .change-password-card {
-    background: rgba(81, 7, 7, 0.021);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+    position: relative;
+    border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 600px;
     overflow: hidden;
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .change-password-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('@/assets/images/1775028110724.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+    z-index: 0;
+    box-shadow:
+      inset 0 0 60px rgba(0, 0, 0, 0.4),
+      inset 0 0 120px rgba(0, 0, 0, 0.25);
+  }
+
+  .change-password-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .change-password-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
   }
 
+  .card-content {
+    max-width: 700px;
+    margin: 40px auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+
   .card-header {
-    background: linear-gradient(135deg, rgba(33, 150, 243, 0.5), rgba(25, 118, 210, 0.4));
-    padding: 30px;
+    padding: 30px 40px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .card-header .section-title {
     color: #ffffff;
-    font-size: 28px;
-    font-weight: 600;
-    margin: 0 0 10px 0;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
     text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   }
 
   .card-header .section-description {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
     margin: 0;
     text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
   }
 
   .card-body {
-    padding: 40px;
+    padding: 50px 60px;
+  }
+
+  .card-body :deep(.el-form) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-body :deep(.el-form-item) {
+    width: 100%;
+    max-width: 600px;
+    justify-content: center;
+  }
+
+  .card-body :deep(.el-form-item__label) {
+    text-align: right;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-body :deep(.el-form-item__content) {
+    flex: 0 1 auto;
   }
 
   .form-item {
-    margin-bottom: 30px !important;
+    margin-bottom: 35px !important;
   }
 
   .code-input-wrapper {
@@ -850,42 +903,70 @@
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    margin-top: 40px;
+    margin-top: 50px;
   }
 
   .form-actions .error-text,
   .form-actions .success-text {
     text-align: center;
     width: 100%;
+    font-size: 16px;
   }
 
-  :deep(.el-input__wrapper) {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: 2px solid rgba(33, 150, 243, 0.5) !important;
+  .change-password-card :deep(.el-input__wrapper) {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 2px solid rgba(33, 150, 243, 0.6) !important;
     border-radius: 12px !important;
     transition: all 0.3s ease !important;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
   }
 
-  :deep(.el-input__wrapper:hover) {
+  .change-password-card :deep(.el-input__wrapper:hover) {
     border-color: rgba(33, 150, 243, 0.8) !important;
-    background: rgba(255, 255, 255, 0.5) !important;
-    box-shadow: 0 0 20px rgba(33, 150, 243, 0.3) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2) !important;
   }
 
-  :deep(.el-input__wrapper.is-focus) {
+  .change-password-card :deep(.el-input__wrapper.is-focus) {
     border-color: rgba(33, 150, 243, 1) !important;
-    background: rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 0 0 30px rgba(33, 150, 243, 0.4) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3) !important;
   }
 
-  :deep(.el-input__input) {
+  .change-password-card :deep(.el-input__input) {
     color: #1a237e !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
   }
 
-  :deep(.el-input__placeholder) {
+  .change-password-card :deep(.el-input__placeholder) {
     color: rgba(26, 35, 126, 0.5) !important;
+    font-size: 16px !important;
+  }
+
+  .change-password-card :deep(.el-button--primary) {
+    background: linear-gradient(135deg, #2196f3, #1976d2) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 14px 28px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .change-password-card :deep(.el-button--primary:hover:not(:disabled)) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4) !important;
+  }
+
+  .change-password-card :deep(.el-button--primary:disabled) {
+    opacity: 0.6 !important;
+  }
+
+  .change-password-card :deep(.el-button) {
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
   }
 
   :deep(.el-button--primary) {
@@ -1133,11 +1214,23 @@
       opacity: 0.8;
       border-radius: 12px;
       z-index: 0;
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.3),
+        inset 0 0 100px rgba(0, 0, 0, 0.2);
     }
 
     .form-with-background > * {
       position: relative;
       z-index: 1;
+    }
+
+    .form-with-background {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .form-with-background:hover {
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
     }
 
     .transparent-input :deep(.el-textarea__inner) {
@@ -1197,47 +1290,55 @@
     :deep(.el-tabs__item:hover) {
       background-color: aliceblue;
     }
-    :deep(.el-form-item__label) {
+    .form-with-background :deep(.el-form-item__label) {
       font-size: 24px !important;
-      color: #1a237e !important;
-      font-weight: 600 !important;
-      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      text-shadow:
+        2px 2px 4px rgba(0, 0, 0, 0.6),
+        0 0 10px rgba(0, 0, 0, 0.4);
     }
-    :deep(.el-input__wrapper) {
-      background: rgba(255, 255, 255, 0.5) !important;
+    .form-with-background :deep(.el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.7) !important;
       border: 2px solid rgba(33, 150, 243, 0.6) !important;
       border-radius: 12px !important;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
     }
-    :deep(.el-input__wrapper:hover) {
-      background: rgba(255, 255, 255, 0.6) !important;
+    .form-with-background :deep(.el-input__wrapper:hover) {
+      background: rgba(255, 255, 255, 0.8) !important;
       border-color: rgba(33, 150, 243, 0.8) !important;
       box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2) !important;
     }
-    :deep(.el-input__wrapper.is-focus) {
-      background: rgba(255, 255, 255, 0.7) !important;
+    .form-with-background :deep(.el-input__wrapper.is-focus) {
+      background: rgba(255, 255, 255, 0.85) !important;
       border-color: rgba(33, 150, 243, 1) !important;
       box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3) !important;
     }
-    :deep(.el-input__inner),
-    :deep(.el-textarea__inner) {
+    .form-with-background :deep(.el-input__inner),
+    .form-with-background :deep(.el-textarea__inner) {
       font-size: 20px;
       padding: 16px 20px;
       color: #1a237e !important;
-      font-weight: 500 !important;
+      font-weight: 600 !important;
+      text-shadow: none;
     }
-    :deep(.el-input__inner)::placeholder,
-    :deep(.el-textarea__inner)::placeholder {
+    .form-with-background :deep(.el-input__inner)::placeholder,
+    .form-with-background :deep(.el-textarea__inner)::placeholder {
       font-size: 20px;
-      color: rgba(26, 35, 126, 0.5) !important;
+      color: rgba(26, 35, 126, 0.6) !important;
     }
-    :deep(.el-select .el-input__wrapper) {
-      background: rgba(255, 255, 255, 0.5) !important;
+    .form-with-background :deep(.el-select .el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.7) !important;
       border: 2px solid rgba(33, 150, 243, 0.6) !important;
     }
-    :deep(.el-date-editor .el-input__wrapper) {
-      background: rgba(255, 255, 255, 0.5) !important;
+    .form-with-background :deep(.el-date-editor .el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.7) !important;
       border: 2px solid rgba(33, 150, 243, 0.6) !important;
+    }
+    .form-with-background :deep(.el-input__count) {
+      background: transparent !important;
+      color: #ffffff !important;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
     .Settings-section {
       height: 80%;
@@ -1293,9 +1394,9 @@
     .el-form {
       margin-top: 20px !important;
     }
-    .el-form-item {
+    .form-with-background .el-form-item {
       margin-bottom: 16px !important;
-      margin-left: 90px;
+      margin-left: 60px;
     }
     .el-form-item:not(:first-child) {
       margin-top: 16px !important;
@@ -1360,45 +1461,85 @@
     .about-container {
       padding: 30px;
       color: rgba(255, 255, 255, 0.8);
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .about-container:hover {
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .about-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('@/assets/images/1775021786984.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: 0;
+      box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.4),
+        inset 0 0 120px rgba(0, 0, 0, 0.25);
+    }
+
+    .about-container > * {
+      position: relative;
+      z-index: 1;
     }
 
     .about-title {
       font-size: 28px;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 20px;
       color: #2196f3;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .about-content {
-      background: linear-gradient(135deg, rgba(25, 111, 210, 0.919), rgba(33, 150, 243, 0.1));
-      /* border: 1px solid rgba(255, 255, 255, 0.1); */
       border-radius: 12px;
       padding: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
       margin-bottom: 40px;
-      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+    }
+
+    .about-content p {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .disclaimer-title {
       font-size: 24px;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 20px;
-      color: #f30404;
+      color: #ff5252;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .disclaimer-content {
-      background: linear-gradient(135deg, rgba(25, 118, 210, 0.919), rgba(33, 150, 243, 0.4));
-      /* border: 1px solid rgba(21, 75, 119, 0.233); */
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
       border-radius: 12px;
       padding: 30px;
-      line-height: 1.6;
-      box-shadow: 0 4px 20px rgba(33, 150, 243, 0.1);
+      line-height: 1.8;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .language-section {
       margin-bottom: 40px;
       padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .language-section:last-child {
@@ -1408,16 +1549,20 @@
     }
 
     .language-section h4 {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       margin-bottom: 15px;
       color: #4fc3f7;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .language-section p {
       margin-bottom: 12px;
       text-align: justify;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 15px;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .language-section p:last-child {
