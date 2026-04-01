@@ -1,6 +1,9 @@
 <script setup lang="ts">
   import { useUserSettings } from '../../composables/useUserSettings'
   import { ref } from 'vue'
+  import backgroundImage from '@/assets/images/AI_1775009231144.png'
+  import uploadIcon from '@/assets/images/上传头像.png'
+  import selectImageIcon from '@/assets/images/选择图片.png'
 
   import {
     ElTabs,
@@ -16,6 +19,7 @@
     ElCol,
   } from 'element-plus'
   import type { TabsInstance } from 'element-plus'
+  import { open } from 'node:fs'
 
   const tabPosition = ref<TabsInstance['tabPosition']>('left')
   const {
@@ -91,7 +95,7 @@
                 @click="uploadAvatar"
               >
                 <span v-if="isUploading" class="btn-spinner"></span>
-                <span v-else>上传头像</span>
+                <img v-else :src="uploadIcon" alt="上传头像" style="width: 24px; height: 24px" />
               </button>
             </div>
           </div>
@@ -178,45 +182,52 @@
 
       <el-tabs v-else :tab-position="tabPosition" type="card" class="demo-tabs">
         <el-tab-pane label="我的信息">
-          <el-form label-width="180px" style="margin-top: 30px">
+          <el-form
+            label-width="180px"
+            class="form-with-background"
+            :style="{
+              marginTop: '30px',
+              padding: '20px',
+              borderRadius: '12px',
+              position: 'relative',
+            }"
+          >
             <div class="Settings-section">
               <div class="Avatar-section">
+                <div class="File-input-wrapper Avatar-action-left">
+                  <input
+                    id="Avatar-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    class="file-input"
+                    @change="handleFileSelect"
+                  />
+                  <label for="Avatar-input" class="File-input-label">
+                    <img :src="selectImageIcon" alt="选择图片" style="width: 100px" />
+                  </label>
+                </div>
                 <div class="Avatar-preview-container">
                   <div class="Avatar-preview">
                     <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
                     <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
                   </div>
                 </div>
-                <div class="Avatar-actions">
-                  <div class="File-input-wrapper">
-                    <input
-                      id="Avatar-input"
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif"
-                      class="file-input"
-                      @change="handleFileSelect"
-                    />
-                    <label for="Avatar-input" class="File-input-label"> 选择图片 </label>
-                  </div>
-                  <button
-                    class="Upload-btn"
-                    :disabled="isUploading || !selectedFile"
-                    @click="uploadAvatar"
-                  >
-                    <span v-if="isUploading" class="Btn-spinner"></span>
-                    <span v-else>上传头像</span>
-                  </button>
-                </div>
+                <button
+                  class="Upload-btn Avatar-action-right"
+                  :disabled="isUploading || !selectedFile"
+                  @click="uploadAvatar"
+                >
+                  <span v-if="isUploading" class="Btn-spinner"></span>
+                  <img v-else :src="uploadIcon" alt="上传头像" style="width: 100px" />
+                </button>
               </div>
               <p v-if="avatarError" class="error-text">{{ avatarError }}</p>
-              <p class="help-text">支持 JPG、PNG、GIF 格式，最大 5MB</p>
             </div>
             <el-form-item label="昵称">
               <el-input
                 v-model="userName"
-                maxlength="20"
-                show-word-limit
-                placeholder="昵称最多允许20个字符"
+                maxlength="10"
+                placeholder="昵称最多允许10个字符QAQ"
                 style="width: auto"
               />
             </el-form-item>
@@ -229,6 +240,7 @@
                 show-word-limit
                 type="textarea"
                 placeholder="  简单介绍下自己吧♡( •ॢ◡-ॢ)✧"
+                class="transparent-input"
                 style="width: 70%; height: auto"
               />
             </el-form-item>
@@ -262,7 +274,10 @@
             <el-form-item label-width="0" style="display: flex; margin-top: 40px; margin-left: 38%">
               <p v-if="detailError" class="error-text">{{ detailError }}</p>
             </el-form-item>
-            <el-form-item label-width="0" style="display: flex; margin-top: 20px; margin-left: 38%">
+            <el-form-item
+              label-width="30"
+              style="display: flex; margin-top: 20px; margin-left: 38%"
+            >
               <el-button
                 type="primary"
                 style="width: 150px"
@@ -677,12 +692,12 @@
     margin: 0;
   }
 
-  .help-text {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 12px;
+  .success-text {
+    color: #81c784;
+    font-size: 14px;
     margin: 0;
+    text-align: center;
   }
-
   .security-container {
     display: flex;
     justify-content: center;
@@ -759,23 +774,32 @@
   }
 
   :deep(.el-input__wrapper) {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 2px solid rgba(33, 150, 243, 0.5) !important;
     border-radius: 12px !important;
     transition: all 0.3s ease !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
   }
 
   :deep(.el-input__wrapper:hover) {
-    border-color: rgba(33, 150, 243, 0.5) !important;
-    box-shadow: 0 0 20px rgba(33, 150, 243, 0.2) !important;
+    border-color: rgba(33, 150, 243, 0.8) !important;
+    background: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.3) !important;
+  }
+
+  :deep(.el-input__wrapper.is-focus) {
+    border-color: rgba(33, 150, 243, 1) !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 0 30px rgba(33, 150, 243, 0.4) !important;
   }
 
   :deep(.el-input__input) {
-    color: #ffffff !important;
+    color: #1a237e !important;
+    font-weight: 500 !important;
   }
 
   :deep(.el-input__placeholder) {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(26, 35, 126, 0.5) !important;
   }
 
   :deep(.el-button--primary) {
@@ -803,7 +827,9 @@
   }
 
   :deep(.el-form-item__label) {
-    color: rgba(85, 159, 188, 0.786) !important;
+    -webkit-text-stroke-width: 0.1px;
+    -webkit-text-stroke-color: rgba(85, 159, 188) !important;
+    color: #36788a5a !important;
     font-size: 16px !important;
     font-weight: 500 !important;
   }
@@ -943,6 +969,37 @@
     }
   }
   @media screen and (min-width: 768px) {
+    .form-with-background::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('@/assets/images/1775021811673.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.8;
+      border-radius: 12px;
+      z-index: 0;
+    }
+
+    .form-with-background > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .transparent-input :deep(.el-textarea__inner) {
+      background-color: rgba(255, 255, 255, 0) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .transparent-input :deep(.el-textarea__inner:focus) {
+      background-color: rgba(255, 255, 255, 0) !important;
+      border-color: rgba(33, 150, 243, 0.5) !important;
+    }
+
     .settings-container-mobileOnly {
       display: none;
     }
@@ -973,6 +1030,7 @@
       width: 80%;
       margin-top: 10%;
       background: rgba(255, 255, 255, 0.05);
+
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
@@ -990,19 +1048,46 @@
       background-color: aliceblue;
     }
     :deep(.el-form-item__label) {
-      font-size: 20px !important;
-
-      /* color: rgba(255, 255, 255, 0.85); */
+      font-size: 24px !important;
+      color: #1a237e !important;
+      font-weight: 600 !important;
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    }
+    :deep(.el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.5) !important;
+      border: 2px solid rgba(33, 150, 243, 0.6) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+    :deep(.el-input__wrapper:hover) {
+      background: rgba(255, 255, 255, 0.6) !important;
+      border-color: rgba(33, 150, 243, 0.8) !important;
+      box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2) !important;
+    }
+    :deep(.el-input__wrapper.is-focus) {
+      background: rgba(255, 255, 255, 0.7) !important;
+      border-color: rgba(33, 150, 243, 1) !important;
+      box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3) !important;
     }
     :deep(.ela_input__inner),
     :deep(.el-textarea__inner) {
-      font-size: 20px; /* 修改这里的值来调整输入文字的大小 */
+      font-size: 20px;
+      padding: 16px 20px;
+      color: #1a237e !important;
+      font-weight: 500 !important;
     }
-
-    /* 修改 Element Plus 输入框 (ela_input, el-textarea) 的 placeholder 字体大小 */
-    :deep(.ela_input__inner)::placeholder,
+    :deep(.el-input__inner)::placeholder,
     :deep(.el-textarea__inner)::placeholder {
-      font-size: 20px; /* 修改这里的值来调整 placeholder 文字的大小 */
+      font-size: 20px;
+      color: rgba(26, 35, 126, 0.5) !important;
+    }
+    :deep(.el-select .el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.5) !important;
+      border: 2px solid rgba(33, 150, 243, 0.6) !important;
+    }
+    :deep(.el-date-editor .el-input__wrapper) {
+      background: rgba(255, 255, 255, 0.5) !important;
+      border: 2px solid rgba(33, 150, 243, 0.6) !important;
     }
     .Settings-section {
       height: 80%;
@@ -1014,18 +1099,29 @@
       margin-top: 20px;
       margin-left: 40%;
     }
+    .el-form-item:not(:first-child) {
+      margin-top: 20px !important;
+    }
     .Avatar-divider {
       margin-top: 20px;
       height: 1px;
       background-color: rgba(20, 68, 86, 0.2);
     }
+    .Avatar-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      margin-left: 0;
+    }
     .Avatar-preview-container {
-      margin-top: 40px;
+      flex-shrink: 0;
     }
     .Avatar-preview {
-      margin-left: 38%;
-      width: 150px;
-      height: 150px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
       background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
       display: flex;
@@ -1037,13 +1133,22 @@
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
-    .Avatar-actions {
-      margin-top: 20px;
-      display: flex;
-      gap: 20px;
-      /* justify-content: center; */
-      margin-left: 31.8%;
-      margin-bottom: 20px;
+    .Avatar-action-left,
+    .Avatar-action-right {
+      flex-shrink: 0;
+    }
+    .Avatar-action-left {
+      margin-right: 30px;
+    }
+    .el-form {
+      margin-top: 20px !important;
+    }
+    .el-form-item {
+      margin-bottom: 16px !important;
+      margin-left: 90px;
+    }
+    .el-form-item:not(:first-child) {
+      margin-top: 16px !important;
     }
 
     .File-input-wrapper {
@@ -1052,7 +1157,7 @@
 
     .File-input {
       position: absolute;
-      opacity: 0;
+      opacity: 0.2;
       width: 100%;
       height: 100%;
       cursor: pointer;
@@ -1060,36 +1165,31 @@
 
     .File-input-label {
       display: block;
-      padding: 12px 24px;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      color: #2196f3;
-      font-size: 20px;
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
     }
 
     .File-input-label:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(33, 150, 243, 0.5);
+      transform: scale(1.05);
     }
     .Upload-btn {
-      padding: 12px 24px;
-      /* background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); */
-      background: rgba(145, 68, 152, 0.397);
+      padding: 16px 60px;
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 20px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 44px;
+      gap: 12px;
+      min-height: 80px;
+      min-width: 100px;
     }
 
     .Upload-btn:hover:not(:disabled) {
