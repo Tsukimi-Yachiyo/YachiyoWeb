@@ -4,6 +4,93 @@
   import { useIconManager } from '../composables/useIconManager'
   import Live2DModel from '../components/Live2DModel/Live2DModel.vue'
 
+  // 海洋动物像素画
+  import img1 from '../assets/images/ChatHome-1.png'
+  import img2 from '../assets/images/ChatHome-2.png'
+  import img3 from '../assets/images/ChatHome-3.png'
+  import img4 from '../assets/images/ChatHome-4.png'
+
+  const animals = [img1, img2, img3, img4]
+
+  const oceanAnimals = computed(() => {
+    const list = []
+    const total = 18
+    for (let i = 0; i < total; i++) {
+      const img = animals[Math.floor(Math.random() * animals.length)]
+
+      // 均匀分布，不扎堆
+      const section = 100 / total
+      const baseLeft = i * section + Math.random() * (section * 0.7)
+      const left = `${baseLeft + Math.random() * 5}%`
+      const top = `${10 + Math.random() * 75}%`
+
+      // 大小层次：近大远小
+      const sizeRand = Math.random()
+      let size
+      if (sizeRand > 0.85) size = 60 + Math.random() * 25
+      else if (sizeRand > 0.6) size = 40 + Math.random() * 18
+      else size = 22 + Math.random() * 14
+
+      // 大小不同速度不同
+      const duration = size > 50 ? 22 + Math.random() * 8 : 14 + Math.random() * 6
+
+      list.push({
+        img,
+        flip: Math.random() > 0.5,
+        delay: `${Math.random() * 4}s`,
+        duration: `${duration}s`,
+        left,
+        top,
+        size: `${size}px`,
+        shadow: size > 40 ? '0 4px 8px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.2)',
+        opacity: size > 40 ? 0.95 : 0.75,
+      })
+    }
+    return list
+  })
+  interface BubbleStyle {
+    width: string
+    height: string
+    left: string
+    animationDuration: string
+    animationDelay: string
+  }
+
+  interface AnimalStyle {
+    left: string
+    animationDuration: string
+    animationDelay: string
+  }
+
+  //随机气泡大小、位置、速度
+  const getBubbleStyle = (i: number): BubbleStyle => {
+    const size = `${5 + Math.random() * 30}px`
+    const left = `${Math.random() * 100}%`
+    const duration = `${10 + Math.random() * 15}s`
+    const delay = `${Math.random() * 5}s`
+
+    return {
+      width: size,
+      height: size,
+      left,
+      animationDuration: duration,
+      animationDelay: delay,
+    }
+  }
+
+  // 动物随机参数
+  const getAnimalStyle = (index: number): AnimalStyle => {
+    const duration = `${15 + index * 5}s`
+    const delay = `${index * 2}s`
+    const left = `${10 + index * 20}%`
+
+    return {
+      left,
+      animationDuration: duration,
+      animationDelay: delay,
+    }
+  }
+
   const enterIconUrl = `${import.meta.env.BASE_URL}icons/theme/ENTER.svg`
 
   // 初始化图标管理器
@@ -98,6 +185,29 @@
 
 <template>
   <div class="chat-container" @touchstart="onTouchStart" @touchend="onTouchEnd">
+    <!-- 海洋层 -->
+    <div class="ocean-container">
+      <div v-for="i in 15" :key="i" class="bubble" :style="getBubbleStyle(i)"></div>
+      <div
+        v-for="(item, i) in oceanAnimals"
+        :key="i"
+        class="animal"
+        :style="{
+          left: item.left,
+          top: item.top,
+          width: item.size,
+          height: item.size,
+          animationDelay: item.delay,
+          animationDuration: item.duration,
+          transform: item.flip ? 'scaleX(-1)' : '',
+          // boxShadow: item.shadow,
+          opacity: item.opacity,
+        }"
+      >
+        <img :src="item.img" alt="海洋动物" class="animal-img" />
+      </div>
+    </div>
+
     <!-- 模型加载覆盖层 -->
     <transition name="fade">
       <div v-if="isModelLoading" class="model-loading-overlay">
@@ -233,14 +343,25 @@
           </div>
         </div>
 
-        <!-- 消息列表 -->
+        <!-- 消息列表  -  修复版-->
         <div v-else-if="!isModelLoading" ref="messageListRef" class="message-list">
           <transition-group name="message">
-            <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.type]">
+            <div
+              v-for="msg in messages"
+              :key="msg.id || JSON.stringify(msg)"
+              :class="['message', msg.type]"
+            >
               <div class="message-bubble">
                 <span v-if="msg.type === 'assistant' && msg.isStreaming && !msg.content"
-                  >思考中...</span
-                >
+                  >思考中
+                  <div v-if="isTyping" class="typing-indicator">
+                    <div class="typing-bubbles">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </span>
                 <span v-else>{{ msg.content }}</span>
                 <div v-if="msg.type === 'assistant' && !msg.isStreaming" class="message-actions">
                   <button
@@ -266,17 +387,7 @@
               </div>
             </div>
           </transition-group>
-
-          <!-- AI 输入中动画 -->
-          <div v-if="isTyping" class="typing-indicator">
-            <div class="typing-bubbles">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
         </div>
-
         <!-- 输入区 -->
         <div v-if="currentConversationId && !isModelLoading" class="input-area">
           <div class="input-wrapper">
@@ -309,9 +420,122 @@
     flex-direction: column;
     width: 100%;
     height: calc(100vh - 80px);
-    background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+    z-index: 1;
+    background: linear-gradient(180deg, #3498db 0%, #2a5298 30%, #0d1642 70%, #050b2c 100%);
     overflow: hidden;
     position: relative;
+    box-shadow: none !important;
+    border-top: none !important;
+    margin-top: 0 !important;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(
+        circle at 50% 10%,
+        rgba(135, 206, 235, 0.35),
+        rgba(0, 191, 255, 0.15) 60%,
+        transparent 100%
+      );
+      backdrop-filter: blur(1.5px);
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40%;
+      background: linear-gradient(to top, #02051a, transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 让内部子元素层级高于背景层，不被遮挡 */
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  /* 海洋层 */
+  /* 🌊 海洋背景层（核心修复：只让背景不拦截点击，不影响Live2D） */
+  .ocean-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    /* 最底层，在所有内容之下 */
+    pointer-events: none;
+    /* 仅背景层不拦截点击 ✅ */
+  }
+
+  /* 气泡：继承父级的pointer-events: none，不拦截点击 */
+  .bubble {
+    position: absolute;
+    bottom: -30px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    animation: bubbleUp linear infinite;
+    pointer-events: none;
+  }
+
+  /* 动物：继承父级的pointer-events: none，不拦截点击 */
+  .animal {
+    position: absolute;
+    animation: swimFloat ease-in-out infinite;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .animal img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  /* 气泡动画 */
+  @keyframes bubbleUp {
+    0% {
+      transform: translateY(0) scale(0.8);
+      opacity: 0.7;
+    }
+
+    100% {
+      transform: translateY(-110vh) scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  /* 动物漂浮动画 */
+
+  @keyframes swimFloat {
+    0% {
+      transform: scaleX(1) translateX(0) translateY(0) rotate(-1.8deg);
+    }
+    25% {
+      transform: scaleX(1) translateX(30px) translateY(-15px) rotate(0deg);
+    }
+    50% {
+      transform: scaleX(1) translateX(0) translateY(-28px) rotate(1.8deg);
+    }
+    75% {
+      transform: scaleX(1) translateX(-30px) translateY(-15px) rotate(0deg);
+    }
+    100% {
+      transform: scaleX(1) translateX(0) translateY(0) rotate(-1.8deg);
+    }
   }
 
   /* 主内容区 */
@@ -373,6 +597,7 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
@@ -382,9 +607,11 @@
     0% {
       opacity: 0.7;
     }
+
     50% {
       opacity: 1;
     }
+
     100% {
       opacity: 0.7;
     }
@@ -599,8 +826,8 @@
     width: 100%;
     height: 100%;
     z-index: 1;
-    opacity: 0.8;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
   }
 
   @media (max-width: 768px) {
@@ -803,16 +1030,18 @@
   .typing-indicator {
     display: flex;
     align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
   .typing-bubbles {
     display: flex;
     gap: 6px;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    border-bottom-left-radius: 4px;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    margin-top: 15px;
   }
 
   .typing-bubbles span {
@@ -838,7 +1067,6 @@
       transform: scale(0);
       opacity: 0.5;
     }
-
     40% {
       transform: scale(1);
       opacity: 1;

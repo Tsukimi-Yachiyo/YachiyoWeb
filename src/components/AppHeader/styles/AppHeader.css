@@ -2,7 +2,17 @@
 
 /* 标题栏 */
 .title-bar {
-  @apply h-20 bg-white shadow-md z-100;
+  @apply h-32 bg-black  z-100;
+  position: relative;
+}
+
+.title-bar-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
 }
 
 .title-bar-content {
@@ -41,7 +51,7 @@
 }
 
 .username-header {
-  color: #333;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;

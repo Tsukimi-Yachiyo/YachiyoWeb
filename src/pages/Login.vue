@@ -422,7 +422,7 @@
     top: 87%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
+    color: black;
     font-size: 20px;
     font-weight: 500;
     animation: pulse 1.5s ease-in-out infinite;
@@ -559,6 +559,7 @@
     box-sizing: border-box;
     flex: 1;
     min-width: 120px;
+    color: black;
   }
 
   .captcha-image {
@@ -602,7 +603,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: #64b5f6;
-    color: white;
+    color: black;
     white-space: nowrap;
   }
 
@@ -632,6 +633,7 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 16px;
+    color: black;
   }
 
   .login-btn {
@@ -642,7 +644,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     background-color: #64b5f6;
-    color: white;
+    color: black;
     width: 100%;
   }
 
@@ -753,7 +755,7 @@
 
   .confirm-btn {
     background-color: #64b5f6;
-    color: white;
+    color: black;
   }
 
   .confirm-btn:hover:not(:disabled) {
