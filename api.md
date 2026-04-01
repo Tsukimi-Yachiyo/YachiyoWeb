@@ -30,13 +30,13 @@
 
 ```bash
 # 1. 发送验证码
-POST http://localhost:8080/api/v1/auth/send-code
+POST http://211.101.237.141:8080/api/v1/auth/send-code
 Content-Type: application/json
 
 "your_email@example.com"
 
 # 2. 注册账号
-POST http://localhost:8080/api/v1/auth/register
+POST http://211.101.237.141:8080/api/v1/auth/register
 Content-Type: application/json
 
 {
@@ -47,7 +47,7 @@ Content-Type: application/json
 }
 
 # 3. 登录获取 Token
-POST http://localhost:8080/api/v1/auth/login
+POST http://211.101.237.141:8080/api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -67,7 +67,7 @@ Content-Type: application/json
 
 ```bash
 # 1. 创建会话
-POST http://localhost:8080/api/v2/ai/create
+POST http://211.101.237.141:8080/api/v2/ai/create
 Authorization: Bearer YOUR_JWT_TOKEN
 
 # 响应：返回会话 ID
@@ -78,7 +78,7 @@ Authorization: Bearer YOUR_JWT_TOKEN
 }
 
 # 2. 发送消息
-POST http://localhost:8080/api/v2/ai/chat
+POST http://211.101.237.141:8080/api/v2/ai/chat
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
@@ -91,7 +91,7 @@ Content-Type: application/json
 ### 3. 发布帖子
 
 ```bash
-POST http://localhost:8080/api/v2/posting/upload
+POST http://211.101.237.141:8080/api/v2/posting/upload
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: multipart/form-data
 
@@ -110,7 +110,7 @@ files: [文件 1, 文件 2]
 # expire 是 Unix 时间戳（秒）
 # sign 由服务端使用 MD5 生成
 
-GET http://localhost:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123...
+GET http://211.101.237.141:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123...
 
 # 注意：签名需要后端生成，前端直接使用后端返回的完整 URL
 ```
@@ -121,7 +121,7 @@ GET http://localhost:8080/file/generate?fileName=1%2Favatar.jpg&expire=171150000
 
 本文档描述了 YachiyoService 后端服务的所有 RESTful API 接口。
 
-**服务地址**: `http://localhost:8080`
+**服务地址**: `http://211.101.237.141:8080`
 
 **API 版本**: v1, v2, v3
 
@@ -1459,10 +1459,10 @@ String sign = md5Hex(fileName + expire + KEY);
 # 3. 生成签名（需要后端生成）
 
 # 请求示例（fileName 需要 URL 编码）
-GET http://localhost:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123def456...
+GET http://211.101.237.141:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123def456...
 
 # 使用 cURL 示例
-curl -X GET "http://localhost:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123"
+curl -X GET "http://211.101.237.141:8080/file/generate?fileName=1%2Favatar.jpg&expire=1711500000&sign=abc123"
 ```
 
 **注意事项**:

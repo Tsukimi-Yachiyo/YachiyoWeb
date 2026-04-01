@@ -388,7 +388,6 @@
             </div>
           </transition-group>
         </div>
-
         <!-- 输入区 -->
         <div v-if="currentConversationId && !isModelLoading" class="input-area">
           <div class="input-wrapper">
@@ -1068,7 +1067,6 @@
       transform: scale(0);
       opacity: 0.5;
     }
-
     40% {
       transform: scale(1);
       opacity: 1;
