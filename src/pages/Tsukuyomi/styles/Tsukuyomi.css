@@ -2,7 +2,7 @@
 
 .tsukuyomi-container {
   @apply flex flex-col w-full h-full overflow-hidden relative;
-  background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+  background: #3498db;
 }
 
 /* 主内容区 */
