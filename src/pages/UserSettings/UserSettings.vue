@@ -1,9 +1,8 @@
 <script setup lang="ts">
   import { useUserSettings } from '../../composables/useUserSettings'
   import { ref } from 'vue'
-  import backgroundImage from '@/assets/images/AI_1775009231144.png'
-  import uploadIcon from '@/assets/images/上传头像.png'
-  import selectImageIcon from '@/assets/images/选择图片.png'
+  import uploadIcon from '@/assets/icons/upload-avatar.png'
+  import selectImageIcon from '@/assets/icons/select-image.png'
 
   import {
     ElTabs,
@@ -19,7 +18,6 @@
     ElCol,
   } from 'element-plus'
   import type { TabsInstance } from 'element-plus'
-  import { open } from 'node:fs'
 
   const tabPosition = ref<TabsInstance['tabPosition']>('left')
   const {
@@ -808,7 +806,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('@/assets/images/1775028110724.jpeg');
+    background-image: url('@/assets/images/change-password.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1207,7 +1205,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: url('@/assets/images/1775021811673.jpeg');
+      background-image: url('@/assets/images/profile-page.jpeg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -1479,7 +1477,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: url('@/assets/images/1775021786984.png');
+      background-image: url('@/assets/images/about-us.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;

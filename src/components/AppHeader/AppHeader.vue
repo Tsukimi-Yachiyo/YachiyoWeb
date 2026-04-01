@@ -26,8 +26,8 @@
     loadUserDetail,
   } = useUserProfile()
   const iconBaseUrl = `${import.meta.env.BASE_URL}icons/theme/`
-  const appLogoUrl = `${iconBaseUrl}月见八千代.svg`
-  const tsukuyomiLogoUrl = `${iconBaseUrl}月读空间.svg`
+  const appLogoUrl = `${iconBaseUrl}yachiyo-tsukimi.svg`
+  const tsukuyomiLogoUrl = `${iconBaseUrl}tsukuyomi-space.svg`
   // 优先使用全局单例资料，避免页面级 props 在路由切换时短暂抖动造成头像闪烁
   const resolvedUsername = computed(() => profileUsername.value || props.username || '用户')
   const resolvedUserAvatar = computed(() => profileUserAvatar.value || props.userAvatar || '')
