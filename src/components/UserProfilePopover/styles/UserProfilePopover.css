@@ -5,17 +5,49 @@
 
 .user-profile-popover {
   position: absolute;
-  top: 70%;
+  top: 110%;
   right: -20px;
   width: 240px;
   background: rgba(220, 230, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 16px;
-  padding: 60px 20px 25px;
+  padding: 20px 20px 25px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   z-index: 5;
   transform-origin: top right;
+}
+
+/* 硬币显示样式 */
+.popover-coin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.popover-coin:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.popover-coin .coin-icon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+
+.popover-coin .coin-amount {
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
 }
 
 .popover-header {

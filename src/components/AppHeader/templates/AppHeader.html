@@ -18,11 +18,14 @@
       <span class="username-header" :class="{ 'avatar-active': userProfileIsVisible }"
         >{{ resolvedUsername }}</span
       >
+      
       <UserProfilePopover
         :username="resolvedUsername"
         :userAvatar="resolvedUserAvatar"
+        :coinAmount="coinAmount"
         @logout="handleLogout"
         @update:isVisible="value => userProfileIsVisible = value"
+        @toggle-checkin="toggleCheckin"
       >
         <template #trigger="{ showPopover, hidePopover, isVisible }">
           <div
@@ -41,6 +44,15 @@
       </UserProfilePopover>
     </div>
   </div>
+  
+  <!-- 签到模块弹出层 -->
+  <div v-if="isCheckinVisible" class="checkin-popover">
+    <div class="checkin-popover-content">
+      <button class="close-button" @click="toggleCheckin">×</button>
+      <CheckinModule @checkin-complete="handleCheckinComplete" />
+    </div>
+  </div>
+  
   <div class="title-bar-wave">
     <WaveEffect />
   </div>
