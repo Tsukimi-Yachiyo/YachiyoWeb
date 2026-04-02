@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useUserSettings } from '../composables/useUserSettings'
   import { ref } from 'vue'
+  import Message from '../components/Message.vue'
   import uploadIcon from '@/assets/icons/upload-avatar.png'
   import selectImageIcon from '@/assets/icons/select-image.png'
 
@@ -72,9 +73,13 @@
         <div class="placeholder"></div>
       </div>
 
-      <div v-if="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
+      <Message
+        v-if="successMessage"
+        type="success"
+        :message="successMessage"
+        :auto-close="3000"
+        @close="successMessage = ''"
+      />
 
       <div v-if="isLoading" class="loading-container">
         <div class="loading-spinner"></div>
@@ -185,9 +190,13 @@
   <!-- PC端界面 -->
   <div class="settings-container-pcOnly">
     <div class="Setting-Card">
-      <div v-if="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
+      <Message
+        v-if="successMessage"
+        type="success"
+        :message="successMessage"
+        :auto-close="3000"
+        @close="successMessage = ''"
+      />
 
       <div v-if="isLoading" class="loading-container">
         <div class="loading-spinner"></div>
@@ -358,9 +367,13 @@
 
                     <div class="form-actions">
                       <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
-                      <p v-if="changePasswordSuccess" class="success-text">
-                        {{ changePasswordSuccess }}
-                      </p>
+                      <Message
+                        v-if="changePasswordSuccess"
+                        type="success"
+                        :message="changePasswordSuccess"
+                        :auto-close="3000"
+                        @close="changePasswordSuccess = ''"
+                      />
                       <el-button
                         type="primary"
                         style="width: 150px"
@@ -468,6 +481,7 @@
   }
   .settings-container-pcOnly {
     display: none;
+    background: white;
   }
 
   .settings-card {
@@ -516,17 +530,6 @@
 
   .placeholder {
     width: 80px;
-  }
-
-  .success-message {
-    background: rgba(76, 175, 80, 0.2);
-    border: 1px solid rgba(76, 175, 80, 0.3);
-    color: #81c784;
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    text-align: center;
-    animation: fadeIn 0.3s ease;
   }
 
   .loading-container {
@@ -778,12 +781,6 @@
     margin: 0;
   }
 
-  .success-text {
-    color: #81c784;
-    font-size: 14px;
-    margin: 0;
-    text-align: center;
-  }
   .security-container {
     display: flex;
     justify-content: center;
@@ -1264,14 +1261,13 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      background: white;
     }
     .Setting-Card {
       align-items: center;
       justify-content: center;
       width: 80%;
-      margin-top: 10%;
       background: rgba(255, 255, 255, 0.05);
-
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
