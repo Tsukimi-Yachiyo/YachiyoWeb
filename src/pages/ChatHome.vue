@@ -435,12 +435,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(
+/*      background: radial-gradient(
         circle at 50% 10%,
         rgba(135, 206, 235, 0.35),
         rgba(0, 191, 255, 0.15) 60%,
         transparent 100%
-      );
+      );*/
       backdrop-filter: blur(1.5px);
       opacity: 0.85;
       pointer-events: none;
