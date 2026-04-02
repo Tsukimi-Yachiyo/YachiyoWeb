@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { useRoute } from 'vue-router'
-  import AppHeader from './components/AppHeader/AppHeader.vue'
+  import AppHeader from './components/AppHeader.vue'
   import { useAuth } from './composables/useAuth'
   import { useIconManager } from './composables/useIconManager'
 
@@ -26,6 +26,46 @@
   useIconManager()
 </script>
 
-<template src="./templates/App.html"></template>
+<template>
+  <div class="app-shell">
+    <AppHeader v-if="showGlobalHeader" :current-page="currentPage" @logout="logout" />
+    <main class="app-content">
+      <router-view />
+    </main>
+  </div>
+</template>
 
-<style src="./styles/App.css"></style>
+<style>
+  /* 全局样式 */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  #app,
+  .app-shell {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+</style>

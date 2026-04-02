@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router'
-  import AppHeader from '../../components/AppHeader/AppHeader.vue'
   import { useUserProfile } from '../../composables/useUserProfile'
   import { useIconManager } from '../../composables/useIconManager'
   import { postAPI } from '../../services/api'
