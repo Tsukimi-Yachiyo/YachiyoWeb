@@ -18,8 +18,8 @@
           { value: 'calm', label: '平静', emoji: '😌' },
           { value: 'tired', label: '疲惫', emoji: '😴' },
           { value: 'sad', label: '难过', emoji: '😢' },
-          { value: 'angry', label: '生气', emoji: '😠' }
-        ]
+          { value: 'angry', label: '生气', emoji: '😠' },
+        ],
       }
     },
     mounted() {
@@ -65,7 +65,7 @@
         setTimeout(() => {
           this.successMessage = ''
         }, 2000)
-      }
+      },
     },
   }
 </script>
@@ -88,8 +88,8 @@
     <div v-if="checkinStatus" class="mood-section">
       <h4>今日心情</h4>
       <div class="mood-selector">
-        <button 
-          v-for="mood in moods" 
+        <button
+          v-for="mood in moods"
           :key="mood.value"
           class="mood-button"
           :class="{ active: selectedMood === mood.value }"
@@ -98,9 +98,7 @@
           {{ mood.emoji }} {{ mood.label }}
         </button>
       </div>
-      <button class="save-mood-button" @click="saveMood" :disabled="!selectedMood">
-        保存心情
-      </button>
+      <button class="save-mood-button" :disabled="!selectedMood" @click="saveMood">保存心情</button>
     </div>
     <div v-if="errorMessage" class="error-message">
       {{ errorMessage }}

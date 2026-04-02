@@ -549,7 +549,24 @@ export const commentAPI = {
     return unwrapData(
       apiClient.post<ApiResponse<boolean>>('/api/v1/auth/delete-comment', commentId)
     )
-  }
+  },
+}
+
+export const coinAPI = {
+  // 签到
+  sign(): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/coin/sign'))
+  },
+
+  // 获取金币数量
+  getCoinAmount(): Promise<ApiResponse<number>> {
+    return unwrapData(apiClient.post<ApiResponse<number>>('/api/v2/coin/get'))
+  },
+
+  // 开启钱包
+  openWallet(): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/coin/open-wallet'))
+  },
 }
 
 export default apiClient
