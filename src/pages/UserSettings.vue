@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { useUserSettings } from '../../composables/useUserSettings'
+  import { useUserSettings } from '../composables/useUserSettings'
   import { ref } from 'vue'
   import uploadIcon from '@/assets/icons/upload-avatar.png'
   import selectImageIcon from '@/assets/icons/select-image.png'
@@ -40,6 +40,22 @@
     uploadAvatar,
     saveUserDetail,
     goBack,
+    changePasswordEmail,
+    changePasswordCode,
+    changePasswordNewPassword,
+    changePasswordCodeCountdown,
+    isSendingChangePasswordCode,
+    showChangePasswordCaptchaModal,
+    changePasswordCaptchaUrl,
+    changePasswordCaptchaInput,
+    changePasswordError,
+    changePasswordSuccess,
+    isChangingPassword,
+    handleSendChangePasswordCode,
+    handleConfirmChangePasswordCaptcha,
+    handleCloseChangePasswordCaptchaModal,
+    handleChangePassword,
+    refreshChangePasswordCaptcha,
   } = useUserSettings()
 </script>
 
@@ -254,7 +270,7 @@
                 v-model="userBirthday"
                 type="date"
                 placeholder="选择您的生日"
-                style="width: 200px"
+                style="width: 210px"
               />
             </el-form-item>
             <el-row :gutter="10" style="margin-top: 40px">
@@ -278,7 +294,7 @@
             >
               <el-button
                 type="primary"
-                style="width: 150px"
+                style="width: 150px; height: auto"
                 :disabled="isSavingDetail"
                 @click="saveUserDetail"
                 ><span v-if="isSavingDetail" class="Btn-spinner"></span>
@@ -404,6 +420,39 @@
           </div>
         </el-tab-pane>
       </el-tabs>
+    </div>
+
+    <div v-if="showChangePasswordCaptchaModal" class="captcha-modal">
+      <div class="captcha-modal-content">
+        <h3>验证身份</h3>
+        <p>请输入图形验证码以获取邮箱验证码</p>
+        <div class="captcha-modal-form">
+          <div class="captcha-container">
+            <el-input
+              v-model="changePasswordCaptchaInput"
+              placeholder="请输入图形验证码"
+              style="width: 200px"
+            />
+            <img
+              :src="changePasswordCaptchaUrl"
+              alt="验证码"
+              class="captcha-image"
+              @click="refreshChangePasswordCaptcha"
+            />
+          </div>
+          <div class="captcha-modal-actions">
+            <el-button @click="handleCloseChangePasswordCaptchaModal">取消</el-button>
+            <el-button
+              type="primary"
+              :disabled="isSendingChangePasswordCode"
+              @click="handleConfirmChangePasswordCaptcha"
+            >
+              {{ isSendingChangePasswordCode ? '发送中...' : '确认' }}
+            </el-button>
+          </div>
+          <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -1062,6 +1111,70 @@
   }
 
   /* 响应式设计 */
+  @media (max-width: 768px) {
+    .security-container {
+      padding: 20px 15px;
+    }
+
+    .change-password-card {
+      margin: 0 10px;
+    }
+
+    .card-header {
+      padding: 20px;
+    }
+
+    .card-header .section-title {
+      font-size: 24px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .form-item {
+      margin-bottom: 20px !important;
+    }
+
+    .code-input-wrapper {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .code-input-wrapper .el-input {
+      width: 100% !important;
+    }
+
+    .code-input-wrapper .el-button {
+      margin-left: 0 !important;
+      width: 100%;
+    }
+
+    .form-actions {
+      margin-top: 30px;
+    }
+
+    .captcha-modal-content {
+      padding: 30px 20px;
+      margin: 0 15px;
+    }
+
+    .captcha-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .captcha-container .el-input {
+      width: 100% !important;
+    }
+
+    .captcha-image {
+      align-self: center;
+      margin-top: 10px;
+    }
+  }
+
   @media (max-width: 480px) {
     .settings-card {
       padding: 20px;
@@ -1230,7 +1343,7 @@
     }
     .Section-title {
       color: #1976d2;
-      font-size: 22px;
+      font-size: 28px;
       font-weight: 500;
       margin-top: 20px;
       margin-left: 40%;
@@ -1250,7 +1363,7 @@
       gap: 40px;
       margin-top: 20px;
       margin-bottom: 20px;
-      margin-left: 0;
+      margin-left: -10%;
     }
     .Avatar-preview-container {
       flex-shrink: 0;
@@ -1265,16 +1378,21 @@
       justify-content: center;
       color: white;
       font-weight: bold;
-      font-size: 40px;
+      font-size: 60px;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .Avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .Avatar-action-left,
     .Avatar-action-right {
       flex-shrink: 0;
     }
     .Avatar-action-left {
-      margin-right: 30px;
+      margin-right: 0px;
     }
     .el-form {
       margin-top: 20px !important;
@@ -1308,14 +1426,18 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .File-input-label:hover {
       transform: scale(1.05);
     }
     .Upload-btn {
-      padding: 16px 60px;
-      color: white;
+      padding: 8px;
+      background: transparent;
       border: none;
       border-radius: 12px;
       cursor: pointer;
@@ -1323,14 +1445,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
       min-height: 80px;
-      min-width: 100px;
+      min-width: 80px;
     }
 
     .Upload-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+      box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
     }
 
     .Upload-btn:disabled {
