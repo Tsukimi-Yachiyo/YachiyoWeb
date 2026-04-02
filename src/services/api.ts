@@ -552,4 +552,68 @@ export const commentAPI = {
   },
 }
 
+export interface MailItem {
+  id: number
+  title: string
+  content: string
+  sender: string
+  time: string
+  isRead: boolean
+  status: string
+}
+
+export const mailAPI = {
+  getMailList(type: string): Promise<any> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        let mockData: MailItem[] = []
+        if (type === 'LIKE') {
+          mockData = [
+            {
+              id: 1,
+              title: '赞了你的视频',
+              content: '《Vue 3 从入门到精通》',
+              sender: 'BangBooM',
+              time: '10 分钟前',
+              isRead: false,
+              status: 'unread',
+            },
+            {
+              id: 2,
+              title: '赞了你的专栏',
+              content: '《深入理解 TypeScript 泛型》',
+              sender: '小说家助手',
+              time: '1 小时前',
+              isRead: false,
+              status: 'unread',
+            },
+            {
+              id: 3,
+              title: '赞了你的动态',
+              content: '今天完成了一个大项目！',
+              sender: '代码艺术家',
+              time: '3 小时前',
+              isRead: true,
+              status: 'read',
+            },
+          ]
+        } else if (type === 'REPLY') {
+          mockData = [
+            {
+              id: 4,
+              title: '回复了你的动态',
+              content: '设定太棒了，期待后续！',
+              sender: '热心读者',
+              time: '刚才',
+              isRead: false,
+              status: 'unread',
+            },
+          ]
+        }
+        resolve({ success: true, code: '200', message: 'success', data: mockData, detail: null })
+      }, 600)
+    })
+  },
+}
+
 export default apiClient
