@@ -11,9 +11,13 @@
       type: String,
       default: '',
     },
+    coinAmount: {
+      type: Number,
+      default: 0,
+    },
   })
 
-  const emit = defineEmits(['go-settings', 'logout', 'update:isVisible'])
+  const emit = defineEmits(['go-settings', 'logout', 'update:isVisible', 'toggle-checkin'])
 
   const {
     isVisible,
