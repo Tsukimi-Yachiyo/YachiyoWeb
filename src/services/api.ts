@@ -549,7 +549,7 @@ export const commentAPI = {
     return unwrapData(
       apiClient.post<ApiResponse<boolean>>('/api/v1/auth/delete-comment', commentId)
     )
-  },
+  }
 }
 
 export default apiClient
