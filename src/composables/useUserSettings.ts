@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { userAPI } from '../services/api'
 import { useAuth } from './useAuth'
 import { processImageData } from './useImageData'
+import apiClient from '../services/api'
 
 const USERNAME_CACHE_KEY = 'cached_username'
 const AVATAR_CACHE_KEY = 'cached_avatar'
@@ -19,8 +20,8 @@ export function useUserSettings() {
   const userIntroduction = ref('')
   const userCity = ref('')
   const userGender = ref('')
-  const userPhone = ref('')
   const userBirthday = ref('')
+  const userQQ = ref('')
 
   const isLoading = ref(false)
   const isUploading = ref(false)
@@ -32,6 +33,18 @@ export function useUserSettings() {
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+
+  const changePasswordEmail = ref('')
+  const changePasswordCode = ref('')
+  const changePasswordNewPassword = ref('')
+  const changePasswordCodeCountdown = ref(0)
+  const isSendingChangePasswordCode = ref(false)
+  const showChangePasswordCaptchaModal = ref(false)
+  const changePasswordCaptchaUrl = ref('')
+  const changePasswordCaptchaInput = ref('')
+  const changePasswordError = ref('')
+  const changePasswordSuccess = ref('')
+  const isChangingPassword = ref(false)
 
   const fetchLatestAvatar = async (maxRetries = 3): Promise<string | null> => {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -67,7 +80,7 @@ export function useUserSettings() {
         userIntroduction.value = detailResult.data.userIntroduction || ''
         userCity.value = detailResult.data.userCity || ''
         userGender.value = detailResult.data.userGender || ''
-        userPhone.value = detailResult.data.userPhone || ''
+        userQQ.value = detailResult.data.userQQ || ''
         localStorage.setItem(USERNAME_CACHE_KEY, userName.value)
 
         if (detailResult.data.userBirthday) {
@@ -201,7 +214,7 @@ export function useUserSettings() {
       userIntroduction: userIntroduction.value.trim(),
       userCity: userCity.value.trim(),
       userGender: userGender.value,
-      userPhone: userPhone.value.trim(),
+      userQQ: userQQ.value.trim(),
       userBirthday: userBirthday.value ? new Date(userBirthday.value).toISOString() : null,
     }
 
@@ -227,7 +240,210 @@ export function useUserSettings() {
   }
 
   const goBack = () => {
-    router.back()
+    router.push('/chat/home')
+  }
+
+  const generateChangePasswordCaptcha = () => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    canvas.width = 100
+    canvas.height = 40
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let captchaText = ''
+    for (let i = 0; i < 4; i++) {
+      captchaText += chars[Math.floor(Math.random() * chars.length)]
+    }
+
+    ;(window as any).changePasswordCaptchaText = captchaText
+
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath()
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height)
+      ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height)
+      ctx.strokeStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
+      ctx.stroke()
+    }
+
+    for (let i = 0; i < 50; i++) {
+      ctx.beginPath()
+      ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, 2 * Math.PI)
+      ctx.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`
+      ctx.fill()
+    }
+
+    ctx.font = '20px Arial'
+    ctx.fillStyle = '#333'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(captchaText, canvas.width / 2, canvas.height / 2)
+
+    return canvas.toDataURL('image/png')
+  }
+
+  const refreshChangePasswordCaptcha = () => {
+    changePasswordCaptchaUrl.value = generateChangePasswordCaptcha()
+    changePasswordCaptchaInput.value = ''
+  }
+
+  const startChangePasswordCodeCountdown = () => {
+    changePasswordCodeCountdown.value = 60
+    const timer = setInterval(() => {
+      if (changePasswordCodeCountdown.value > 0) {
+        changePasswordCodeCountdown.value--
+      } else {
+        clearInterval(timer)
+      }
+    }, 1000)
+  }
+
+  const handleSendChangePasswordCode = () => {
+    if (!changePasswordEmail.value) {
+      changePasswordError.value = '请输入邮箱'
+      return
+    }
+
+    let cleanedEmail = changePasswordEmail.value.trim().toLowerCase()
+    cleanedEmail = cleanedEmail.replace(/[^\u0020-\u007E]/g, '')
+
+    if (cleanedEmail !== changePasswordEmail.value.trim().toLowerCase()) {
+      console.warn('邮箱地址包含非ASCII字符，已自动移除')
+    }
+
+    changePasswordEmail.value = cleanedEmail
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(changePasswordEmail.value)) {
+      changePasswordError.value = '请输入有效的邮箱地址'
+      return
+    }
+
+    if (changePasswordEmail.value.length > 254) {
+      changePasswordError.value = '邮箱地址过长，请检查后重试'
+      return
+    }
+
+    showChangePasswordCaptchaModal.value = true
+    refreshChangePasswordCaptcha()
+  }
+
+  const handleConfirmChangePasswordCaptcha = async () => {
+    if (!changePasswordCaptchaInput.value) {
+      changePasswordError.value = '请输入图形验证码'
+      return
+    }
+
+    if (
+      changePasswordCaptchaInput.value.toUpperCase() !==
+      (window as any).changePasswordCaptchaText?.toUpperCase()
+    ) {
+      changePasswordError.value = '图形验证码错误'
+      refreshChangePasswordCaptcha()
+      return
+    }
+
+    isSendingChangePasswordCode.value = true
+    changePasswordError.value = ''
+
+    try {
+      changePasswordEmail.value = changePasswordEmail.value.trim().toLowerCase()
+      changePasswordEmail.value = changePasswordEmail.value.replace(/[^\u0020-\u007E]/g, '')
+
+      const codeResponse = await apiClient.post(
+        '/api/v1/auth/send-code',
+        changePasswordEmail.value,
+        {
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        }
+      )
+
+      if (codeResponse.data && codeResponse.data.success) {
+        changePasswordSuccess.value = '验证码已发送，请查收'
+        startChangePasswordCodeCountdown()
+        showChangePasswordCaptchaModal.value = false
+        changePasswordCaptchaInput.value = ''
+      } else {
+        changePasswordError.value = codeResponse.data?.message || '发送验证码失败，请重试'
+      }
+    } catch (err: any) {
+      console.error('发送验证码失败:', err)
+
+      const errCode = err?.code || err?.response?.data?.code
+      const errMessage = err?.message || err?.response?.data?.message
+
+      if (errCode === '400' && errMessage?.includes('验证码已发送，请稍后再试')) {
+        changePasswordSuccess.value = '验证码可能已发送，请检查邮箱。发送过于频繁，请稍后再试'
+        startChangePasswordCodeCountdown()
+        showChangePasswordCaptchaModal.value = false
+        changePasswordCaptchaInput.value = ''
+      } else {
+        changePasswordError.value = err?.message || '发送验证码失败，请重试'
+      }
+    } finally {
+      isSendingChangePasswordCode.value = false
+    }
+  }
+
+  const handleCloseChangePasswordCaptchaModal = () => {
+    showChangePasswordCaptchaModal.value = false
+    changePasswordCaptchaInput.value = ''
+    changePasswordError.value = ''
+  }
+
+  const handleChangePassword = async () => {
+    changePasswordError.value = ''
+
+    if (!changePasswordEmail.value) {
+      changePasswordError.value = '请输入邮箱'
+      return
+    }
+
+    if (!changePasswordCode.value) {
+      changePasswordError.value = '请输入验证码'
+      return
+    }
+
+    if (!changePasswordNewPassword.value) {
+      changePasswordError.value = '请输入新密码'
+      return
+    }
+
+    if (changePasswordNewPassword.value.length < 6) {
+      changePasswordError.value = '密码长度至少6位'
+      return
+    }
+
+    isChangingPassword.value = true
+    try {
+      const response = await apiClient.post('/api/v1/auth/change-password', {
+        username: userName.value,
+        password: changePasswordNewPassword.value,
+        email: changePasswordEmail.value,
+        code: changePasswordCode.value,
+      })
+
+      if (response.data && response.data.code === '200') {
+        changePasswordSuccess.value = '密码修改成功'
+        changePasswordEmail.value = ''
+        changePasswordCode.value = ''
+        changePasswordNewPassword.value = ''
+        setTimeout(() => {
+          changePasswordSuccess.value = ''
+        }, 3000)
+      } else {
+        changePasswordError.value = response.data?.message || '密码修改失败，请重试'
+      }
+    } catch (err: any) {
+      console.error('密码修改失败:', err)
+      changePasswordError.value = err?.message || '密码修改失败，请重试'
+    } finally {
+      isChangingPassword.value = false
+    }
   }
 
   onMounted(() => {
@@ -246,8 +462,8 @@ export function useUserSettings() {
     userIntroduction,
     userCity,
     userGender,
-    userPhone,
     userBirthday,
+    userQQ,
     isLoading,
     isUploading,
     isSavingDetail,
@@ -258,5 +474,21 @@ export function useUserSettings() {
     uploadAvatar,
     saveUserDetail,
     goBack,
+    changePasswordEmail,
+    changePasswordCode,
+    changePasswordNewPassword,
+    changePasswordCodeCountdown,
+    isSendingChangePasswordCode,
+    showChangePasswordCaptchaModal,
+    changePasswordCaptchaUrl,
+    changePasswordCaptchaInput,
+    changePasswordError,
+    changePasswordSuccess,
+    isChangingPassword,
+    handleSendChangePasswordCode,
+    handleConfirmChangePasswordCaptcha,
+    handleCloseChangePasswordCaptchaModal,
+    handleChangePassword,
+    refreshChangePasswordCaptcha,
   }
 }
