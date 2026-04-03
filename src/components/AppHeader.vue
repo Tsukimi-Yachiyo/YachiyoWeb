@@ -38,7 +38,7 @@
   const shiftIconY = ref(0)
   let animationFrame = null
   let time = 0
-  
+
   const tooltipX = ref(0)
   const tooltipY = ref(0)
   const showTooltip = ref(false)
@@ -101,12 +101,12 @@
     const amplitude = 5
     const frequency = 0.02
     const speed = 0.03
-    
+
     let y = 0
     y += amplitude * Math.sin(frequency * 0 + speed * time)
     y += amplitude * 0.5 * Math.sin(2 * frequency * 0 + 1.5 * speed * time)
     y += amplitude * 0.3 * Math.sin(3 * frequency * 0 + 2 * speed * time)
-    
+
     shiftIconY.value = y
     animationFrame = requestAnimationFrame(animateShiftIcon)
   }
