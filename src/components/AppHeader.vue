@@ -1,10 +1,13 @@
 <script setup lang="ts">
-  import { computed, ref, onMounted } from 'vue'
+  import { computed, ref, onMounted, onUnmounted } from 'vue'
   import UserProfilePopover from './UserProfilePopover/UserProfilePopover.vue'
   import WaveEffect from './WaveEffect.vue'
   import CheckinModule from './CheckinModule.vue'
   import { useUserProfile } from '../composables/useUserProfile'
   import { coinAPI } from '../services/api'
+  import { useRouter } from 'vue-router'
+
+  const router = useRouter()
 
   const props = defineProps({
     currentPage: {
@@ -29,8 +32,12 @@
   } = useUserProfile()
   const iconBaseUrl = `${import.meta.env.BASE_URL}icons/theme/`
   const appLogoUrl = `${iconBaseUrl}yachiyo-tsukimi.svg`
-  const tsukuyomiLogoUrl = `${iconBaseUrl}tsukuyomi-space.svg`
-  const fujuLogoUrl = `${iconBaseUrl}FUJU.svg`
+  const shiftIconUrl = new URL('../assets/icons/shift.png', import.meta.url).href
+  const tsukuyomiIconUrl = new URL('../assets/icons/tsukuyomi-space-v4.png', import.meta.url).href
+
+  const shiftIconY = ref(0)
+  let animationFrame = null
+  let time = 0
   // 优先使用全局单例资料，避免页面级 props 在路由切换时短暂抖动造成头像闪烁
   const resolvedUsername = computed(() => profileUsername.value || props.username || '用户')
   const resolvedUserAvatar = computed(() => profileUserAvatar.value || props.userAvatar || '')
@@ -74,9 +81,41 @@
     isCheckinVisible.value = false
   }
 
+  // 路由切换函数
+  const switchToChat = () => {
+    router.push('/chat/home')
+  }
+
+  const switchToTsukuyomi = () => {
+    router.push('/tsukuyomi')
+  }
+
+  // 波浪同步动画
+  const animateShiftIcon = () => {
+    time += 1
+    const amplitude = 5
+    const frequency = 0.02
+    const speed = 0.03
+
+    let y = 0
+    y += amplitude * Math.sin(frequency * 0 + speed * time)
+    y += amplitude * 0.5 * Math.sin(2 * frequency * 0 + 1.5 * speed * time)
+    y += amplitude * 0.3 * Math.sin(3 * frequency * 0 + 2 * speed * time)
+
+    shiftIconY.value = y
+    animationFrame = requestAnimationFrame(animateShiftIcon)
+  }
+
   onMounted(() => {
     loadUserDetail(false)
     getCoinAmount()
+    animateShiftIcon()
+  })
+
+  onUnmounted(() => {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame)
+    }
   })
 </script>
 
@@ -87,15 +126,6 @@
         <router-link class="app-title-button" to="/chat/home">
           <img :src="appLogoUrl" alt="yachiyo-tsukimi" width="64" height="64" />
         </router-link>
-        <div class="nav-buttons">
-          <router-link
-            class="nav-button"
-            :class="{ active: currentPage === 'tsukuyomi' }"
-            to="/tsukuyomi"
-          >
-            <img :src="tsukuyomiLogoUrl" alt="tsukuyomi-space" width="64" height="64" />
-          </router-link>
-        </div>
       </div>
       <div class="user-info-header">
         <span class="username-header" :class="{ 'avatar-active': userProfileIsVisible }">{{
@@ -140,6 +170,25 @@
     <div class="title-bar-wave">
       <WaveEffect />
     </div>
+
+    <div class="switch-buttons-container">
+      <button
+        v-if="currentPage !== 'chat'"
+        class="switch-button shift-button"
+        :style="{ transform: `translateY(${shiftIconY}px) rotate(45deg)` }"
+        @click="switchToChat"
+      >
+        <img :src="shiftIconUrl" alt="切换至聊天" />
+      </button>
+
+      <button
+        v-if="currentPage !== 'tsukuyomi'"
+        class="switch-button tsukuyomi-button"
+        @click="switchToTsukuyomi"
+      >
+        <img :src="tsukuyomiIconUrl" alt="切换至月读" />
+      </button>
+    </div>
   </header>
 </template>
 
@@ -175,20 +224,6 @@
   }
 
   .app-title-button:hover {
-    transform: translateY(-2px);
-  }
-
-  .nav-buttons {
-    display: flex;
-    gap: 10px;
-  }
-
-  .nav-button {
-    background: transparent;
-    transition: all 0.3s ease;
-  }
-
-  .nav-button:hover {
     transform: translateY(-2px);
   }
 
@@ -305,19 +340,6 @@
       font-size: 16px;
     }
 
-    .nav-buttons {
-      gap: 8px;
-    }
-
-    .nav-button {
-      padding: 6px 12px;
-      font-size: 13px;
-    }
-
-    .nav-button.text-only {
-      padding: 6px 12px;
-    }
-
     .username-header {
       font-size: 13px;
       max-width: 120px;
@@ -339,17 +361,79 @@
       font-size: 14px;
     }
 
-    .nav-button {
-      padding: 4px 8px;
-      font-size: 12px;
-    }
-
-    .nav-button.text-only {
-      padding: 4px 8px;
-    }
-
     .username-header {
       display: none;
+    }
+  }
+
+  /* 切换按钮容器 */
+  .switch-buttons-container {
+    position: absolute;
+    bottom: 10px;
+    left: 20%;
+    display: flex;
+    gap: 30px;
+    z-index: 1;
+  }
+
+  /* 切换按钮通用样式 */
+  .switch-button {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .switch-button:hover {
+    transform: scale(1.1);
+  }
+
+  .switch-button:hover img {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1))
+      drop-shadow(0 0 24px rgba(255, 255, 255, 0.6));
+  }
+
+  .switch-button img {
+    width: 108px;
+    height: 108px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.8))
+      drop-shadow(0 0 32px rgba(255, 255, 255, 0.4));
+  }
+
+  /* 响应式设计 - 切换按钮 */
+  @media (max-width: 768px) {
+    .switch-buttons-container {
+      bottom: 15px;
+      left: 15px;
+      gap: 20px;
+    }
+
+    .switch-button img {
+      width: 90px;
+      height: 90px;
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.8))
+        drop-shadow(0 0 28px rgba(255, 255, 255, 0.4));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .switch-buttons-container {
+      bottom: 10px;
+      left: 10px;
+      gap: 15px;
+    }
+
+    .switch-button img {
+      width: 72px;
+      height: 72px;
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
+        drop-shadow(0 0 24px rgba(255, 255, 255, 0.4));
     }
   }
 </style>

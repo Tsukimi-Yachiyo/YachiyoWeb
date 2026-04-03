@@ -122,6 +122,7 @@
     position: relative;
     overflow: hidden;
     background-color: #000000;
+    pointer-events: none;
   }
 
   .wave-container {
