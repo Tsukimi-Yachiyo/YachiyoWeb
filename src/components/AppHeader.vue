@@ -38,6 +38,11 @@
   const shiftIconY = ref(0)
   let animationFrame = null
   let time = 0
+  
+  const tooltipX = ref(0)
+  const tooltipY = ref(0)
+  const showTooltip = ref(false)
+  const tooltipText = ref('')
   // 优先使用全局单例资料，避免页面级 props 在路由切换时短暂抖动造成头像闪烁
   const resolvedUsername = computed(() => profileUsername.value || props.username || '用户')
   const resolvedUserAvatar = computed(() => profileUserAvatar.value || props.userAvatar || '')
@@ -96,14 +101,29 @@
     const amplitude = 5
     const frequency = 0.02
     const speed = 0.03
-
+    
     let y = 0
     y += amplitude * Math.sin(frequency * 0 + speed * time)
     y += amplitude * 0.5 * Math.sin(2 * frequency * 0 + 1.5 * speed * time)
     y += amplitude * 0.3 * Math.sin(3 * frequency * 0 + 2 * speed * time)
-
+    
     shiftIconY.value = y
     animationFrame = requestAnimationFrame(animateShiftIcon)
+  }
+
+  // 处理鼠标事件
+  const handleMouseMove = (event: MouseEvent) => {
+    tooltipX.value = event.clientX + 15
+    tooltipY.value = event.clientY + 15
+  }
+
+  const showTooltipWithText = (text: string) => {
+    tooltipText.value = text
+    showTooltip.value = true
+  }
+
+  const hideTooltip = () => {
+    showTooltip.value = false
   }
 
   onMounted(() => {
@@ -176,7 +196,11 @@
         v-if="currentPage !== 'chat'"
         class="switch-button shift-button"
         :style="{ transform: `translateY(${shiftIconY}px) rotate(45deg)` }"
+        title="切换至聊天"
         @click="switchToChat"
+        @mousemove="handleMouseMove"
+        @mouseenter="showTooltipWithText('切换至聊天')"
+        @mouseleave="hideTooltip"
       >
         <img :src="shiftIconUrl" alt="切换至聊天" />
       </button>
@@ -184,10 +208,22 @@
       <button
         v-if="currentPage !== 'tsukuyomi'"
         class="switch-button tsukuyomi-button"
+        title="切换至月读"
         @click="switchToTsukuyomi"
+        @mousemove="handleMouseMove"
+        @mouseenter="showTooltipWithText('切换至月读')"
+        @mouseleave="hideTooltip"
       >
         <img :src="tsukuyomiIconUrl" alt="切换至月读" />
       </button>
+    </div>
+
+    <div
+      v-if="showTooltip"
+      class="tooltip"
+      :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
+    >
+      {{ tooltipText }}
     </div>
   </header>
 </template>
@@ -270,7 +306,7 @@
   }
 
   .user-info-header .username-header.avatar-active {
-    transform: translateX(-40px) translateY(35px);
+    transform: translateX(-40px) translateY(40px);
   }
 
   .user-avatar-header img {
@@ -387,6 +423,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
   }
 
   .switch-button:hover {
@@ -404,6 +441,19 @@
     object-fit: contain;
     filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.8))
       drop-shadow(0 0 32px rgba(255, 255, 255, 0.4));
+  }
+
+  .tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.2s ease;
   }
 
   /* 响应式设计 - 切换按钮 */
