@@ -4,11 +4,14 @@
   import AppHeader from './components/AppHeader.vue'
   import { useAuth } from './composables/useAuth'
   import { useIconManager } from './composables/useIconManager'
+  import { useModelLoading } from './composables/useModelLoading'
 
   const route = useRoute()
   const { logout } = useAuth()
+  const { isLoading: isModelLoading } = useModelLoading()
 
   const showGlobalHeader = computed(() => {
+    if (isModelLoading.value) return false
     const path = route.path
     return (
       path.startsWith('/chat/home') || path.startsWith('/tsukuyomi') || path.startsWith('/manager')

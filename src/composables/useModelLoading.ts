@@ -1,12 +1,14 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
-// 全局模型加载状态
 const globalModelLoaded = ref(false)
+const globalIsLoading = ref(!globalModelLoaded.value)
+const globalLoadProgress = ref(globalModelLoaded.value ? 100 : 0)
+const globalLoadStatus = ref(globalModelLoaded.value ? '资源加载完成' : '正在与八千代建立连结...')
 
 export function useModelLoading() {
-  const isLoading = ref(!globalModelLoaded.value)
-  const loadProgress = ref(globalModelLoaded.value ? 100 : 0)
-  const loadStatus = ref(globalModelLoaded.value ? '资源加载完成' : '正在与八千代建立连结...')
+  const isLoading = globalIsLoading
+  const loadProgress = globalLoadProgress
+  const loadStatus = globalLoadStatus
   const totalTextureSize = ref(0)
 
   const printLog = message => {
