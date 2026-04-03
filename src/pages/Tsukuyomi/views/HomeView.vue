@@ -379,7 +379,6 @@
 
   .search-container {
     @apply flex items-center gap-3 w-full max-w-3xl mx-auto p-5 z-10;
-    backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 

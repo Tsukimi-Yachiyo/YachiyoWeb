@@ -121,7 +121,7 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-    background-color: #000000;
+    background-color: transparent;
     pointer-events: none;
   }
 
