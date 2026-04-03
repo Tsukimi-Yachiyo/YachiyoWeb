@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
     path: '/settings',
     name: 'Settings',
     // 懒加载设置页面组件
-    component: () => import('../pages/UserSettings/UserSettings.vue') as Promise<any>,
+    component: () => import('../pages/UserSettings.vue') as Promise<any>,
     // 路由守卫，需要登录才能访问
     meta: {
       requiresAuth: true,

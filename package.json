@@ -15,6 +15,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.13.6",
+    "element-plus": "^2.13.6",
     "marked": "^17.0.5",
     "tailwindcss": "^4.2.2",
     "vue": "^3.5.29",
