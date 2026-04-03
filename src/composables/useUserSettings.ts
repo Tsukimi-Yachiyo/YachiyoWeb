@@ -240,7 +240,7 @@ export function useUserSettings() {
   }
 
   const goBack = () => {
-    router.back()
+    router.push('/chat/home')
   }
 
   const generateChangePasswordCaptcha = () => {

@@ -215,6 +215,10 @@
               position: 'relative',
             }"
           >
+            <button class="pc-back-btn" @click="goBack">
+              <span>←</span>
+              <span>返回</span>
+            </button>
             <div class="Settings-section">
               <div class="Avatar-section">
                 <div class="File-input-wrapper Avatar-action-left">
@@ -315,6 +319,10 @@
         <el-tab-pane label="账号安全">
           <div class="security-container">
             <div class="change-password-card">
+              <button class="pc-back-btn" @click="goBack">
+                <span>←</span>
+                <span>返回</span>
+              </button>
               <div class="card-content">
                 <div class="card-header">
                   <h3 class="section-title">修改密码</h3>
@@ -392,6 +400,10 @@
         </el-tab-pane>
         <el-tab-pane label="关于我们">
           <div class="about-container">
+            <button class="pc-back-btn" @click="goBack">
+              <span>←</span>
+              <span>返回</span>
+            </button>
             <h3 class="about-title">关于我们</h3>
             <div class="about-content">
               <p>欢迎使用我们的服务，我们致力于为您提供优质的用户体验。</p>
@@ -775,6 +787,29 @@
     animation: spin 0.8s linear infinite;
   }
 
+  .pc-back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .pc-back-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-3px);
+  }
+
   .error-text {
     color: #f44336;
     font-size: 13px;
@@ -794,6 +829,13 @@
     width: 100%;
     overflow: hidden;
     transition: box-shadow 0.3s ease;
+  }
+
+  .change-password-card > .pc-back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
   }
 
   .change-password-card::before {
@@ -1466,6 +1508,13 @@
       transition: box-shadow 0.3s ease;
     }
 
+    .about-container > .pc-back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    }
+
     .about-container:hover {
       box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
     }
@@ -1499,6 +1548,11 @@
       margin-bottom: 20px;
       color: #2196f3;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .disclaimer-title {
+      text-align: center;
     }
 
     .about-content {
