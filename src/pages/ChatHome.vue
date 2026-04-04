@@ -2,7 +2,10 @@
   import { ref, computed } from 'vue'
   import { useChatHome } from '../composables/useChatHome'
   import { useIconManager } from '../composables/useIconManager'
+  import { useBackgroundMusic } from '../composables/useBackgroundMusic'
   import Live2DModel from '../components/Live2DModel/Live2DModel.vue'
+
+  const { isPlaying, toggle } = useBackgroundMusic()
 
   // 海洋动物像素画
   import img1 from '../assets/images/ChatHome-1.png'
@@ -330,6 +333,15 @@
         <!-- 欢迎界面 -->
         <div v-if="!currentConversationId && !isModelLoading" class="welcome-screen">
           <div class="welcome-content">
+            <!-- 音乐开关按钮 -->
+            <button
+              class="music-toggle-btn"
+              :class="{ playing: isPlaying }"
+              title="音乐开关"
+              @click="toggle"
+            >
+              <span class="music-icon">{{ isPlaying ? '🔊' : '🔇' }}</span>
+            </button>
             <!-- 对下面标签文字加粗 -->
             <h1>太阳西沉 夜幕降临</h1>
             <p>欢迎来到月读，{{ username }}！</p>
@@ -863,6 +875,38 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .music-toggle-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .music-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .music-toggle-btn.playing {
+    background: rgba(100, 181, 246, 0.4);
+    border-color: rgba(100, 181, 246, 0.6);
+  }
+
+  .music-icon {
+    font-size: 20px;
   }
 
   .welcome-content p {

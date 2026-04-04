@@ -5,6 +5,38 @@
   background: #3498db;
 }
 
+.music-toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 300;
+}
+
+.music-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.music-toggle-btn.playing {
+  background: rgba(100, 181, 246, 0.4);
+  border-color: rgba(100, 181, 246, 0.6);
+}
+
+.music-icon {
+  font-size: 20px;
+}
+
 /* 主内容区 */
 .main-content {
   @apply flex items-center justify-center overflow-hidden relative flex-1;
@@ -342,6 +374,14 @@
 }
 
 @media (max-width: 480px) {
+  /* 音乐按钮移动端调整 */
+  .music-toggle-btn {
+    top: 14%;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+  }
+
   .content-placeholder h2 {
     font-size: 18px;
   }

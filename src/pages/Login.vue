@@ -1,7 +1,10 @@
 <script setup lang="ts">
   import { useLogin } from '../composables/useLogin'
+  import { useBackgroundMusic } from '../composables/useBackgroundMusic'
   import { ref, onMounted, onUnmounted, computed } from 'vue'
   import { useIconManager } from '../composables/useIconManager'
+
+  const { isPlaying, toggle, start } = useBackgroundMusic()
   const {
     introVideo,
     cycleVideo,
@@ -73,6 +76,7 @@
   }
 
   onMounted(() => {
+    start()
     countdownTimer = setInterval(() => {
       if (countdown.value > 0) {
         countdown.value -= 0.5
@@ -125,6 +129,15 @@
           }}
         </h2>
         <div v-if="!isRegisterMode && !isForgotPasswordMode" class="login-mode-toggle">
+          <button
+            type="button"
+            class="toggle-btn music-toggle"
+            :class="{ playing: isPlaying }"
+            title="音乐开关"
+            @click="toggle"
+          >
+            <span class="music-icon">{{ isPlaying ? '🔊' : '🔇' }}</span>
+          </button>
           <button
             type="button"
             class="toggle-btn"
@@ -469,6 +482,30 @@
   .login-form.fade-in {
     opacity: 1; /* 淡入后变为不透明 */
     pointer-events: auto; /* 淡入后恢复交互 */
+  }
+
+  .music-toggle {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .music-toggle:hover {
+    background-color: #f5f5f5;
+  }
+
+  .music-toggle.playing {
+    background-color: rgba(100, 181, 246, 0.5);
+    border-color: rgba(100, 181, 246, 0.5);
+  }
+
+  .music-icon {
+    font-size: 18px;
   }
 
   .form-header {
