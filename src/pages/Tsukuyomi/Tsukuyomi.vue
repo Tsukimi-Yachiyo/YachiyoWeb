@@ -2,6 +2,9 @@
   import { ref, computed } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useIconManager } from '../../composables/useIconManager'
+  import { useBackgroundMusic } from '../../composables/useBackgroundMusic'
+
+  const { isPlaying, toggle } = useBackgroundMusic()
 
   // 初始化图标管理器
   const { checkIconCache } = useIconManager()
