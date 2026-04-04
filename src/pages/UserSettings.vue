@@ -498,13 +498,14 @@
 
   .settings-card {
     width: 100%;
-    /* max-width: 600px; */
+    max-height: calc(100vh - 40px);
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 30px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
   }
 
   .settings-header {
