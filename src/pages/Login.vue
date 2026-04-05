@@ -369,7 +369,7 @@
         <h3>验证身份</h3>
         <p>请输入图形验证码以获取邮箱验证码</p>
         <div class="captcha-modal-form">
-          <div class="captcha-container">           
+          <div class="captcha-container">
             <input
               v-model="captchaInput"
               type="text"
@@ -404,7 +404,6 @@
   </div>
 </template>
 <style scoped>
-
   .splash-screen {
     position: fixed;
     top: 0;
