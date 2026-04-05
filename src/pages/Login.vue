@@ -370,7 +370,13 @@
         <p>请输入图形验证码以获取邮箱验证码</p>
         <div class="captcha-modal-form">
           <div class="captcha-container">           
-            <input v-model="captchaInput" type="text" placeholder="请输入图形验证码" style="text-align: center;" required />
+            <input
+              v-model="captchaInput"
+              type="text"
+              placeholder="请输入图形验证码"
+              style="text-align: center"
+              required
+            />
             <img :src="captchaUrl" alt="验证码" class="captcha-image" @click="refreshCaptcha" />
           </div>
           <div class="captcha-modal-actions">
