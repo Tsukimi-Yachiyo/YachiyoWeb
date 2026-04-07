@@ -52,7 +52,35 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/settings',
-    name: 'Settings',
+    redirect: '/settings/profile',
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/settings/profile',
+    name: 'SettingsProfile',
+    // 懒加载设置页面组件
+    component: () => import('../pages/UserSettings.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/settings/password',
+    name: 'SettingsPassword',
+    // 懒加载设置页面组件
+    component: () => import('../pages/UserSettings.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/settings/about',
+    name: 'SettingsAbout',
     // 懒加载设置页面组件
     component: () => import('../pages/UserSettings.vue') as Promise<any>,
     // 路由守卫，需要登录才能访问

@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useUserSettings } from '../composables/useUserSettings'
-  import { ref } from 'vue'
+  import { computed, ref } from 'vue'
+  import { useRoute, useRouter } from 'vue-router'
   import Message from '../components/Message.vue'
   import uploadIcon from '@/assets/icons/upload-avatar.png'
   import selectImageIcon from '@/assets/icons/select-image.png'
@@ -20,7 +21,33 @@
   } from 'element-plus'
   import type { TabsInstance } from 'element-plus'
 
+  const route = useRoute()
+  const router = useRouter()
   const tabPosition = ref<TabsInstance['tabPosition']>('left')
+
+  const mobileSettingsTabs = [
+    { key: 'profile', label: '个人主页', path: '/settings/profile' },
+    { key: 'password', label: '修改密码', path: '/settings/password' },
+    { key: 'about', label: '关于我们', path: '/settings/about' },
+  ] as const
+
+  const currentMobileTab = computed(() => {
+    if (route.path === '/settings/password') return 'password'
+    if (route.path === '/settings/about') return 'about'
+    return 'profile'
+  })
+
+  const currentMobileTabLabel = computed(() => {
+    const tab = mobileSettingsTabs.find(item => item.key === currentMobileTab.value)
+    return tab?.label || '个人主页'
+  })
+
+  const switchMobileTab = (path: string) => {
+    if (route.path !== path) {
+      router.push(path)
+    }
+  }
+
   const {
     userName,
     userQQ,
@@ -58,6 +85,66 @@
     handleChangePassword,
     refreshChangePasswordCaptcha,
   } = useUserSettings()
+
+  const confirmChangePasswordNewPassword = ref('')
+
+  const passwordStrengthScore = computed(() => {
+    const password = changePasswordNewPassword.value || ''
+    if (!password) return 0
+
+    let score = 0
+    if (password.length >= 6) score += 1
+    if (password.length >= 10) score += 1
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1
+    if (/\d/.test(password)) score += 1
+    if (/[^A-Za-z0-9]/.test(password)) score += 1
+
+    return Math.min(score, 4)
+  })
+
+  const passwordStrengthText = computed(() => {
+    if (!changePasswordNewPassword.value) return '请输入新密码'
+    if (passwordStrengthScore.value <= 1) return '强度：弱'
+    if (passwordStrengthScore.value <= 3) return '强度：中'
+    return '强度：强'
+  })
+
+  const passwordStrengthClass = computed(() => {
+    if (!changePasswordNewPassword.value) return ''
+    if (passwordStrengthScore.value <= 1) return 'weak'
+    if (passwordStrengthScore.value <= 3) return 'medium'
+    return 'strong'
+  })
+
+  const passwordMismatch = computed(() => {
+    if (!confirmChangePasswordNewPassword.value) return false
+    return confirmChangePasswordNewPassword.value !== changePasswordNewPassword.value
+  })
+
+  const handleMobileChangePassword = async () => {
+    changePasswordError.value = ''
+
+    if (!confirmChangePasswordNewPassword.value) {
+      changePasswordError.value = '请再次输入新密码'
+      return
+    }
+
+    if (passwordMismatch.value) {
+      changePasswordError.value = '两次输入的新密码不一致'
+      return
+    }
+
+    if (passwordStrengthScore.value <= 1) {
+      changePasswordError.value = '密码强度过弱，请增加大小写字母、数字或符号组合'
+      return
+    }
+
+    await handleChangePassword()
+
+    if (!changePasswordError.value) {
+      confirmChangePasswordNewPassword.value = ''
+    }
+  }
 </script>
 
 <template>
@@ -69,7 +156,7 @@
           <span>←</span>
           <span>返回</span>
         </button>
-        <h1 class="settings-title">个人设置</h1>
+        <h1 class="settings-title">{{ currentMobileTabLabel }}</h1>
         <div class="placeholder"></div>
       </div>
 
@@ -86,103 +173,267 @@
         <span>加载中...</span>
       </div>
 
-      <div v-else class="settings-content">
-        <!-- 头像设置 -->
-        <div class="settings-section">
-          <h2 class="section-title">头像设置</h2>
-          <div class="avatar-section">
-            <div class="avatar-preview-container">
-              <div class="avatar-preview">
-                <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
-                <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
-              </div>
-            </div>
-            <div class="avatar-actions">
-              <div class="file-input-wrapper">
-                <input
-                  id="avatar-input"
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif"
-                  class="file-input"
-                  @change="handleFileSelect"
-                />
-                <label for="avatar-input" class="file-input-label"> 选择图片 </label>
-              </div>
-              <button
-                class="upload-btn"
-                :disabled="isUploading || !selectedFile"
-                @click="uploadAvatar"
-              >
-                <span v-if="isUploading" class="btn-spinner"></span>
-                <img v-else :src="uploadIcon" alt="上传头像" style="width: 24px; height: 24px" />
-              </button>
-            </div>
-          </div>
-          <p v-if="avatarError" class="error-text">{{ avatarError }}</p>
-          <p class="help-text">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+      <div v-else class="settings-content mobile-settings-shell">
+        <div class="mobile-settings-nav">
+          <button
+            v-for="tab in mobileSettingsTabs"
+            :key="tab.key"
+            type="button"
+            class="mobile-tab-btn"
+            :class="{ active: currentMobileTab === tab.key }"
+            @click="switchMobileTab(tab.path)"
+          >
+            {{ tab.label }}
+          </button>
         </div>
 
-        <div class="section-divider"></div>
+        <div class="mobile-settings-panel">
+          <template v-if="currentMobileTab === 'profile'">
+            <div class="mobile-page-card">
+              <div class="settings-section">
+                <h2 class="section-title">头像设置</h2>
+                <div class="avatar-section">
+                  <div class="avatar-preview-container">
+                    <div class="avatar-preview">
+                      <img v-if="avatarPreview" :src="avatarPreview" alt="头像预览" />
+                      <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+                    </div>
+                  </div>
+                  <div class="avatar-actions">
+                    <div class="file-input-wrapper">
+                      <input
+                        id="avatar-input"
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif"
+                        class="file-input"
+                        @change="handleFileSelect"
+                      />
+                      <label for="avatar-input" class="file-input-label">
+                        <img
+                          :src="selectImageIcon"
+                          alt="选择图片"
+                          class="mobile-avatar-action-icon"
+                        />
+                      </label>
+                    </div>
+                    <button
+                      class="upload-btn"
+                      :disabled="isUploading || !selectedFile"
+                      @click="uploadAvatar"
+                    >
+                      <span v-if="isUploading" class="btn-spinner"></span>
+                      <img
+                        v-else
+                        :src="uploadIcon"
+                        alt="上传头像"
+                        class="mobile-avatar-action-icon"
+                      />
+                    </button>
+                  </div>
+                </div>
+                <p v-if="avatarError" class="error-text">{{ avatarError }}</p>
+                <p class="help-text avatar-help-text">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+              </div>
 
-        <!-- 用户详情 -->
-        <div class="settings-section">
-          <h2 class="section-title">基本信息</h2>
+              <div class="section-divider"></div>
 
-          <div class="form-group">
-            <label class="form-label">昵称</label>
-            <input
-              v-model="userName"
-              type="text"
-              placeholder="输入昵称"
-              class="form-input"
-              maxlength="20"
-            />
-          </div>
+              <div class="settings-section">
+                <h2 class="section-title center-title">基本信息</h2>
 
-          <div class="form-group">
-            <label class="form-label">个人简介</label>
-            <textarea
-              v-model="userIntroduction"
-              placeholder="介绍一下自己..."
-              class="form-textarea"
-              rows="4"
-            ></textarea>
-          </div>
+                <div class="form-group">
+                  <label class="form-label">昵称</label>
+                  <input
+                    v-model="userName"
+                    type="text"
+                    placeholder="昵称最多允许10个字符QAQ"
+                    class="form-input"
+                    maxlength="10"
+                  />
+                </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">性别</label>
-              <select v-model="userGender" class="form-select">
-                <option value="男">男</option>
-                <option value="女">女</option>
-              </select>
+                <div class="form-group">
+                  <label class="form-label">个人简介</label>
+                  <textarea
+                    v-model="userIntroduction"
+                    placeholder="简单介绍下自己吧♡( •ॢ◡-ॢ)✧"
+                    class="form-textarea"
+                    rows="4"
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">性别</label>
+                    <select v-model="userGender" class="form-select">
+                      <option value="男">男</option>
+                      <option value="女">女</option>
+                      <option value="保密">保密</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">生日</label>
+                    <input v-model="userBirthday" type="date" class="form-input" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">城市</label>
+                    <input
+                      v-model="userCity"
+                      type="text"
+                      placeholder="所在城市"
+                      class="form-input"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">QQ</label>
+                    <input v-model="userQQ" type="text" placeholder="QQ号" class="form-input" />
+                  </div>
+                </div>
+
+                <div class="save-section">
+                  <p v-if="detailError" class="error-text">{{ detailError }}</p>
+                  <button class="save-btn" :disabled="isSavingDetail" @click="saveUserDetail">
+                    <span v-if="isSavingDetail" class="btn-spinner"></span>
+                    <span v-else>保存信息</span>
+                  </button>
+                </div>
+              </div>
             </div>
+          </template>
 
-            <div class="form-group">
-              <label class="form-label">生日</label>
-              <input v-model="userBirthday" type="date" class="form-input" />
+          <template v-else-if="currentMobileTab === 'password'">
+            <div class="mobile-page-card mobile-password-card">
+              <div class="settings-section">
+                <h2 class="section-title">修改密码</h2>
+                <p class="help-text">通过邮箱验证码修改您的登录密码</p>
+
+                <div class="form-group">
+                  <label class="form-label">邮箱</label>
+                  <input
+                    v-model="changePasswordEmail"
+                    type="email"
+                    placeholder="请输入您的邮箱地址"
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">验证码</label>
+                  <div class="mobile-code-row">
+                    <input
+                      v-model="changePasswordCode"
+                      type="text"
+                      placeholder="请输入邮箱验证码"
+                      class="form-input"
+                    />
+                    <button
+                      type="button"
+                      class="code-btn"
+                      :disabled="isSendingChangePasswordCode || changePasswordCodeCountdown > 0"
+                      @click="handleSendChangePasswordCode"
+                    >
+                      <span v-if="isSendingChangePasswordCode">发送中...</span>
+                      <span v-else-if="changePasswordCodeCountdown > 0">
+                        {{ Math.floor(changePasswordCodeCountdown / 60) }}分
+                        {{ changePasswordCodeCountdown % 60 }}秒
+                      </span>
+                      <span v-else>获取验证码</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">新密码</label>
+                  <input
+                    v-model="changePasswordNewPassword"
+                    type="password"
+                    placeholder="请输入新密码（至少6位）"
+                    class="form-input"
+                  />
+                  <p class="password-strength" :class="passwordStrengthClass">
+                    {{ passwordStrengthText }}
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">确认新密码</label>
+                  <input
+                    v-model="confirmChangePasswordNewPassword"
+                    type="password"
+                    placeholder="请再次输入新密码"
+                    class="form-input"
+                  />
+                  <p v-if="passwordMismatch" class="error-text">两次输入的新密码不一致</p>
+                </div>
+
+                <div class="save-section">
+                  <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
+                  <p v-if="changePasswordSuccess" class="success-text">
+                    {{ changePasswordSuccess }}
+                  </p>
+                  <button
+                    class="save-btn"
+                    :disabled="isChangingPassword"
+                    @click="handleMobileChangePassword"
+                  >
+                    <span v-if="isChangingPassword" class="btn-spinner"></span>
+                    <span v-else>确认修改</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          </template>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">城市</label>
-              <input v-model="userCity" type="text" placeholder="所在城市" class="form-input" />
+          <template v-else>
+            <div class="mobile-page-card">
+              <div class="settings-section">
+                <h2 class="section-title">关于我们</h2>
+                <div class="mobile-about-card">
+                  <p>欢迎使用我们的服务，我们致力于为您提供优质的用户体验。</p>
+                  <p>我们的团队不断努力改进产品，为您带来更好的服务。</p>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h2 class="section-title">免责声明</h2>
+                <div class="mobile-about-card disclaimer-card-mobile">
+                  <div class="language-section-mobile">
+                    <h4>当サイトについて</h4>
+                    <p>
+                      当サイトは、アニメーション作品『超かぐや姫！』（以下「本作品」といいます）の二次創作ファンサイトであり、本作品の公式サイト、製作者、著作権者とは一切関係ございません。
+                    </p>
+                    <p>
+                      当サイトは非営利目的で運営されており、収益を目的とした広告、アフィリエイト、有料コンテンツなどは一切行っておりません。
+                    </p>
+                    <p>
+                      当サイトで使用している画像・イラスト・名称などの著作権は、それぞれの権利者に帰属します。権利者の皆様には深く敬意を表します。
+                    </p>
+                    <p>
+                      本作品の権利者からご連絡をいただいた場合、当サイトの内容について速やかに対応（修正・削除など）いたします。
+                    </p>
+                    <p>© 超かぐや姫！製作委員会</p>
+                  </div>
+
+                  <div class="language-section-mobile">
+                    <h4>关于本网站</h4>
+                    <p>
+                      本网站为动画作品《超时空辉夜姬》（以下简称“本作品”）的二次创作粉丝网站，与本作品的官方网站、制作方、版权方无任何关联。
+                    </p>
+                    <p>本网站为非营利性质，不包含任何形式的广告、返利链接、付费内容或商业推广。</p>
+                    <p>
+                      本网站所使用的图片、插图、名称等版权均归其各自权利人所有。我们对所有权利人表示诚挚的敬意。
+                    </p>
+                    <p>如本作品的版权方提出要求，我们将立即对网站内容进行修正或删除。</p>
+                    <p>© 超时空辉夜姬 制作委员会</p>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div class="form-group">
-              <label class="form-label">QQ</label>
-              <input v-model="userQQ" type="text" placeholder="QQ号" class="form-input" />
-            </div>
-          </div>
-
-          <div class="save-section">
-            <p v-if="detailError" class="error-text">{{ detailError }}</p>
-            <button class="save-btn" :disabled="isSavingDetail" @click="saveUserDetail">
-              <span v-if="isSavingDetail" class="btn-spinner"></span>
-              <span v-else>保存信息</span>
-            </button>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -446,37 +697,37 @@
         </el-tab-pane>
       </el-tabs>
     </div>
+  </div>
 
-    <div v-if="showChangePasswordCaptchaModal" class="captcha-modal">
-      <div class="captcha-modal-content">
-        <h3>验证身份</h3>
-        <p>请输入图形验证码以获取邮箱验证码</p>
-        <div class="captcha-modal-form">
-          <div class="captcha-container">
-            <el-input
-              v-model="changePasswordCaptchaInput"
-              placeholder="请输入图形验证码"
-              style="width: 200px"
-            />
-            <img
-              :src="changePasswordCaptchaUrl"
-              alt="验证码"
-              class="captcha-image"
-              @click="refreshChangePasswordCaptcha"
-            />
-          </div>
-          <div class="captcha-modal-actions">
-            <el-button @click="handleCloseChangePasswordCaptchaModal">取消</el-button>
-            <el-button
-              type="primary"
-              :disabled="isSendingChangePasswordCode"
-              @click="handleConfirmChangePasswordCaptcha"
-            >
-              {{ isSendingChangePasswordCode ? '发送中...' : '确认' }}
-            </el-button>
-          </div>
-          <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
+  <div v-if="showChangePasswordCaptchaModal" class="captcha-modal">
+    <div class="captcha-modal-content">
+      <h3>验证身份</h3>
+      <p>请输入图形验证码以获取邮箱验证码</p>
+      <div class="captcha-modal-form">
+        <div class="captcha-container">
+          <el-input
+            v-model="changePasswordCaptchaInput"
+            placeholder="请输入图形验证码"
+            style="width: 200px"
+          />
+          <img
+            :src="changePasswordCaptchaUrl"
+            alt="验证码"
+            class="captcha-image"
+            @click="refreshChangePasswordCaptcha"
+          />
         </div>
+        <div class="captcha-modal-actions">
+          <el-button @click="handleCloseChangePasswordCaptchaModal">取消</el-button>
+          <el-button
+            type="primary"
+            :disabled="isSendingChangePasswordCode"
+            @click="handleConfirmChangePasswordCaptcha"
+          >
+            {{ isSendingChangePasswordCode ? '发送中...' : '确认' }}
+          </el-button>
+        </div>
+        <p v-if="changePasswordError" class="error-text">{{ changePasswordError }}</p>
       </div>
     </div>
   </div>
@@ -485,7 +736,7 @@
 <style scoped>
   .settings-container-mobileOnly {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+    background: linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -499,12 +750,12 @@
   .settings-card {
     width: 100%;
     max-height: calc(100vh - 40px);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.86);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
     overflow-y: auto;
   }
 
@@ -520,22 +771,22 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.35);
     border-radius: 10px;
-    color: #fff;
-    font-size: 20px;
+    color: #1f2937;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
   }
 
   .back-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.95);
     transform: translateX(-3px);
   }
 
   .settings-title {
-    color: #fff;
+    color: #0f172a;
     font-size: 24px;
     font-weight: 500;
     margin: 0;
@@ -551,14 +802,14 @@
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(30, 41, 59, 0.7);
     gap: 15px;
   }
 
   .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(15, 23, 42, 0.1);
     border-top-color: #2196f3;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -570,6 +821,86 @@
     gap: 30px;
   }
 
+  .mobile-settings-shell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .mobile-settings-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 110px;
+    flex-shrink: 0;
+  }
+
+  .mobile-tab-btn {
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #334155;
+    background: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tab-btn.active {
+    color: #0b4f99;
+    background: rgba(219, 234, 254, 0.9);
+    border-color: rgba(59, 130, 246, 0.55);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.18);
+  }
+
+  .mobile-settings-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .mobile-page-card {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 14px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+    width: 100%;
+  }
+
+  .mobile-password-card {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .mobile-password-card .settings-section {
+    align-items: center;
+    width: 100%;
+  }
+
+  .mobile-password-card .form-group,
+  .mobile-password-card .save-section {
+    width: 100%;
+  }
+
+  .mobile-password-card .section-title,
+  .mobile-password-card .help-text {
+    text-align: center;
+  }
+
+  .center-title {
+    text-align: center;
+  }
+
+  .avatar-help-text {
+    font-size: 12px;
+    color: rgba(71, 85, 105, 0.9);
+  }
+
   .settings-section {
     display: flex;
     flex-direction: column;
@@ -577,26 +908,31 @@
   }
 
   .section-title {
-    color: #fff;
+    color: #0f172a;
     font-size: 18px;
     font-weight: 500;
-    margin: 0 0 10px 0;
+    margin: 12px 0 0 0;
   }
 
   .section-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(148, 163, 184, 0.3);
   }
 
   /* 头像设置 */
   .avatar-section {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 25px;
     flex-wrap: wrap;
+    width: 100%;
   }
 
   .avatar-preview-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
     flex-shrink: 0;
   }
 
@@ -624,10 +960,18 @@
 
   .avatar-actions {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 12px;
+    flex: 1 1 100%;
+    min-width: 0;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  .avatar-actions .file-input-wrapper,
+  .avatar-actions .upload-btn {
     flex: 1;
-    min-width: 150px;
+    max-width: 140px;
   }
 
   .file-input-wrapper {
@@ -643,47 +987,51 @@
   }
 
   .file-input-label {
-    display: block;
-    padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: transparent;
+    border: none;
     border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 72px;
   }
 
   .file-input-label:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(33, 150, 243, 0.5);
+    transform: scale(1.05);
   }
 
   .upload-btn {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    color: white;
+    padding: 8px;
+    background: transparent;
     border: none;
     border-radius: 10px;
-    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 44px;
+    min-height: 72px;
+    min-width: 72px;
   }
 
   .upload-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
   }
 
   .upload-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  .mobile-avatar-action-icon {
+    width: 88px;
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
 
   /* 表单样式 */
@@ -701,7 +1049,7 @@
   }
 
   .form-label {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(51, 65, 85, 0.85);
     font-size: 14px;
   }
 
@@ -709,10 +1057,10 @@
   .form-textarea,
   .form-select {
     padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.35);
     border-radius: 12px;
-    color: #fff;
+    color: #0f172a;
     font-size: 14px;
     outline: none;
     transition: all 0.3s ease;
@@ -720,15 +1068,15 @@
 
   .form-input::placeholder,
   .form-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(100, 116, 139, 0.85);
   }
 
   .form-input:focus,
   .form-textarea:focus,
   .form-select:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: #ffffff;
     border-color: rgba(33, 150, 243, 0.5);
-    box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.12);
   }
 
   .form-textarea {
@@ -741,8 +1089,8 @@
   }
 
   .form-select option {
-    background: #1a1a2e;
-    color: #fff;
+    background: #ffffff;
+    color: #0f172a;
   }
 
   .save-section {
@@ -777,6 +1125,103 @@
   .save-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  .mobile-code-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .code-btn {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .code-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .mobile-about-card {
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 12px;
+    padding: 14px;
+    background: #f8fafc;
+    color: #1f2937;
+    line-height: 1.7;
+  }
+
+  .mobile-about-card p {
+    margin: 0 0 10px 0;
+  }
+
+  .mobile-about-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .success-text {
+    color: #81c784;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .password-strength {
+    margin: 6px 0 0 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .password-strength.weak {
+    color: #ef9a9a;
+  }
+
+  .password-strength.medium {
+    color: #ffd54f;
+  }
+
+  .password-strength.strong {
+    color: #81c784;
+  }
+
+  .disclaimer-card-mobile {
+    gap: 16px;
+  }
+
+  .language-section-mobile {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+
+  .language-section-mobile:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .language-section-mobile h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #0f4c81;
+  }
+
+  .language-section-mobile p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #334155;
+  }
+
+  .language-section-mobile p:last-child {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #1e293b;
   }
 
   .btn-spinner {
@@ -1226,15 +1671,61 @@
 
     .avatar-section {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .avatar-actions {
       width: 100%;
+      justify-content: center;
     }
 
     .form-row {
       flex-direction: column;
+    }
+
+    .mobile-settings-shell {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mobile-settings-nav {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      position: relative;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .mobile-settings-nav::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0.5px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .mobile-tab-btn {
+      min-width: 92px;
+      white-space: nowrap;
+    }
+
+    .mobile-settings-panel {
+      width: 100%;
+    }
+
+    .mobile-page-card {
+      padding: 14px;
+    }
+
+    .mobile-password-card {
+      width: 100%;
+    }
+
+    .language-section-mobile h4 {
+      font-size: 15px;
     }
   }
   @media screen and (min-width: 768px) {
