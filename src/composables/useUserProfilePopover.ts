@@ -30,7 +30,7 @@ export function useUserProfilePopover(props, emit) {
 
   const goToSettings = () => {
     isVisible.value = false
-    router.push('/settings')
+    router.push('/settings/profile')
   }
 
   const goToManager = () => {
