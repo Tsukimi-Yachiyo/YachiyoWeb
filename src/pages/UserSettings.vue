@@ -736,7 +736,7 @@
 <style scoped>
   .settings-container-mobileOnly {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a237e 0%, #0d1642 100%);
+    background: linear-gradient(180deg, #f7f9fc 0%, #edf2f7 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -750,12 +750,12 @@
   .settings-card {
     width: 100%;
     max-height: calc(100vh - 40px);
-    background: #102049;
-    backdrop-filter: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
     overflow-y: auto;
   }
 
@@ -771,22 +771,22 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(148, 163, 184, 0.35);
     border-radius: 10px;
-    color: #fff;
+    color: #1f2937;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
   }
 
   .back-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.95);
     transform: translateX(-3px);
   }
 
   .settings-title {
-    color: #fff;
+    color: #0f172a;
     font-size: 24px;
     font-weight: 500;
     margin: 0;
@@ -802,14 +802,14 @@
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(30, 41, 59, 0.7);
     gap: 15px;
   }
 
   .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(15, 23, 42, 0.1);
     border-top-color: #2196f3;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -839,19 +839,19 @@
   .mobile-tab-btn {
     padding: 10px 8px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #334155;
+    background: rgba(255, 255, 255, 0.78);
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s ease;
   }
 
   .mobile-tab-btn.active {
-    color: #fff;
-    background: rgba(33, 150, 243, 0.45);
-    border-color: rgba(33, 150, 243, 0.9);
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.35);
+    color: #0b4f99;
+    background: rgba(219, 234, 254, 0.9);
+    border-color: rgba(59, 130, 246, 0.55);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.18);
   }
 
   .mobile-settings-panel {
@@ -863,11 +863,11 @@
   }
 
   .mobile-page-card {
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 14px;
     padding: 16px;
-    background: #132756;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
     width: 100%;
   }
 
@@ -898,7 +898,7 @@
 
   .avatar-help-text {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(71, 85, 105, 0.9);
   }
 
   .settings-section {
@@ -908,7 +908,7 @@
   }
 
   .section-title {
-    color: #fff;
+    color: #0f172a;
     font-size: 18px;
     font-weight: 500;
     margin: 12px 0 0 0;
@@ -916,7 +916,7 @@
 
   .section-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(148, 163, 184, 0.3);
   }
 
   /* 头像设置 */
@@ -1049,7 +1049,7 @@
   }
 
   .form-label {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(51, 65, 85, 0.85);
     font-size: 14px;
   }
 
@@ -1057,10 +1057,10 @@
   .form-textarea,
   .form-select {
     padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.35);
     border-radius: 12px;
-    color: #fff;
+    color: #0f172a;
     font-size: 14px;
     outline: none;
     transition: all 0.3s ease;
@@ -1068,15 +1068,15 @@
 
   .form-input::placeholder,
   .form-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(100, 116, 139, 0.85);
   }
 
   .form-input:focus,
   .form-textarea:focus,
   .form-select:focus {
-    background: rgba(255, 255, 255, 0.15);
+    background: #ffffff;
     border-color: rgba(33, 150, 243, 0.5);
-    box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.12);
   }
 
   .form-textarea {
@@ -1089,8 +1089,8 @@
   }
 
   .form-select option {
-    background: #1a1a2e;
-    color: #fff;
+    background: #ffffff;
+    color: #0f172a;
   }
 
   .save-section {
@@ -1149,11 +1149,11 @@
   }
 
   .mobile-about-card {
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.28);
     border-radius: 12px;
     padding: 14px;
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.9);
+    background: #f8fafc;
+    color: #1f2937;
     line-height: 1.7;
   }
 
@@ -1194,7 +1194,7 @@
   }
 
   .language-section-mobile {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.28);
     padding-bottom: 14px;
     margin-bottom: 14px;
   }
@@ -1208,18 +1208,20 @@
   .language-section-mobile h4 {
     margin: 0 0 8px 0;
     font-size: 16px;
-    color: #7dc2ff;
+    color: #0f4c81;
   }
 
   .language-section-mobile p {
     margin: 0 0 8px 0;
     font-size: 13px;
     line-height: 1.75;
+    color: #334155;
   }
 
   .language-section-mobile p:last-child {
     margin-bottom: 0;
     font-weight: 600;
+    color: #1e293b;
   }
 
   .btn-spinner {
