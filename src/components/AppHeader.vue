@@ -233,7 +233,7 @@
 
   /* 标题栏 */
   .title-bar {
-    @apply h-32 bg-black  z-100;
+    @apply h-32 z-100;
     position: relative;
   }
 

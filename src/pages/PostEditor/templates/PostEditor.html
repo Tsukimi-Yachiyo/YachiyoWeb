@@ -1,90 +1,122 @@
+<link rel="stylesheet" href="/src/assets/github-markdown-dark.css">
+
 <div class="post-editor">
-  <header class="title-bar">
-    <div class="title-bar-content">
-      <div class="title-section">
-        <div class="nav-buttons">
-          <button 
-            class="nav-button"
-            @click="handleExit"
-            title="直接退出（删除所有内容）"
-          >
-            <img v-if="exitIconUrl" :src="exitIconUrl" alt="退出" style="width: 16px; height: 16px;" />
-            <span v-else>退出</span>
-          </button>
-          <button 
-            class="nav-button"
-            @click="handleSaveLocally"
-            title="缓存到本地"
-          >
-            <img v-if="saveIconUrl" :src="saveIconUrl" alt="保存" style="width: 16px; height: 16px;" />
-            <span v-else>保存</span>
-          </button>
-        </div>
-      </div>
-      <div class="user-info-header">
-        <span class="username-header">{{ username }}</span>
-        <div class="user-avatar-header">
-          <img v-if="userAvatar" :src="userAvatar" alt="用户头像" />
-          <span v-else>{{ username.charAt(0).toUpperCase() }}</span>
-        </div>
-      </div>
-    </div>
-  </header>
-  
   <div class="editor-content">
     <div class="editor-form">
-      <div class="form-row">
-        <div class="form-left">
-          <div class="form-group">
-            <label for="title">标题</label>
-            <input type="text" id="title" v-model="title" placeholder="请输入标题" />
+      <div class="form-left">
+        <button class="exit-btn" @click="handleExit" title="退出编辑器">
+          <img v-if="exitIconUrl" :src="exitIconUrl" alt="退出" style="width: 16px; height: 16px;" />
+          <span>退出编辑</span>
+        </button>
+
+        <div class="left-section">
+          <div class="title-section">
+            <label class="section-label">标题</label>
+            <input 
+              type="text" 
+              class="title-input" 
+              v-model="title" 
+              placeholder="请输入标题..." 
+              maxlength="100"
+            />
+            <span class="title-counter">{{ title.length }}/100</span>
           </div>
-          
-          <div class="form-group">
-            <label for="postType">帖子类型</label>
-            <select id="postType" v-model="postType">
+
+          <div class="setting-item">
+            <label class="section-label">帖子类型</label>
+            <select id="postType" v-model="postType" class="setting-select">
+              <option value="">请选择类型</option>
               <option value="article">文章</option>
               <option value="news">新闻</option>
               <option value="story">故事</option>
               <option value="other">其他</option>
             </select>
           </div>
-        </div>
-        <div class="form-right">
-          <div class="form-group">
-            <label>封面图片</label>
-            <div class="cover-image-uploader" @click="triggerCoverImageUpload" style="cursor: pointer;">
-              <img v-if="coverImagePreview" :src="coverImagePreview" alt="封面图片" style="pointer-events: none;" />
+
+          <div class="setting-item">
+            <label class="section-label">封面图片</label>
+            <div class="cover-image-uploader" @click="triggerCoverImageUpload">
+              <img v-if="coverImagePreview" :src="coverImagePreview" alt="封面图片" />
               <div v-else class="add-image-placeholder">
-                <span>+ 添加图片</span>
+                <span class="add-icon">+</span>
+                <span class="add-text">添加封面</span>
               </div>
-              <input type="file" id="coverImage" ref="coverImageInput" @change="handleCoverImageChange" style="display: none;" />
+              <input 
+                type="file" 
+                id="coverImage" 
+                ref="coverImageInput" 
+                @change="handleCoverImageChange"
+                style="display: none;" 
+                accept="image/*"
+              />
             </div>
+            <button 
+              v-if="coverImagePreview" 
+              class="remove-cover-btn" 
+              @click.stop="coverImagePreview = null; coverImage = null"
+            >
+              移除封面
+            </button>
           </div>
         </div>
       </div>
-      
-      <div class="form-group">
-        <label for="content">内容</label>
-        <textarea 
-          id="content" 
-          v-model="content" 
-          placeholder="支持 Markdown 和 HTML 格式，可拖拽图片到此处"
-          @dragover="handleDragOver"
-          @drop="handleDrop"
-          @input="autoResizeTextarea"
-        ></textarea>
+
+      <div class="form-right">
+        <div class="content-section">
+          <div class="content-toolbar">
+            <div class="toolbar-left">
+              <span class="content-label">正文</span>
+              <span class="word-count">{{ content.length }} 字</span>
+            </div>
+            <div class="toolbar-right">
+              <button 
+                class="mode-toggle" 
+                :class="{ active: !isPreviewMode }" 
+                @click="isPreviewMode = false"
+                title="编辑模式"
+              >
+                <img v-if="editIconUrl" :src="editIconUrl" alt="编辑" style="width: 16px; height: 16px;" />
+                <span>编辑</span>
+              </button>
+              <button 
+                class="mode-toggle" 
+                :class="{ active: isPreviewMode }" 
+                @click="isPreviewMode = true"
+                title="预览模式"
+              >
+                <img v-if="previewIconUrl" :src="previewIconUrl" alt="预览" style="width: 16px; height: 16px;" />
+                <span>预览</span>
+              </button>
+            </div>
+          </div>
+          <div class="content-area-wrapper">
+            <textarea 
+              v-show="!isPreviewMode" 
+              id="content" 
+              v-model="content" 
+              placeholder="支持 Markdown 格式，可拖拽图片到此处上传..." 
+              @dragover="handleDragOver" 
+              @drop="handleDrop" 
+              @input="autoResizeTextarea"
+            ></textarea>
+            <div 
+              v-show="isPreviewMode" 
+              class="content-preview markdown-body" 
+              v-html="renderedContent"
+            ></div>
+          </div>
+          <div class="content-footer">
+            <button class="action-btn save-btn" @click="handleSaveLocally" title="保存草稿到本地">
+              <img v-if="saveIconUrl" :src="saveIconUrl" alt="保存" style="width: 16px; height: 16px;" />
+              <span>保存草稿</span>
+            </button>
+            <button class="action-btn publish-btn" @click="handleSaveAndExit" title="发布帖子">
+              <img v-if="uploadIconUrl" :src="uploadIconUrl" alt="发布" style="width: 18px; height: 18px;" />
+              <span>发布帖子</span>
+            </button>
+          </div>
+        </div>
       </div>
-      
-     
     </div>
   </div>
-</div>
-
- <!-- 上传按钮 -->
-<div class="upload-button-container">
-  <button class="upload-button" @click="handleSaveAndExit" title="上传">
-    <img v-if="uploadIconUrl" :src="uploadIconUrl" alt="上传" style="width: 24px; height: 24px;" />
-    <span v-else>上传</span>
-  </button>
 </div>

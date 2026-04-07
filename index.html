@@ -1,22 +1,14 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="./favicon.ico">
+  <link rel="icon" href="/favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YachiyoChat</title>
+  <link href="/src/assets/global.css" rel="stylesheet">
+
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-      min-height: 100vh;
-    }
-    #app {
-      min-height: 100vh;
-      background-color: #000;
-    }
     .app-loading-placeholder {
       position: fixed;
       top: 0;
@@ -30,10 +22,12 @@
       z-index: 9999;
       transition: opacity 0.3s ease;
     }
+
     .app-loading-placeholder.hidden {
       opacity: 0;
       pointer-events: none;
     }
+
     .app-loading-spinner {
       width: 40px;
       height: 40px;
@@ -42,13 +36,25 @@
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="app-loading-placeholder" id="app-loading">
+      <div class="app-loading-spinner"></div>
+    </div>
+  </div>
+
   <script>
     // GitHub Pages 路由重定向恢复
-    (function() {
+    (function () {
       const storedPath = sessionStorage.getItem('ghp_redirect_path');
       if (storedPath) {
         // 清除存储，避免重复应用
@@ -71,14 +77,7 @@
       }
     })();
   </script>
-</head>
 
-<body>
-  <div id="app">
-    <div class="app-loading-placeholder" id="app-loading">
-      <div class="app-loading-spinner"></div>
-    </div>
-  </div>
   <!-- Live2DCubismCore script -->
   <script src="./Core/live2dcubismcore.js"></script>
   <script type="module" src="./src/main.js"></script>
