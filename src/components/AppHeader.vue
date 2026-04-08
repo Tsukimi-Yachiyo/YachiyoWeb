@@ -233,9 +233,7 @@
 
   /* 标题栏 */
   .title-bar {
-    @apply h-32 z-100;
-    position: relative;
-    isolation: isolate;
+    @apply h-32 z-100 relative;
   }
 
   .title-bar-wave {
