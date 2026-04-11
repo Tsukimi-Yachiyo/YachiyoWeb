@@ -47,9 +47,9 @@ const isPlaying = ref(false)
 const isPlayerVisible = ref(false)
 
 let player: APlayerInstance | null = null
-let panelEl: HTMLDivElement | null = null
-let playerContainerEl: HTMLDivElement | null = null
-let styleEl: HTMLStyleElement | null = null
+let panelEl: globalThis.HTMLDivElement | null = null
+let playerContainerEl: globalThis.HTMLDivElement | null = null
+let styleEl: globalThis.HTMLStyleElement | null = null
 
 const ensureStyle = () => {
   if (styleEl) return
