@@ -32,3 +32,8 @@ declare module '@demo/lappsubdelegate' {
 declare module '@demo/lapppal' {
   export const LAppPal: any
 }
+
+declare module 'aplayer' {
+  const APlayer: any
+  export default APlayer
+}
