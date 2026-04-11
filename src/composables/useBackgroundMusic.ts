@@ -1,6 +1,4 @@
 import { ref } from 'vue'
-import 'aplayer/dist/APlayer.min.css'
-
 const BACKGROUND_MUSIC_IMAGE_URL = new URL('../assets/images/backgoundMusic.jpeg', import.meta.url)
   .href
 
