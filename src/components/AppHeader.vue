@@ -233,8 +233,7 @@
 
   /* 标题栏 */
   .title-bar {
-    @apply h-32 bg-black  z-100;
-    position: relative;
+    @apply h-32 z-100 relative;
   }
 
   .title-bar-wave {
@@ -404,12 +403,7 @@
 
   /* 切换按钮容器 */
   .switch-buttons-container {
-    position: absolute;
-    bottom: 10px;
-    left: 20%;
-    display: flex;
-    gap: 30px;
-    z-index: 1;
+    @apply flex items-end w-full absolute top-0 bottom-4 md:bottom-2 pl-4 md:pl-[10%] gap-4 md:gap-8 overflow-hidden z-1;
   }
 
   /* 切换按钮通用样式 */
@@ -458,12 +452,6 @@
 
   /* 响应式设计 - 切换按钮 */
   @media (max-width: 768px) {
-    .switch-buttons-container {
-      bottom: 15px;
-      left: 15px;
-      gap: 20px;
-    }
-
     .switch-button img {
       width: 90px;
       height: 90px;
@@ -473,12 +461,6 @@
   }
 
   @media (max-width: 480px) {
-    .switch-buttons-container {
-      bottom: 10px;
-      left: 10px;
-      gap: 15px;
-    }
-
     .switch-button img {
       width: 72px;
       height: 72px;

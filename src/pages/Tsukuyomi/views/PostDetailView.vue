@@ -320,6 +320,7 @@
 </script>
 
 <template>
+  <link rel="stylesheet" href="/src/assets/github-markdown-dark.css" />
   <div class="post-detail-container">
     <!-- 主内容区 -->
     <div class="main-content">
@@ -362,7 +363,7 @@
           <!-- 帖子内容 -->
           <div class="post-content">
             <!-- 帖子文本内容 -->
-            <div class="post-text" v-html="renderedContent"></div>
+            <div class="post-text markdown-body" v-html="renderedContent"></div>
 
             <!-- 点赞和收藏按钮 -->
             <div class="post-actions">
@@ -615,6 +616,7 @@
     0% {
       transform: rotate(0deg);
     }
+
     100% {
       transform: rotate(360deg);
     }

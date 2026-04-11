@@ -39,36 +39,12 @@
 </template>
 
 <style>
-  /* 全局样式 */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #fff;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-  }
-
-  #app,
   .app-shell {
-    width: 100%;
-    height: 100vh;
-  }
-
-  .app-shell {
-    display: flex;
-    flex-direction: column;
+    @apply w-full h-full flex flex-col;
   }
 
   .app-content {
     flex: 1;
-    min-height: 0;
     overflow: auto;
   }
 </style>

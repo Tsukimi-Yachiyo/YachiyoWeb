@@ -4,11 +4,10 @@
   import { useUserProfile } from '../../composables/useUserProfile'
   import { useIconManager } from '../../composables/useIconManager'
   import { postAPI } from '../../services/api'
+  import { marked } from 'marked'
 
-  // 初始化图标管理器
   const { checkIconCache } = useIconManager()
 
-  // 计算属性，用于获取图标数据URL
   const exitIconUrl = computed(() => {
     const iconData = checkIconCache('arrow-left.svg')
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
@@ -24,10 +23,26 @@
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
   })
 
+  const previewIconUrl = computed(() => {
+    const iconData = checkIconCache('eye.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
+
+  const editIconUrl = computed(() => {
+    const iconData = checkIconCache('edit.svg')
+    return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
+  })
+
   const router = useRouter()
   const { username, userAvatar } = useUserProfile()
 
-  // 表单数据
+  const isPreviewMode = ref(false)
+
+  const renderedContent = computed(() => {
+    if (!content.value) return ''
+    return marked(content.value)
+  })
+
   const title = ref('')
   const content = ref('')
   const postType = ref('')
@@ -36,7 +51,10 @@
   const files = ref([])
   const coverImageInput = ref(null)
 
-  // 处理退出
+  const togglePreviewMode = () => {
+    isPreviewMode.value = !isPreviewMode.value
+  }
+
   const handleExit = () => {
     // 直接退出，删除所有内容
     if (confirm('确定要直接退出吗？所有未保存的内容将被删除。')) {
