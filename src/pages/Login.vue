@@ -1,10 +1,11 @@
 <script setup lang="ts">
   import { useLogin } from '../composables/useLogin'
-  import { useBackgroundMusic } from '../composables/useBackgroundMusic'
+  import BackgroundMusicToggle from '../components/BackgroundMusicToggle.vue'
   import { ref, onMounted, onUnmounted, computed } from 'vue'
   import { useIconManager } from '../composables/useIconManager'
 
-  const { isPlaying, toggle, start } = useBackgroundMusic()
+  const musicToggleRef = ref<InstanceType<typeof BackgroundMusicToggle> | null>(null)
+
   const {
     introVideo,
     cycleVideo,
@@ -76,7 +77,7 @@
   }
 
   onMounted(() => {
-    start()
+    musicToggleRef.value?.startMusic()
     countdownTimer = setInterval(() => {
       if (countdown.value > 0) {
         countdown.value -= 0.5
@@ -129,15 +130,13 @@
           }}
         </h2>
         <div v-if="!isRegisterMode && !isForgotPasswordMode" class="login-mode-toggle">
-          <button
-            type="button"
-            class="toggle-btn music-toggle"
-            :class="{ playing: isPlaying }"
+          <BackgroundMusicToggle
+            ref="musicToggleRef"
+            button-class="toggle-btn music-toggle"
+            icon-class="music-icon"
+            icon-size="18px"
             title="音乐开关"
-            @click="toggle"
-          >
-            <span class="music-icon">{{ isPlaying ? '🔊' : '🔇' }}</span>
-          </button>
+          />
           <button
             type="button"
             class="toggle-btn"

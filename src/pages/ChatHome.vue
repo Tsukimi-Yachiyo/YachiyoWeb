@@ -2,10 +2,8 @@
   import { ref, computed } from 'vue'
   import { useChatHome } from '../composables/useChatHome'
   import { useIconManager } from '../composables/useIconManager'
-  import { useBackgroundMusic } from '../composables/useBackgroundMusic'
+  import BackgroundMusicToggle from '../components/BackgroundMusicToggle.vue'
   import Live2DModel from '../components/Live2DModel/Live2DModel.vue'
-
-  const { isPlaying, toggle } = useBackgroundMusic()
 
   // 海洋动物像素画
   import img1 from '../assets/images/ChatHome-1.png'
@@ -334,14 +332,12 @@
         <div v-if="!currentConversationId && !isModelLoading" class="welcome-screen">
           <div class="welcome-content">
             <!-- 音乐开关按钮 -->
-            <button
-              class="music-toggle-btn"
-              :class="{ playing: isPlaying }"
+            <BackgroundMusicToggle
+              button-class="music-toggle-btn"
+              icon-class="music-icon"
+              icon-size="20px"
               title="音乐开关"
-              @click="toggle"
-            >
-              <span class="music-icon">{{ isPlaying ? '🔊' : '🔇' }}</span>
-            </button>
+            />
             <!-- 对下面标签文字加粗 -->
             <h1>太阳西沉 夜幕降临</h1>
             <p>欢迎来到月读，{{ username }}！</p>
