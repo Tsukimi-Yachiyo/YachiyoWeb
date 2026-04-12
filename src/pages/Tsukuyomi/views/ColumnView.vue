@@ -84,7 +84,7 @@
     </section>
 
     <button
-      class="fixed right-5 bottom-5 z-[100] flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border-none bg-gradient-to-br from-[#2196f3] to-[#1976d2] text-white shadow-[0_4px_15px_rgba(33,150,243,0.3)] transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 hover:from-[#1976d2] hover:to-[#0d47a1] hover:shadow-[0_6px_20px_rgba(33,150,243,0.4)] active:scale-95 active:translate-y-0 active:shadow-[0_2px_10px_rgba(33,150,243,0.3)] md:top-[150px] md:right-[30px] md:bottom-auto md:h-[60px] md:w-[60px]"
+      class="fixed right-5 bottom-5 z-100 flex h-50px w-50px cursor-pointer items-center justify-center rounded-full border-none bg-gradient-to-br from-[#2196f3] to-[#1976d2] text-white shadow-[0_4px_15px_rgba(33,150,243,0.3)] transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 hover:from-[#1976d2] hover:to-[#0d47a1] hover:shadow-[0_6px_20px_rgba(33,150,243,0.4)] active:scale-95 active:translate-y-0 active:shadow-[0_2px_10px_rgba(33,150,243,0.3)] md:top-[150px] md:right-[30px] md:bottom-auto md:h-[60px] md:w-[60px]"
       title="编辑专栏"
       @click="goToColumnEditor"
     >
