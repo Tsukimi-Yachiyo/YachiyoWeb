@@ -95,6 +95,10 @@
     router.push('/tsukuyomi')
   }
 
+  const switchToPlayer = () => {
+    router.push('/player')
+  }
+
   // 波浪同步动画
   const animateShiftIcon = () => {
     time += 1
@@ -215,6 +219,20 @@
         @mouseleave="hideTooltip"
       >
         <img :src="tsukuyomiIconUrl" alt="切换至月读" />
+      </button>
+
+      <button
+        v-if="currentPage !== 'player'"
+        class="switch-button player-button"
+        title="切换至放映室"
+        @click="switchToPlayer"
+        @mousemove="handleMouseMove"
+        @mouseenter="showTooltipWithText('切换至放映室')"
+        @mouseleave="hideTooltip"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" class="player-icon">
+          <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" />
+        </svg>
       </button>
     </div>
 
@@ -429,12 +447,17 @@
       drop-shadow(0 0 24px rgba(255, 255, 255, 0.6));
   }
 
-  .switch-button img {
+  .switch-button img,
+  .switch-button .player-icon {
     width: 108px;
     height: 108px;
     object-fit: contain;
     filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.8))
       drop-shadow(0 0 32px rgba(255, 255, 255, 0.4));
+  }
+
+  .switch-button .player-icon {
+    color: white;
   }
 
   .tooltip {
@@ -452,7 +475,8 @@
 
   /* 响应式设计 - 切换按钮 */
   @media (max-width: 768px) {
-    .switch-button img {
+    .switch-button img,
+    .switch-button .player-icon {
       width: 90px;
       height: 90px;
       filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.8))
@@ -461,7 +485,8 @@
   }
 
   @media (max-width: 480px) {
-    .switch-button img {
+    .switch-button img,
+    .switch-button .player-icon {
       width: 72px;
       height: 72px;
       filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
