@@ -307,6 +307,12 @@ export const userAPI = {
   },
 }
 
+export const systemAPI = {
+  testBackendStatus(): Promise<ApiResponse<unknown>> {
+    return unwrapData(apiClient.get<ApiResponse<unknown>>('/api/v3/test'))
+  },
+}
+
 export const postAPI = {
   uploadPost(formData: FormData): Promise<ApiResponse<boolean>> {
     return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/posting/upload', formData))
