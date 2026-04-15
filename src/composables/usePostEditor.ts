@@ -126,7 +126,7 @@ export const usePostEditor = () => {
   }
 
   const autoResizeTextarea = (event: Event) => {
-    const textarea = event.target as HTMLTextAreaElement
+    const textarea = event.target as globalThis.HTMLTextAreaElement
     textarea.style.height = 'auto'
     textarea.style.height = `${Math.min(textarea.scrollHeight, 800)}px`
   }
@@ -150,17 +150,17 @@ export const usePostEditor = () => {
     return `{photo:"${file.name}"}`
   }
 
-  const handleDragOver = (event: DragEvent) => {
+  const handleDragOver = (event: globalThis.DragEvent) => {
     event.preventDefault()
   }
 
-  const handleDrop = (event: DragEvent) => {
+  const handleDrop = (event: globalThis.DragEvent) => {
     event.preventDefault()
     const file = event.dataTransfer?.files?.[0]
     if (!file) return
 
     const textToInsert = addFile(file)
-    const textarea = event.target as HTMLTextAreaElement
+    const textarea = event.target as globalThis.HTMLTextAreaElement
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
     content.value = content.value.substring(0, start) + textToInsert + content.value.substring(end)
