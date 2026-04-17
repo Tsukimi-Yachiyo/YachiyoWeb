@@ -8,6 +8,11 @@ const routes: RouteRecordRaw[] = [
     component: Login,
   },
   {
+    path: '/maintenance',
+    name: 'Maintenance',
+    component: () => import('../pages/Maintenance.vue') as Promise<unknown>,
+  },
+  {
     path: '/chat/home',
     name: 'Home',
     // 懒加载聊天主页组件

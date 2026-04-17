@@ -273,19 +273,17 @@ export const chatAPI = {
 
 export const userAPI = {
   getUserDetail(): Promise<ApiResponse<UserDetailResponse>> {
-    return unwrapData(
-      apiClient.post<ApiResponse<UserDetailResponse>>('/api/v1/user/detail/detail/get')
-    )
+    return unwrapData(apiClient.post<ApiResponse<UserDetailResponse>>('/api/v2/user/detail/get'))
   },
 
   updateUserDetail(userDetail: Partial<UserDetailResponse>): Promise<ApiResponse<boolean>> {
     return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/detail/update', userDetail)
+      apiClient.post<ApiResponse<boolean>>('/api/v2/user/detail/update', userDetail)
     )
   },
 
   getAvatar(): Promise<ApiResponse<string>> {
-    return unwrapData(apiClient.post<ApiResponse<string>>('/api/v1/user/detail/avatar/get'))
+    return unwrapData(apiClient.post<ApiResponse<string>>('/api/v2/user/avatar/get'))
   },
 
   updateAvatar(file: File): Promise<ApiResponse<boolean>> {
@@ -293,17 +291,21 @@ export const userAPI = {
     // 兼容后端字段名差异：部分实现读取 avatar，部分读取 fileBytes
     formData.append('avatar', file)
     formData.append('fileBytes', file)
-    return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/v1/user/detail/avatar/update', formData)
-    )
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/user/avatar/update', formData))
   },
 
   getPosterDetail(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
     return unwrapData(
       apiClient.post<ApiResponse<PosterDetailResponse>>(
-        `/api/v1/user/detail/detail/get/user?userId=${userId}`
+        `/api/v2/user/detail/get/user?userId=${userId}`
       )
     )
+  },
+}
+
+export const systemAPI = {
+  testBackendStatus(): Promise<ApiResponse<unknown>> {
+    return unwrapData(apiClient.get<ApiResponse<unknown>>('/api/v3/test/hello'))
   },
 }
 
@@ -319,7 +321,7 @@ export const postAPI = {
   ): Promise<ApiResponse<number[]>> {
     return unwrapData(
       apiClient.post<ApiResponse<number[]>>(
-        `/api/v2/searching/search?keyword=${encodeURIComponent(keyword)}&pageNum=${encodeURIComponent(pageNum)}&pageSize=${encodeURIComponent(pageSize)}`
+        `/api/v2/posting/search?keyword=${encodeURIComponent(keyword)}&pageNum=${encodeURIComponent(pageNum)}&pageSize=${encodeURIComponent(pageSize)}`
       )
     )
   },
@@ -327,7 +329,7 @@ export const postAPI = {
   getPostingEncapsulate(postingId: number): Promise<ApiResponse<PostEncapsulateResponse>> {
     return unwrapData(
       apiClient.post<ApiResponse<PostEncapsulateResponse>>(
-        `/api/v2/searching/encapsulate?postingId=${postingId}`
+        `/api/v2/posting/encapsulate?postingId=${postingId}`
       )
     )
   },
@@ -533,21 +535,21 @@ export const commentAPI = {
   // 添加评论
   addComment(commentRequest: CommentRequest): Promise<ApiResponse<boolean>> {
     return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/v1/auth/add-comment', commentRequest)
+      apiClient.post<ApiResponse<boolean>>('/api/v2/posting/add-comment', commentRequest)
     )
   },
 
   // 获取评论列表
   getCommentList(postingId: number): Promise<ApiResponse<Comment[]>> {
     return unwrapData(
-      apiClient.post<ApiResponse<Comment[]>>('/api/v1/auth/get-comment-list', postingId)
+      apiClient.post<ApiResponse<Comment[]>>('/api/v2/posting/get-comment-list', postingId)
     )
   },
 
   // 删除评论
   deleteComment(commentId: number): Promise<ApiResponse<boolean>> {
     return unwrapData(
-      apiClient.post<ApiResponse<boolean>>('/api/v1/auth/delete-comment', commentId)
+      apiClient.post<ApiResponse<boolean>>('/api/v2/posting/delete-comment', commentId)
     )
   },
 }
@@ -617,17 +619,12 @@ export const mailAPI = {
 export const coinAPI = {
   // 签到
   sign(): Promise<ApiResponse<boolean>> {
-    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/coin/sign'))
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/check_in'))
   },
 
   // 获取金币数量
   getCoinAmount(): Promise<ApiResponse<number>> {
     return unwrapData(apiClient.post<ApiResponse<number>>('/api/v2/coin/get'))
-  },
-
-  // 开启钱包
-  openWallet(): Promise<ApiResponse<boolean>> {
-    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/coin/open-wallet'))
   },
 }
 export default apiClient
