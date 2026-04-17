@@ -169,6 +169,16 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/player',
+    name: 'Player',
+    // 懒加载放映室页面组件
+    component: () => import('../pages/Player/Player.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ]
 
 const router = createRouter({
