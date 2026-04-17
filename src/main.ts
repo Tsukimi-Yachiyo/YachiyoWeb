@@ -6,6 +6,10 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'aplayer/dist/APlayer.min.css'
 import { systemAPI } from './services/api'
+
+const skipMaintenanceCheck =
+  import.meta.env.DEV && import.meta.env.VITE_SKIP_MAINTENANCE_CHECK === 'true'
+
 const app = createApp(App)
 app.use(router)
 app.use(ElementPlus)
@@ -13,7 +17,9 @@ app.component('Message', Message)
 
 router.isReady().then(async () => {
   try {
-    await systemAPI.testBackendStatus()
+    if (!skipMaintenanceCheck) {
+      await systemAPI.testBackendStatus()
+    }
   } catch (error: unknown) {
     console.error('后端状态检测失败，跳转维护页:', error)
     if (router.currentRoute.value.path !== '/maintenance') {

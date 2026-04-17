@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八千代杯 - 挑战赛</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="home-page" class="page active">
+            <div class="bg-layer bg-1"></div>
+            <div class="bg-layer bg-2"></div>
+            <div class="home-content">
+                <img src="assets/images/logo.png" alt="八千代杯" class="logo">
+            </div>
+            <button id="join-btn" class="join-button">
+                <img src="assets/svg/button-icon.svg" alt="参与">
+            </button>
+        </div>
+
+        <div id="info-page" class="page">
+            <div class="bg-layer page-bg-1 active"></div>
+            <div class="bg-layer page-bg-2"></div>
+            <div class="bg-layer page-bg-3"></div>
+            <div class="info-content">
+                <div class="top-buttons">
+                    <button id="back-btn" class="back-button">← 返回</button>
+                    <button id="view-docs-btn" class="view-docs-button">📄 查看完整文档</button>
+                </div>
+                <div class="info-container">
+                    <div class="page-indicator">
+                        <span id="current-page">1</span> / <span id="total-pages">4</span>
+                    </div>
+                    <div class="pages-wrapper">
+                        <div class="info-page-content active" data-page="1">
+                            <h1>第一届月见八千代ACG杯</h1>
+                            <div class="content-section">
+                                <h2>活动背景</h2>
+                                <p>为感谢广大粉丝与技术人员对 YachiyoChat 论坛、《超时空辉夜姬》国内社群的长期支持，我们决定举办本次挑战赛。这不仅是一次回馈社群的盛会，更是为了纪念项目初创期所有成员的辛勤付出与卓越贡献。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>活动信息</h2>
+                                <p><strong>活动全称：</strong>第一届月见八千代ACG杯挑战赛</p>
+                                <p><strong>活动性质：</strong>本次活动由粉丝自发组织，旨在促进社区交流，不代表《超时空辉夜姬》官方立场。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>活动宣传语</h2>
+                                <p>"看完《超时空辉夜姬》还意犹未尽？快来参加八千代杯挑战赛，发布创意视频/图文，赢限定周边！"</p>
+                            </div>
+                        </div>
+                        <div class="info-page-content" data-page="2">
+                            <h1>参与方式</h1>
+                            <div class="content-section">
+                                <h2>投稿渠道</h2>
+                                <ul>
+                                    <li><strong>YachiyoChat 论坛：</strong>发布内容时，请务必带上 #八千代杯 话题标签</li>
+                                    <li><strong>Bilibili (B站)：</strong>发布相关作品动态，并在内容中@主办方官方账号</li>
+                                </ul>
+                            </div>
+                            <div class="content-section">
+                                <h2>内容形式</h2>
+                                <p>只要是与"八千代杯"主题相关的创意内容，均在征集范围内。推荐形式：</p>
+                                <ul>
+                                    <li>游戏实况视频</li>
+                                    <li>二创图文</li>
+                                    <li>Cosplay</li>
+                                    <li>绘画创作</li>
+                                </ul>
+                            </div>
+                            <div class="content-section">
+                                <h2>参与条件</h2>
+                                <p>零门槛全民参与！无任何限制条件，无论你是创作者、玩家，还是单纯的ACG爱好者，都可以加入。</p>
+                            </div>
+                        </div>
+                        <div class="info-page-content" data-page="3">
+                            <h1>活动投稿板块</h1>
+                            <div class="content-section">
+                                <h2>#COS角色扮演</h2>
+                                <p>秀出你的角色扮演风采！无论是高度还原的原剧情角色，还是独具创意的二创形象，都欢迎来展示你的魅力瞬间。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>#LIFE趣味生活</h2>
+                                <p>分享你与《超时空辉夜姬》相关的生活点滴。周边开箱、线下打卡、或者是游戏中的搞笑日常，记录每一个美好瞬间。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>#GAME游戏攻略</h2>
+                                <p>玩家聚集地！分享与超时空辉夜姬相关的游戏剪辑、MOD展示、相关整活，或是精彩的操作集锦，共同交流进步。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>#ART绘梦空间</h2>
+                                <p>展示你的绘画与设计才华！同人插画、角色立绘、场景概念图、UI界面设计等，用画笔描绘出你心中的辉夜姬世界。</p>
+                            </div>
+                            <div class="content-section">
+                                <h2>#OTHER创意无限</h2>
+                                <p>MMD动画、手工模型、配音翻唱、小说创作、音MAD等，单个作品限投一个板块。</p>
+                            </div>
+                        </div>
+                        <div class="info-page-content" data-page="4">
+                            <h1>时间与奖项</h1>
+                            <div class="content-section">
+                                <h2>活动时间</h2>
+                                <ul>
+                                    <li><strong>投稿阶段：</strong>2026年4月17日 18:00 — 2026年5月17日 18:00</li>
+                                    <li><strong>评选阶段：</strong>2026年4月17日 18:00 — 2026年5月23日 18:00</li>
+                                    <li><strong>结果公布：</strong>2026年5月24日 16:00</li>
+                                </ul>
+                            </div>
+                            <div class="content-section">
+                                <h2>奖项设置</h2>
+                                <ul>
+                                    <li><strong>🏆 板块一等奖：</strong>在 #cos、#生活、#游戏、#绘画 四大核心板块中，各评选出综合评分第1名，共计4名获奖者</li>
+                                    <li><strong>⭐ 超新星奖：</strong>从四大板块的第2、3名，以及#其他板块中，综合作品质量与潜力，评选出2名最具潜力的超新星创作者</li>
+                                </ul>
+                            </div>
+                            <div class="content-section">
+                                <h2>期待您的参与！</h2>
+                                <p>第一届月见八千代ACG杯挑战赛 · 我们在月读等您！</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="navigation-buttons">
+                        <button id="prev-btn" class="nav-btn" disabled>上一页</button>
+                        <button id="next-btn" class="nav-btn">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="docs-page" class="page">
+            <div class="bg-layer page-bg-1 active"></div>
+            <div class="bg-layer page-bg-2"></div>
+            <div class="bg-layer page-bg-3"></div>
+            <div class="docs-content">
+                <button id="back-from-docs-btn" class="back-button">← 返回</button>
+                <div class="docs-container">
+                    <div class="docs-header">
+                        <h1>完整文档</h1>
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="搜索内容...">
+                            <button id="search-btn">🔍</button>
+                        </div>
+                    </div>
+                    <div class="docs-tabs">
+                        <button class="doc-tab active" data-doc="1">策划案（精简版）</button>
+                        <button class="doc-tab" data-doc="2">第一届八千代杯策划案</button>
+                        <button class="doc-tab" data-doc="3">有效内容评定指南</button>
+                        <button class="doc-tab" data-doc="4">活动手册</button>
+                    </div>
+                    <div class="docs-wrapper">
+                        <div class="doc-content active" data-doc="1">
+                            <div class="doc-full-content">
+                                <h2>第一届八千代杯挑战赛（精简版）</h2>
+                                <p><strong>主办：</strong>八千代的月读服务器全体成员</p>
+                                
+                                <h3>一、活动背景</h3>
+                                <p>为感谢粉丝与技术人员对 YachiyoChat 论坛、《超时空辉夜姬》国内社群的支持，回馈社群、纪念初创期贡献，特举办本次挑战赛。</p>
+                                
+                                <h3>二、活动信息</h3>
+                                <p><strong>全称：</strong>八千代杯挑战赛</p>
+                                <p><strong>性质：</strong>粉丝自发组织，不代表《超时空辉夜姬》官方立场，请理性参与。</p>
+                                
+                                <h3>三、活动宣传语</h3>
+                                <p>看完《超时空辉夜姬》还意犹未尽？快来参加八千代杯挑战赛，发布创意视频 / 图文，赢限定周边！# 超时空辉夜姬 #创意挑战</p>
+                                
+                                <h3>四、参与方式</h3>
+                                <p><strong>投稿渠道：</strong>YachiyoChat 论坛（带 #八千代杯标签）；B 站发布相关内容并 @主办方。</p>
+                                <p><strong>投稿形式：</strong>视频、图文、直播等。</p>
+                                <p><strong>投稿板块：</strong>#cos、# 生活、# 游戏、# 绘画、# 其它（单作品限投一个板块）。</p>
+                                <p><strong>参与条件：</strong>无限制。</p>
+                                <p><strong>有效判定：</strong>按附录《有效内容评定表》执行。</p>
+                                
+                                <h3>五、活动时间</h3>
+                                <p><strong>投稿：</strong>2026.4.17 18:00 — 2026.5.17 18:00</p>
+                                <p><strong>评选：</strong>2026.4.17 18:00 — 2026.5.23 18:00</p>
+                                <p><strong>结果公布：</strong>2026.5.24 16:00</p>
+                                
+                                <h3>六、奖项设置</h3>
+                                <p><strong>板块一等奖：</strong>#cos、# 生活、# 游戏、# 绘画各 1 名</p>
+                                <p><strong>超新星奖：</strong>共 2 名</p>
+                                
+                                <h3>七、评选规则</h3>
+                                <p>四大板块各取综合评分第 1 名，获板块一等奖。</p>
+                                <p>从四大板块第 2、3 名及 #生活板块参选作品中，选出 2 名超新星奖。</p>
+                                
+                                <h3>八、活动奖励</h3>
+                                <p>xxxxxx</p>
+                                
+                                <h3>九、评分细则</h3>
+                                <p>详见附录《评分细则》</p>
+                                
+                                <p class="doc-date">2026.3.27</p>
+                            </div>
+                        </div>
+                        <div class="doc-content" data-doc="2">
+                            <div class="doc-full-content">
+                                <h2>第一届《八千代杯》策划案</h2>
+                                <p><strong>主办单位：</strong>&lt;八千代的月读服务器&gt;全体成员</p>
+                                
+                                <h3>活动背景</h3>
+                                <p>针对当前QQ群&lt;八千代的月读服务器@1094218305&gt;群内成员日益增长的相关情况，纪念各位粉丝及相关技术人员为YachiyoChat论坛（以下简称"论坛"）建设及电影《超时空辉夜姬》国内社群建设的支持，特举办本次"《八千代杯》挑战赛"（以下简称"《八千代杯》"），旨在回馈广大粉丝，感谢各位在论坛初创期给予的支持。</p>
+                                
+                                <h3>活动相关信息</h3>
+                                <p><strong>本次活动全称：</strong>"《八千代杯》挑战赛"</p>
+                                <p><strong>活动性质：</strong>本次活动系粉丝组织，不代表《超时空辉夜姬》官方立场，请各位粉丝理性参与</p>
+                                
+                                <p>看完《超时空辉夜姬》，你是否也意犹未尽，渴望亲身踏入那场跨越维度的绮丽梦境？现在机会来了！加入我们的《八千代杯》挑战赛，发布创意视频/图文，赢取限定周边！快来书写属于你的篇章！#超时空辉夜姬 #创意挑战</p>
+                                
+                                <h3>活动参与方式</h3>
+                                <p>本次活动采用"线上投稿"方式开展，各位参与者需在规定时间内于YachiyoChat论坛发布含"#八千代杯"标签的相关内容，同时可在哔哩哔哩（以下简称"b站"）平台发布《超时空辉夜姬》相关内容并@主办方参与投稿，投稿形式包括视频、帖子及直播等。</p>
+                                
+                                <p>我们将开设#cos、#生活、#游戏、#绘画以及#其它共五个板块，用户可在论坛添加相关标签参与指定板块。</p>
+                                
+                                <p><strong>注：</strong>单一内容仅可参与单一板块，请在帖子前添加对应标签</p>
+                                
+                                <p><strong>报名要求：</strong>不限</p>
+                                <p><strong>投稿方式：</strong>在规定时间内于论坛发布含"#八千代杯"标签的有效内容即视为成功参与</p>
+                                <p><strong>有效内容判定：</strong>详见附录&lt;有效内容评定表&gt;</p>
+                                
+                                <h3>活动时间</h3>
+                                <p><strong>投稿入口开放时间：</strong>2026.4.17 18：00----2026.5.17 18：00</p>
+                                <p><strong>评选及审议：</strong>2026.4.17 18：00----2026.5.23 18：00</p>
+                                <p><strong>最终结果公布：</strong>2026.5.24 16：00</p>
+                                
+                                <h3>奖项说明</h3>
+                                <p>设#cos、#生活、#游戏、#绘画四大板块一等奖各一名</p>
+                                <p>设"'超新星'奖"共两名</p>
+                                
+                                <h3>评议说明</h3>
+                                <p>1.本次评选将各取#cos、#生活、#游戏、#绘画板块综合评分第一名（共计四名）</p>
+                                <p>2.将从#cos、#生活、#游戏、#绘画四大板块各第二、三名暨#生活板块全体评选出"超新星"奖共两名</p>
+                                
+                                <h3>活动奖励</h3>
+                                <p>xxxxxx</p>
+                                
+                                <h3>活动评分细则</h3>
+                                <p>详见附录&lt;评分细则&gt;</p>
+                                
+                                <p><strong>附录：</strong>&lt;内容有效性评定指南&gt; &lt;评分细则&gt;</p>
+                                
+                                <p class="doc-date">2026.3.27</p>
+                            </div>
+                        </div>
+                        <div class="doc-content" data-doc="3">
+                            <div class="doc-full-content">
+                                <h2>有效内容评定指南</h2>
+                                <p class="doc-date">2026.3.27</p>
+                                
+                                <h3>简介</h3>
+                                <p>本指南旨在指导用户完成对《八千代杯》挑战赛投稿内容的有效性评定，不具备具体实施与稿件指导功能，内容有效性最终评定结果请以@主办方为唯一标准，@主办方享有最终解释权</p>
+                                
+                                <h3>按照内容类型分设有效性评定标准如下：</h3>
+                                
+                                <h4>视频类型内容</h4>
+                                <p>时长：.....</p>
+                                
+                                <h4>图文类型内容</h4>
+                                <p>主题相关性与相关内容总量</p>
+                                
+                                <h4>游戏类型内容</h4>
+                                <p>......</p>
+                            </div>
+                        </div>
+                        <div class="doc-content" data-doc="4">
+                            <div class="doc-full-content">
+                                <h2>第一届月见八千代ACG杯</h2>
+                                <h3>第一届八千代杯挑战赛</h3>
+                                <p class="slogan">粉丝共创 · 荣耀开启</p>
+                                <p class="slogan-en">FAN CREATION & GLORY KICK-OFF</p>
+                                <h4>活动详解手册</h4>
+                                
+                                <h3>活动背景</h3>
+                                <p>为感谢广大粉丝与技术人员对YachiyoChat 论坛、《超时空辉夜姬》国内社群的长期支持，我们决定举办本次挑战赛。这不仅是一次回馈社群的盛会，更是为了纪念项目初创期所有成员的辛勤付出与卓越贡献。</p>
+                                
+                                <p class="quote">"人心齐，泰山移。社区的繁荣离不开每一位成员的热情投入，希望这次活动能成为大家连接彼此、共同回忆的美好契机。"</p>
+                                
+                                <h3>活动信息</h3>
+                                <p><strong>▍ 活动全称</strong><br>第一届月见八千代ACG杯挑战赛</p>
+                                <p><strong>▍ 活动性质</strong><br>本次活动由粉丝自发组织，旨在促进社区交流，不代表《超时空辉夜姬》官方立场。</p>
+                                <p>请各位参与者秉持理性、友好的态度，共同维护一个积极健康的创作环境，享受创作与交流的乐趣。</p>
+                                
+                                <h3>八千代杯创意挑战赛</h3>
+                                <p><strong>01. 主题限定 · THEME</strong><br>#超时空辉夜姬<br>围绕《超时空辉夜姬》IP进行二创，剧情延展、角色解读、世界观补全均可。</p>
+                                
+                                <p><strong>02. 多元创作 · FORMAT</strong><br>#创意视频 / 图文<br>形式不限！COS美图、混剪视频、手书动画、条漫插画、深度解析长文，只要有创意就能投！</p>
+                                
+                                <p><strong>03. 惊喜好礼 · REWARD</strong><br>赢取神秘礼品<br>由月人bro提供の神秘礼品</p>
+                                
+                                <p><strong>04. 即刻参与 · ACTION</strong><br>#参赛指南<br>各位参与者需在规定时间内于YachiyoChat论坛发布含"#八千代杯"标签的相关内容，同时可在哔哩哔哩（以下简称"b站"）平台发布《超时空辉夜姬》相关内容并@主办方参与投稿，投稿形式包括视频、帖子及直播等。</p>
+                                
+                                <h3>✨ 活动初心 ✨</h3>
+                                <p class="quote">"看完《超时空辉夜姬》还意犹未尽？"<br>那就把你的脑洞和热情变成作品，让更多人看到！</p>
+                                
+                                <h3>活动参与方式</h3>
+                                <p><strong>官方投稿渠道</strong><br>● YachiyoChat 论坛 发布内容时，请务必带上#八千代杯话题标签。<br>● Bilibili (B站) 发布相关作品动态，并在内容中@主办方官方账号。</p>
+                                
+                                <p><strong>内容形式不限</strong><br>只要是与"八千代杯"主题相关的创意内容，均在征集范围内。<br>推荐形式： 游戏实况视频、二创图文、Cosplay、绘画创作等。</p>
+                                
+                                <p><strong>零门槛全民参与</strong><br>无任何限制条件 无论你是创作者、玩家，还是单纯的ACG爱好者，都可以加入。<br>Tips:内容需遵守社区规范，积极向上。</p>
+                                
+                                <h3>活动投稿板块</h3>
+                                <p><strong>#COS角色扮演</strong><br>秀出你的角色扮演风采！无论是高度还原的原剧情角色，还是独具创意的二创形象，都欢迎来展示你的魅力瞬间。</p>
+                                
+                                <p><strong>#LIFE趣味生活</strong><br>分享你与《超时空辉夜姬》相关的生活点滴。周边开箱、线下打卡、或者是游戏中的搞笑日常，记录每一个美好瞬间。</p>
+                                
+                                <p><strong>#ART绘梦空间</strong><br>展示你的绘画与设计才华！同人插画、角色立绘、场景概念图、UI界面设计等，用画笔描绘出你心中的辉夜姬世界。</p>
+                                
+                                <p><strong>#GAME游戏攻略</strong><br>玩家聚集地！分享与超时空辉夜姬相关的游戏剪辑、MOD展示、相关整活，或是精彩的操作集锦，共同交流进步。</p>
+                                
+                                <p><strong>#OTHER</strong><br>创意无限大集合 MMD动画 | 手工模型 配音翻唱 | 小说创作 音MAD等</p>
+                                
+                                <p><strong>注：</strong>单个作品限投一个板块，多板块重复投稿将视为无效参与，感谢配合。</p>
+                                
+                                <h3>活动时间</h3>
+                                <p><strong>投稿阶段：</strong><br>2026年4月17日 18:00 —2026年5月17日 18:00</p>
+                                <p><strong>评选阶段：</strong><br>2026年4月17日 18:00 —2026年5月23日 18:00</p>
+                                <p><strong>结果公布：</strong><br>2026年5月24日 16:00</p>
+                                
+                                <h3>奖项设置</h3>
+                                <p><strong>🏆 板块一等奖</strong><br>在#cos、#生活、#游戏、#绘画四大核心板块中，各评选出综合评分第1名，共计4名获奖者。</p>
+                                
+                                <p><strong>⭐ 超新星奖</strong><br>从四大板块的第2、3名，以及#其他板块中，综合作品质量与潜力，评选出2名最具潜力的超新星创作者。</p>
+                                
+                                <h3>评选规则</h3>
+                                <p><strong>板块一等奖评选标准</strong><br>覆盖 #cos、#生活、#游戏、#绘画 四大核心板块。各板块依据综合评分排名，取第1名授予"板块一等奖"荣誉。</p>
+                                
+                                <p><strong>超新星奖评选标准</strong><br>候选池包含四大板块综合评分第2、3名作品，以及#其他板块所有参选作品。通过二次综合评审，最终选拔出 2 名优秀创作者获得"超新星奖"。</p>
+                                
+                                <p><strong>注：</strong>活动详细的打分维度与具体分值，可查阅附录文件《内容有效性评定指南》与《评分细则》，确保评选过程公开透明。</p>
+                                
+                                <p class="closing">期！待！您！来！</p>
+                                <p class="closing">第一届月见八千代ACG杯挑战赛 · 我们在月读等您！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

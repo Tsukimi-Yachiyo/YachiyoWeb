@@ -8,6 +8,7 @@ declare module '*.vue' {
 
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string
+  readonly VITE_SKIP_MAINTENANCE_CHECK?: string
   // 更多环境变量可以在这里添加
 }
 
