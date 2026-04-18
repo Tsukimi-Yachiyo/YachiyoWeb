@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (doc.classList.contains('active')) {
         const fullContent = doc.querySelector('.doc-full-content')
         if (fullContent) {
-          const walker = document.createTreeWalker(fullContent, NodeFilter.SHOW_TEXT)
+          const walker = document.createTreeWalker(fullContent, window.NodeFilter.SHOW_TEXT)
           const textNodes = []
           let node
           while ((node = walker.nextNode())) {

@@ -1,3 +1,5 @@
+import type { UploadInstance, UploadProps } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useIconManager } from './useIconManager'
@@ -21,7 +23,7 @@ interface AttachmentAssetItem {
 }
 
 interface ColumnDraftItem {
-  id: number
+  id: number | string
   title: string
   category: ColumnCategory
   categoryLabel: string
@@ -72,8 +74,8 @@ export const useColumnEditor = () => {
   const isPublishing = ref(false)
   const formError = ref('')
   const formSuccess = ref('')
-  const imageInputRef = ref<HTMLInputElement | null>(null)
-  const attachmentInputRef = ref<HTMLInputElement | null>(null)
+  const imageUploadRef = ref<UploadInstance | null>(null)
+  const attachmentUploadRef = ref<UploadInstance | null>(null)
   const drafts = ref<ColumnDraftItem[]>([])
 
   const summaryLength = computed(() => summary.value.length)
@@ -91,7 +93,7 @@ export const useColumnEditor = () => {
   const attachmentCountText = computed(() => {
     return attachmentAssets.value.length > 0
       ? `已选择 ${attachmentAssets.value.length} 个文件`
-      : '尚未选择 Word/PDF 文件'
+      : '尚未选择附件文件'
   })
 
   const formatNow = () => {
@@ -108,71 +110,61 @@ export const useColumnEditor = () => {
     router.back()
   }
 
-  const openImagePicker = () => {
-    imageInputRef.value?.click()
-  }
-
-  const openAttachmentPicker = () => {
-    attachmentInputRef.value?.click()
-  }
-
-  const handleImageChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const selectedFiles = Array.from(target.files || [])
-    if (selectedFiles.length === 0) return
-
-    const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'))
-    if (imageFiles.length !== selectedFiles.length) {
-      formError.value = '仅支持选择图片文件'
-      return
-    }
-
-    const mapped = imageFiles.map(file => ({
+  const appendImageFiles = (files: File[]) => {
+    const mapped = files.map(file => ({
       id: Date.now() + Math.floor(Math.random() * 10000),
       file,
       previewUrl: URL.createObjectURL(file),
     }))
     imageAssets.value = [...imageAssets.value, ...mapped]
 
-    if (imageFiles.length > 0) {
-      const markdownBlocks = imageFiles.map(file => `![${file.name}](待上传后替换链接)`).join('\n')
+    if (files.length > 0) {
+      const markdownBlocks = files.map(file => `![${file.name}](待上传后替换链接)`).join('\n')
       content.value = content.value ? `${content.value}\n${markdownBlocks}` : markdownBlocks
     }
-
-    formError.value = ''
-    target.value = ''
   }
 
-  const handleAttachmentChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const selectedFiles = Array.from(target.files || [])
-    if (selectedFiles.length === 0) return
-
-    const allowedFiles = selectedFiles.filter(file => {
-      const lowerName = file.name.toLowerCase()
-      return lowerName.endsWith('.pdf') || lowerName.endsWith('.doc') || lowerName.endsWith('.docx')
-    })
-
-    if (allowedFiles.length !== selectedFiles.length) {
-      formError.value = '附件仅支持 .pdf / .doc / .docx'
-      return
-    }
-
-    const mapped = allowedFiles.map(file => ({
+  const appendAttachmentFiles = (files: File[]) => {
+    const mapped = files.map(file => ({
       id: Date.now() + Math.floor(Math.random() * 10000),
       file,
     }))
     attachmentAssets.value = [...attachmentAssets.value, ...mapped]
 
-    if (allowedFiles.length > 0) {
-      const attachmentBlocks = allowedFiles
+    if (files.length > 0) {
+      const attachmentBlocks = files
         .map(file => `- 附件：${file.name}（待上传后替换链接）`)
         .join('\n')
       content.value = content.value ? `${content.value}\n${attachmentBlocks}` : attachmentBlocks
     }
+  }
 
+  const handleImageUploadChange: UploadProps['onChange'] = uploadFile => {
+    const rawFile = uploadFile.raw
+    if (!rawFile) return
+
+    if (!rawFile.type.startsWith('image/')) {
+      formError.value = '仅支持选择图片文件'
+      imageUploadRef.value?.clearFiles()
+      return
+    }
+
+    appendImageFiles([rawFile])
     formError.value = ''
-    target.value = ''
+    imageUploadRef.value?.clearFiles()
+  }
+
+  const handleAttachmentUploadChange: UploadProps['onChange'] = uploadFile => {
+    const rawFile = uploadFile.raw
+    if (!rawFile) return
+
+    appendAttachmentFiles([rawFile])
+    formError.value = ''
+    attachmentUploadRef.value?.clearFiles()
+  }
+
+  const handleUploadExceed = () => {
+    ElMessage.info('文件已添加，继续选择会自动追加到当前素材列表')
   }
 
   const removeImageById = (id: number) => {
@@ -255,7 +247,6 @@ export const useColumnEditor = () => {
     formError.value = ''
     isSaving.value = true
     try {
-      persistCurrentForm()
       const item: ColumnDraftItem = {
         id: Date.now(),
         title: columnTitle.value.trim() || '未命名草稿',
@@ -267,6 +258,9 @@ export const useColumnEditor = () => {
         summary: summary.value.trim(),
         updatedAt: formatNow(),
       }
+
+      persistCurrentForm()
+
       drafts.value = [item, ...drafts.value].slice(0, 10)
       persistDrafts()
       formSuccess.value = '草稿已保存'
@@ -277,12 +271,27 @@ export const useColumnEditor = () => {
 
   const publishColumnDoc = async () => {
     formSuccess.value = ''
+    formError.value = ''
     if (!validateBeforeSubmit()) return
     isPublishing.value = true
     try {
       persistCurrentForm()
-      // 预留接口调用，当前先以成功反馈为主
-      formSuccess.value = '专栏内容发布流程已提交（当前为演示态）'
+
+      const fallbackDraft: ColumnDraftItem = {
+        id: Date.now(),
+        title: columnTitle.value.trim() || '未命名草稿',
+        category: category.value,
+        categoryLabel: selectedCategoryLabel.value,
+        content: content.value,
+        imageCount: imageAssets.value.length,
+        attachmentCount: attachmentAssets.value.length,
+        summary: summary.value.trim(),
+        updatedAt: formatNow(),
+      }
+      drafts.value = [fallbackDraft, ...drafts.value].slice(0, 10)
+      persistDrafts()
+      formSuccess.value = '当前后端文档未提供发布接口，已保存为本地待发布草稿'
+      formError.value = ''
     } finally {
       isPublishing.value = false
     }
@@ -318,14 +327,13 @@ export const useColumnEditor = () => {
     isPublishing,
     formError,
     formSuccess,
-    imageInputRef,
-    attachmentInputRef,
+    imageUploadRef,
+    attachmentUploadRef,
     drafts,
     goBack,
-    openImagePicker,
-    openAttachmentPicker,
-    handleImageChange,
-    handleAttachmentChange,
+    handleImageUploadChange,
+    handleAttachmentUploadChange,
+    handleUploadExceed,
     removeImageById,
     removeAttachmentById,
     saveDraft,

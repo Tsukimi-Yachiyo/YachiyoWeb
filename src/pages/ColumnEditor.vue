@@ -22,14 +22,13 @@
     isPublishing,
     formError,
     formSuccess,
-    imageInputRef,
-    attachmentInputRef,
+    imageUploadRef,
+    attachmentUploadRef,
     drafts,
     goBack,
-    openImagePicker,
-    openAttachmentPicker,
-    handleImageChange,
-    handleAttachmentChange,
+    handleImageUploadChange,
+    handleAttachmentUploadChange,
+    handleUploadExceed,
     removeImageById,
     removeAttachmentById,
     saveDraft,
@@ -53,7 +52,7 @@
 
         <div class="left-card">
           <h2>专栏内容编辑</h2>
-          <p>发布的是专栏内容本身，Word / PDF 会作为正文附件插入。</p>
+          <p>发布的是专栏内容本身，附件支持全部格式并会作为正文附件插入。</p>
 
           <label class="label">专栏标题</label>
           <input
@@ -98,7 +97,7 @@
             class="content-textarea"
             rows="13"
             maxlength="20000"
-            placeholder="输入专栏正文，可在下方批量插入图片或 Word/PDF 附件"
+            placeholder="输入专栏正文，可在下方批量插入图片或任意格式附件"
           ></textarea>
         </section>
 
@@ -111,28 +110,30 @@
             <div class="asset-panel">
               <div class="asset-panel-head">
                 <h4>图片素材（支持多张）</h4>
-                <button class="mini-btn" @click="openImagePicker">选择图片</button>
+                <span class="hint">点击下方上传区域选择</span>
               </div>
 
-              <div class="file-box" @click="openImagePicker">
-                <img
-                  v-if="uploadIconUrl"
-                  :src="uploadIconUrl"
-                  alt="上传图片"
-                  style="width: 24px; height: 24px; opacity: 0.9"
-                />
-                <p class="file-name">{{ imageCountText }}</p>
-                <p class="hint">支持 jpg / png / gif / webp，多图会自动追加到正文占位</p>
-              </div>
-
-              <input
-                ref="imageInputRef"
-                type="file"
+              <el-upload
+                ref="imageUploadRef"
+                class="upload-area"
+                :auto-upload="false"
+                :show-file-list="false"
+                :multiple="true"
                 accept="image/*"
-                multiple
-                style="display: none"
-                @change="handleImageChange"
-              />
+                :on-change="handleImageUploadChange"
+                :on-exceed="handleUploadExceed"
+              >
+                <div class="file-box">
+                  <img
+                    v-if="uploadIconUrl"
+                    :src="uploadIconUrl"
+                    alt="上传图片"
+                    style="width: 24px; height: 24px; opacity: 0.9"
+                  />
+                  <p class="file-name">{{ imageCountText }}</p>
+                  <p class="hint">支持 jpg / png / gif / webp，多图会自动追加到正文占位</p>
+                </div>
+              </el-upload>
 
               <ul v-if="imageAssets.length > 0" class="asset-list image-list">
                 <li v-for="item in imageAssets" :key="item.id" class="asset-item image-item">
@@ -147,29 +148,30 @@
 
             <div class="asset-panel">
               <div class="asset-panel-head">
-                <h4>文档附件（Word/PDF）</h4>
-                <button class="mini-btn" @click="openAttachmentPicker">选择文件</button>
+                <h4>文档附件（支持全部格式）</h4>
+                <span class="hint">点击下方上传区域选择</span>
               </div>
 
-              <div class="file-box" @click="openAttachmentPicker">
-                <img
-                  v-if="uploadIconUrl"
-                  :src="uploadIconUrl"
-                  alt="上传附件"
-                  style="width: 24px; height: 24px; opacity: 0.9"
-                />
-                <p class="file-name">{{ attachmentCountText }}</p>
-                <p class="hint">支持 .pdf / .doc / .docx，会插入正文附件占位</p>
-              </div>
-
-              <input
-                ref="attachmentInputRef"
-                type="file"
-                accept=".pdf,.doc,.docx"
-                multiple
-                style="display: none"
-                @change="handleAttachmentChange"
-              />
+              <el-upload
+                ref="attachmentUploadRef"
+                class="upload-area"
+                :auto-upload="false"
+                :show-file-list="false"
+                :multiple="true"
+                :on-change="handleAttachmentUploadChange"
+                :on-exceed="handleUploadExceed"
+              >
+                <div class="file-box">
+                  <img
+                    v-if="uploadIconUrl"
+                    :src="uploadIconUrl"
+                    alt="上传附件"
+                    style="width: 24px; height: 24px; opacity: 0.9"
+                  />
+                  <p class="file-name">{{ attachmentCountText }}</p>
+                  <p class="hint">支持全部文件格式，会插入正文附件占位</p>
+                </div>
+              </el-upload>
 
               <ul v-if="attachmentAssets.length > 0" class="asset-list">
                 <li v-for="item in attachmentAssets" :key="item.id" class="asset-item">
@@ -225,6 +227,11 @@
 </template>
 
 <style scoped>
+  :deep(.upload-area .el-upload) {
+    width: 100%;
+    display: block;
+  }
+
   .column-editor {
     min-height: 100%;
     padding: 20px;
