@@ -108,7 +108,17 @@ const routes: RouteRecordRaw[] = [
     path: '/tsukuyomi/post-editor',
     name: 'PostEditor',
     // 懒加载帖子编辑上传界面组件
-    component: () => import('../pages/PostEditor/PostEditor.vue') as Promise<any>,
+    component: () => import('../pages/PostEditor.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/tsukuyomi/column-editor',
+    name: 'ColumnEditor',
+    // 懒加载专栏编辑界面组件
+    component: () => import('../pages/ColumnEditor.vue') as Promise<any>,
     // 路由守卫，需要登录才能访问
     meta: {
       requiresAuth: true,

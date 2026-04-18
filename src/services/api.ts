@@ -22,6 +22,10 @@ import type {
   Comment,
   AdminPosting,
   SelfPostResponse,
+  ColumnSearchRequest,
+  ColumnResponse,
+  ColumnInteractionRequest,
+  ColumnInteractionResponse,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -128,10 +132,6 @@ apiClient.interceptors.response.use(
             } catch (e) {
               if (import.meta.env.DEV) console.warn('无法解析data字符串为JSON，保持原值:', e)
             }
-          } else {
-            // 不是JSON格式的字符串，保持原值（如JWT令牌）
-            if (import.meta.env.DEV)
-              console.log('data字符串不是JSON格式，保持原值:', `${data.substring(0, 50)}...`)
           }
         }
 
@@ -553,6 +553,34 @@ export const commentAPI = {
     )
   },
 }
+
+export const columnAPI = {
+  searchColumn(payload: ColumnSearchRequest): Promise<ApiResponse<ColumnResponse[]>> {
+    const searchParams = new URLSearchParams({
+      keyword: payload.keyword,
+      pageNum: String(payload.pageNum),
+      pageSize: String(payload.pageSize),
+    })
+    return unwrapData(
+      apiClient.get<ApiResponse<ColumnResponse[]>>(
+        `/api/v2/column/search?${searchParams.toString()}`
+      )
+    )
+  },
+
+  interactionColumn(payload: ColumnInteractionRequest): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/column/interaction', payload))
+  },
+
+  getInteraction(columnId: number): Promise<ApiResponse<ColumnInteractionResponse>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ColumnInteractionResponse>>('/api/v2/column/getInteraction', {
+        params: { columnId },
+      })
+    )
+  },
+}
+
 export interface MailItem {
   id: number
   title: string

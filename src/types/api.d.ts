@@ -171,3 +171,34 @@ export interface SelfPostResponse {
   approved?: boolean | null
   [key: string]: any
 }
+
+export type ColumnType = 'SIMPLE' | 'NOVEL' | 'ACTIVITY'
+
+export interface ColumnSearchRequest {
+  keyword: string
+  pageNum: number
+  pageSize: number
+}
+
+export interface ColumnResponse {
+  id: number
+  name: string
+  description: string
+  type: ColumnType
+  writer: number
+  essayUrl: string
+  essayURL?: string
+  coverImage?: string
+  coverUrl?: string
+  createTime: Record<string, unknown> | string
+}
+
+export interface ColumnInteractionRequest {
+  columnId: number
+  type: 'LIKE' | 'COIN'
+}
+
+export interface ColumnInteractionResponse {
+  coin: number
+  like: number
+}
