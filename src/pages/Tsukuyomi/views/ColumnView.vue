@@ -90,13 +90,17 @@
 
   // 智能分割算法 - 获取当前最大的矩形
   const getLargestRect = (rects: Rect[]): Rect => {
-    return rects.reduce((max, rect) => 
+    return rects.reduce((max, rect) =>
       rect.width * rect.height > max.width * max.height ? rect : max
     )
   }
 
   // 智能分割算法 - 切分单个矩形（考虑间隔）
-  const splitRect = (rect: Rect, containerWidth: number, containerHeight: number): [Rect, Rect] | null => {
+  const splitRect = (
+    rect: Rect,
+    containerWidth: number,
+    containerHeight: number
+  ): [Rect, Rect] | null => {
     const isVertical = Math.random() > 0.5
     const [min, max] = SPLIT_RANGE
     const ratio = min + Math.random() * (max - min)
@@ -119,7 +123,7 @@
     }
 
     // 校验：排除正方形 + 最小尺寸限制
-    const isValid = (r: Rect) => 
+    const isValid = (r: Rect) =>
       Math.abs(r.width - r.height) > Math.min(r.width, r.height) * 0.1 && // 不是近似正方形
       r.width > containerWidth * MIN_RATIO &&
       r.height > containerHeight * MIN_RATIO
@@ -133,21 +137,21 @@
   // 智能分割算法 - 生成n个矩形（考虑边界间隔）
   const generateLayout = (count: number, width: number, height: number): Rect[] => {
     // 初始矩形减去边界间隔
-    const initialRect: Rect = { 
-      x: GAP_SIZE, 
-      y: GAP_SIZE, 
-      width: width - GAP_SIZE * 2, 
-      height: height - GAP_SIZE * 2 
+    const initialRect: Rect = {
+      x: GAP_SIZE,
+      y: GAP_SIZE,
+      width: width - GAP_SIZE * 2,
+      height: height - GAP_SIZE * 2,
     }
-    
-    let rects: Rect[] = [initialRect]
+
+    const rects: Rect[] = [initialRect]
     let attempts = 0
     const maxAttempts = count * 50
 
     while (rects.length < count && attempts < maxAttempts) {
       const largest = getLargestRect(rects)
       const splitResult = splitRect(largest, width, height)
-      
+
       if (splitResult) {
         const index = rects.indexOf(largest)
         rects.splice(index, 1, splitResult[0], splitResult[1])
@@ -175,7 +179,7 @@
     if (containerRef.value) {
       containerSize.value = {
         width: containerRef.value.clientWidth,
-        height: containerRef.value.clientHeight
+        height: containerRef.value.clientHeight,
       }
     }
   }
@@ -189,13 +193,13 @@
     await nextTick()
     await nextTick() // 再等一个 tick，确保 DOM 完全更新
     initContainer()
-    
+
     console.log('[ColumnView] 容器尺寸:', containerSize.value)
-    
+
     // 如果容器尺寸为 0，使用默认值
-    let width = containerSize.value.width || 1200
-    let height = containerSize.value.height || 600
-    
+    const width = containerSize.value.width || 1200
+    const height = containerSize.value.height || 600
+
     // 生成智能布局
     const rects = generateLayout(columns.length, width, height)
     console.log('[ColumnView] 生成的布局矩形:', rects)
@@ -207,7 +211,7 @@
       visible: true,
       writerName: undefined,
       writerAvatar: undefined,
-      rect: rects[i] || { x: 0, y: 0, width: 100, height: 100 }
+      rect: rects[i] || { x: 0, y: 0, width: 100, height: 100 },
     }))
     console.log('[ColumnView] 处理后的专栏数据:', columnItems.value)
 
@@ -222,10 +226,13 @@
     loadingInitial.value = true
     globalError.value = ''
     try {
-      console.log('[ColumnView] 开始获取专栏，搜索关键词:', activeKeyword.value || '（空，获取全部）')
+      console.log(
+        '[ColumnView] 开始获取专栏，搜索关键词:',
+        activeKeyword.value || '（空，获取全部）'
+      )
       const response = await columnAPI.searchColumn(activeKeyword.value, 1, PAGE_SIZE)
       console.log('[ColumnView] API响应:', response)
-      
+
       if (!response.success || !response.data) {
         console.error('[ColumnView] API响应失败或无数据:', response)
         globalError.value = response.message || '获取专栏失败'
@@ -244,7 +251,7 @@
       // 先设置 loading 为 false，让容器显示出来
       loadingInitial.value = false
       tempColumns.value = columns
-      
+
       // 然后生成布局
       await generateLayoutAndSetColumns(columns)
     } catch (err: unknown) {
@@ -269,19 +276,27 @@
     // 先设置 ResizeObserver，确保容器渲染后能立即监听
     const setupResizeObserver = () => {
       if (containerRef.value) {
-        resizeObserver.value = new ResizeObserver((entries) => {
-          for (let entry of entries) {
+        resizeObserver.value = new ResizeObserver(entries => {
+          for (const entry of entries) {
             containerSize.value = {
               width: entry.contentRect.width,
-              height: entry.contentRect.height
+              height: entry.contentRect.height,
             }
           }
-          
+
           console.log('[ColumnView] 容器尺寸变化:', containerSize.value)
-          
+
           // 重新生成布局
-          if (columnItems.value.length > 0 && containerSize.value.width > 0 && containerSize.value.height > 0) {
-            const rects = generateLayout(columnItems.value.length, containerSize.value.width, containerSize.value.height)
+          if (
+            columnItems.value.length > 0 &&
+            containerSize.value.width > 0 &&
+            containerSize.value.height > 0
+          ) {
+            const rects = generateLayout(
+              columnItems.value.length,
+              containerSize.value.width,
+              containerSize.value.height
+            )
             columnItems.value.forEach((col, i) => {
               col.rect = rects[i] || col.rect
             })
@@ -290,7 +305,7 @@
         resizeObserver.value.observe(containerRef.value)
       }
     }
-    
+
     // 等待 DOM 渲染完成
     setTimeout(() => {
       setupResizeObserver()
@@ -306,7 +321,7 @@
 <template>
   <div class="view-container">
     <div class="search-container">
-    <!-- Search bar -->
+      <!-- Search bar -->
       <div class="search-toggle-container">
         <button class="search-toggle-button" @click="showSearchBar = !showSearchBar">
           <img
@@ -318,7 +333,6 @@
           <span>搜索专栏</span>
         </button>
       </div>
-
 
       <transition name="search-bar">
         <div v-if="showSearchBar" class="search-container">
@@ -332,7 +346,6 @@
           <button class="search-button" @click="searchColumns">搜索</button>
         </div>
       </transition>
-
     </div>
 
     <!-- Loading -->
@@ -357,7 +370,7 @@
             left: column.rect.x + 'px',
             top: column.rect.y + 'px',
             width: column.rect.width + 'px',
-            height: column.rect.height + 'px'
+            height: column.rect.height + 'px',
           }"
           @click="handleCardClick(column)"
         >

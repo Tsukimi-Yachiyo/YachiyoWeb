@@ -44,7 +44,7 @@
   const fetchEssayContent = async (url: string) => {
     try {
       essayUrlRef.value = url
-      
+
       // 先检查 URL 是否是 HTML 文件
       if (checkIsHtmlFile(url)) {
         isHtmlFile.value = true
@@ -58,14 +58,14 @@
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const text = await response.text()
-      
+
       // 检查内容是否是 HTML
       if (checkIsHtmlFile(url, text)) {
         isHtmlFile.value = true
         loading.value = false
         return
       }
-      
+
       content.value = text
     } catch (err: unknown) {
       console.error('获取文件内容失败:', err)
@@ -104,7 +104,12 @@
   <div v-if="isHtmlFile" class="html-viewer">
     <div class="html-header">
       <button class="exit-button" @click="handleExit">
-        <img v-if="exitIconUrl" :src="exitIconUrl" alt="返回" style="width: 20px; height: 20px; filter: brightness(0) invert(1)" />
+        <img
+          v-if="exitIconUrl"
+          :src="exitIconUrl"
+          alt="返回"
+          style="width: 20px; height: 20px; filter: brightness(0) invert(1)"
+        />
         <span>返回</span>
       </button>
       <h1 class="page-title">{{ title }}</h1>
@@ -116,7 +121,12 @@
   <div v-else class="file-viewer-container">
     <div class="header">
       <button class="exit-button" @click="handleExit">
-        <img v-if="exitIconUrl" :src="exitIconUrl" alt="返回" style="width: 20px; height: 20px; filter: brightness(0) invert(1)" />
+        <img
+          v-if="exitIconUrl"
+          :src="exitIconUrl"
+          alt="返回"
+          style="width: 20px; height: 20px; filter: brightness(0) invert(1)"
+        />
         <span>返回</span>
       </button>
       <h1 class="page-title">{{ title }}</h1>
