@@ -22,6 +22,9 @@ import type {
   Comment,
   AdminPosting,
   SelfPostResponse,
+  ColumnResponse,
+  ColumnInteractionResponse,
+  ColumnInteractionRequest,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -627,4 +630,41 @@ export const coinAPI = {
     return unwrapData(apiClient.post<ApiResponse<number>>('/api/v2/coin/get'))
   },
 }
+
+export const columnAPI = {
+  // 搜索专栏
+  searchColumn(
+    keyword: string,
+    pageNum: number,
+    pageSize: number
+  ): Promise<ApiResponse<ColumnResponse[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<ColumnResponse[]>>('/api/v2/column/search', {
+        keyword,
+        pageNum,
+        pageSize,
+      })
+    )
+  },
+
+  // 专栏互动（点赞/投币）
+  columnInteraction(columnId: number, type: 'LIKE' | 'COIN'): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v2/column/interaction', {
+        columnId,
+        type,
+      })
+    )
+  },
+
+  // 获取互动信息
+  getColumnInteraction(columnId: number): Promise<ApiResponse<ColumnInteractionResponse>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ColumnInteractionResponse>>(
+        `/api/v2/column/getInteraction?columnId=${columnId}`
+      )
+    )
+  },
+}
+
 export default apiClient
