@@ -47,12 +47,12 @@ export default defineConfig({
     // 配置代理，解决CORS问题
     proxy: {
       '/api': {
-        target: 'http://211.101.237.141:8881',
+        target: 'http://211.101.234.16:8881',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '/api')
       },
       '/file': {
-        target: 'http://211.101.237.141:8881',
+        target: 'http://211.101.234.16:8881',
         changeOrigin: true,
         rewrite: path => path,
       },

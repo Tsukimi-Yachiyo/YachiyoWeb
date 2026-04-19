@@ -169,6 +169,16 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/file-viewer',
+    name: 'FileViewer',
+    // 懒加载文件查看器组件
+    component: () => import('../pages/FileViewer/FileViewer.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ]
 
 const router = createRouter({
