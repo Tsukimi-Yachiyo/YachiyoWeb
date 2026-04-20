@@ -353,14 +353,11 @@ export function useUserSettings() {
       changePasswordEmail.value = changePasswordEmail.value.replace(/[^\u0020-\u007E]/g, '')
 
       const codeResponse = await apiClient.post(
-        '/api/v1/auth/send-code',
-        changePasswordEmail.value,
-        {
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        }
+        `/api/v1/auth/send-code?email=${encodeURIComponent(changePasswordEmail.value)}`
+        // 注意：第二个参数传 null 或不传，axios 会自动处理
       )
+
+      console.log('验证码发送成功', codeResponse)
 
       if (codeResponse.data && codeResponse.data.success) {
         changePasswordSuccess.value = '验证码已发送，请查收'

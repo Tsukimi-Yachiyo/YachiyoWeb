@@ -22,6 +22,9 @@ import type {
   Comment,
   AdminPosting,
   SelfPostResponse,
+  ColumnResponse,
+  ColumnInteractionResponse,
+  ColumnInteractionRequest,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -619,7 +622,12 @@ export const mailAPI = {
 export const coinAPI = {
   // 签到
   sign(): Promise<ApiResponse<boolean>> {
-    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/check_in'))
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/check-in'))
+  },
+
+  // 获取签到状态
+  getSignStatus(): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/status'))
   },
 
   // 获取金币数量
@@ -627,4 +635,120 @@ export const coinAPI = {
     return unwrapData(apiClient.post<ApiResponse<number>>('/api/v2/coin/get'))
   },
 }
+
+export const columnAPI = {
+  // 搜索专栏
+  searchColumn(
+    keyword: string,
+    pageNum: number,
+    pageSize: number
+  ): Promise<ApiResponse<ColumnResponse[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<ColumnResponse[]>>('/api/v2/column/search', {
+        keyword,
+        pageNum,
+        pageSize,
+      })
+    )
+  },
+
+  // 专栏互动（点赞/投币）
+  columnInteraction(columnId: number, type: 'LIKE' | 'COIN'): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v2/column/interaction', {
+        columnId,
+        type,
+      })
+    )
+  },
+
+  // 获取互动信息
+  getColumnInteraction(columnId: number): Promise<ApiResponse<ColumnInteractionResponse>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ColumnInteractionResponse>>(
+        `/api/v2/column/getInteraction?columnId=${columnId}`
+      )
+    )
+  },
+}
+
+export const authAPI = {
+  // 用户名密码登录
+  login(username: string, password: string): Promise<ApiResponse<string>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>('/api/v1/auth/login', {
+        username,
+        password,
+      })
+    )
+  },
+
+  // 用户注册
+  register(
+    username: string,
+    password: string,
+    email: string,
+    code: string
+  ): Promise<ApiResponse<string>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>('/api/v1/auth/register', {
+        username,
+        password,
+        email,
+        code,
+      })
+    )
+  },
+
+  // 发送验证码
+  sendCode(email: string): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v1/auth/send-code?email=${encodeURIComponent(email)}`
+      )
+    )
+  },
+
+  // 邮箱验证码登录
+  loginByEmail(email: string, code: string): Promise<ApiResponse<string>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>('/api/v1/auth/login-by-email', {
+        email,
+        code,
+      })
+    )
+  },
+
+  // 修改密码
+  changePassword(
+    username: string,
+    password: string,
+    email: string,
+    code: string
+  ): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>('/api/v1/auth/change-password', {
+        username,
+        password,
+        email,
+        code,
+      })
+    )
+  },
+
+  // 退出登录
+  logout(): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v1/auth/logout'))
+  },
+
+  // 刷新令牌
+  refreshToken(refreshToken: string, userId: number): Promise<ApiResponse<string>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<string>>(
+        `/api/v1/auth/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}&userId=${userId}`
+      )
+    )
+  },
+}
+
 export default apiClient
