@@ -622,7 +622,12 @@ export const mailAPI = {
 export const coinAPI = {
   // 签到
   sign(): Promise<ApiResponse<boolean>> {
-    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/check_in'))
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/check-in'))
+  },
+
+  // 获取签到状态
+  getSignStatus(): Promise<ApiResponse<boolean>> {
+    return unwrapData(apiClient.post<ApiResponse<boolean>>('/api/v2/sign/status'))
   },
 
   // 获取金币数量

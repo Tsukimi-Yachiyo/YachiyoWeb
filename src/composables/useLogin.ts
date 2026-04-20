@@ -2,7 +2,7 @@ import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuth } from './useAuth'
-import apiClient from '../services/api'
+import { authAPI } from '../services/api'
 
 export function useLogin() {
   const router = useRouter()
@@ -340,21 +340,17 @@ export function useLogin() {
       email.value = email.value.trim().toLowerCase()
       email.value = email.value.replace(/[^\u0020-\u007E]/g, '')
 
-      // 发送验证码 - 后端期望纯文本字符串，而不是JSON对象
-      const codeResponse = await apiClient.post('/api/v1/auth/send-code', email.value, {
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      })
+      // 发送验证码
+      const codeResponse = await authAPI.sendCode(email.value)
 
-      if (codeResponse.data && codeResponse.data.success) {
+      if (codeResponse.success) {
         successMessage.value = '验证码已发送，请查收'
         startCodeCountdown()
         showCaptchaModal.value = false
         captchaInput.value = ''
       } else {
         // 使用服务器返回的错误消息
-        error.value = codeResponse.data?.message || '发送验证码失败，请重试'
+        error.value = codeResponse.message || '发送验证码失败，请重试'
       }
     } catch (err) {
       console.error('发送验证码失败:', err)
@@ -400,21 +396,21 @@ export function useLogin() {
 
     isLoading.value = true
     try {
-      const response = await apiClient.post('/api/v1/auth/register', {
-        username: form.value.username,
-        password: form.value.password,
-        email: email.value,
-        code: code.value,
-      })
+      const response = await authAPI.register(
+        form.value.username,
+        form.value.password,
+        email.value,
+        code.value
+      )
 
-      if (response.data && response.data.code === '200') {
-        login(response.data.data, form.value.username)
+      if (response.success) {
+        login(response.data, form.value.username)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
         }, 1000)
       } else {
-        error.value = response.data?.message || '注册失败，请重试'
+        error.value = response.message || '注册失败，请重试'
       }
     } catch (err) {
       console.error('[Register] 注册失败:', err)
@@ -429,25 +425,22 @@ export function useLogin() {
     isLoading.value = true
 
     try {
-      const response = await apiClient.post('/api/v1/auth/login', {
-        username: form.value.username,
-        password: form.value.password,
-      })
+      const response = await authAPI.login(form.value.username, form.value.password)
 
-      if (response.data && response.data.code === '200') {
-        login(response.data.data, form.value.username)
+      if (response.success) {
+        login(response.data, form.value.username)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
         }, 1000)
       } else {
-        const errorCode = response.data?.code
+        const errorCode = response.code
         if (errorCode === '400.1') {
           error.value = '用户不存在，请先注册'
         } else if (errorCode === '400.2') {
           error.value = '密码错误，请重新输入'
         } else {
-          error.value = response.data?.message || '操作失败，请重试'
+          error.value = response.message || '操作失败，请重试'
         }
       }
     } catch (err) {
@@ -474,19 +467,16 @@ export function useLogin() {
 
     isLoading.value = true
     try {
-      const response = await apiClient.post('/api/v1/auth/login-by-email', {
-        email: email.value,
-        code: code.value,
-      })
+      const response = await authAPI.loginByEmail(email.value, code.value)
 
-      if (response.data && response.data.code === '200') {
-        login(response.data.data, email.value.split('@')[0])
+      if (response.success) {
+        login(response.data, email.value.split('@')[0])
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
         }, 1000)
       } else {
-        error.value = response.data?.message || '邮箱登录失败，请重试'
+        error.value = response.message || '邮箱登录失败，请重试'
       }
     } catch (err) {
       console.error('[EmailLogin] 登录失败:', err)
@@ -522,14 +512,14 @@ export function useLogin() {
 
     isLoading.value = true
     try {
-      const response = await apiClient.post('/api/v1/auth/change-password', {
-        username: form.value.username,
-        password: form.value.password,
-        email: email.value,
-        code: code.value,
-      })
+      const response = await authAPI.changePassword(
+        form.value.username,
+        form.value.password,
+        email.value,
+        code.value
+      )
 
-      if (response.data && response.data.code === '200') {
+      if (response.success) {
         successMessage.value = '密码重置成功，请使用新密码登录'
         // 重置表单并切换回登录模式
         setTimeout(() => {
@@ -542,7 +532,7 @@ export function useLogin() {
           code.value = ''
         }, 2000)
       } else {
-        error.value = response.data?.message || '密码重置失败，请重试'
+        error.value = response.message || '密码重置失败，请重试'
       }
     } catch (err) {
       console.error('[ForgotPassword] 密码重置失败:', err)
