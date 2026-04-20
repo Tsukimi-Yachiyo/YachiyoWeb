@@ -15,6 +15,8 @@ export default [
       'public/**',
       '.cache/**',
       '.temp/**',
+      '.vite/**',
+      '.trae/**',
       '.vscode/**',
       '.idea/**',
       '*.log',

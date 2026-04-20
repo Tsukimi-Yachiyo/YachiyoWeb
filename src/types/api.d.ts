@@ -171,3 +171,39 @@ export interface SelfPostResponse {
   approved?: boolean | null
   [key: string]: any
 }
+
+/**
+ * 专栏类型枚举
+ */
+export type ColumnType = 'SIMPLE' | 'NOVEL' | 'ACTIVITY'
+
+/**
+ * 专栏信息
+ */
+export interface ColumnResponse {
+  id: number
+  name: string
+  description: string
+  type: ColumnType
+  writer: number
+  essayUrl: string
+  createTime: string
+  [key: string]: any
+}
+
+/**
+ * 专栏互动信息
+ */
+export interface ColumnInteractionResponse {
+  coin: number
+  like: number
+  [key: string]: any
+}
+
+/**
+ * 专栏互动请求
+ */
+export interface ColumnInteractionRequest {
+  columnId: number
+  type: 'LIKE' | 'COIN'
+}
