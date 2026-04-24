@@ -310,9 +310,7 @@ export const userAPI = {
 
   getUserDetailById(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
     return unwrapData(
-      apiClient.post<ApiResponse<PosterDetailResponse>>(
-        `/api/v2/user/detail/get?userId=${userId}`
-      )
+      apiClient.post<ApiResponse<PosterDetailResponse>>(`/api/v2/user/detail/get?userId=${userId}`)
     )
   },
 
