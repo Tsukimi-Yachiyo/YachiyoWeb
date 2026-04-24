@@ -179,6 +179,22 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/pdf-viewer',
+    name: 'PDFViewer',
+    // 懒加载PDF查看器组件
+    component: () => import('../pages/PDFViewer/PDFViewer.vue') as Promise<any>,
+    // 路由守卫，需要登录才能访问
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/user/:user_id',
+    name: 'UserProfile',
+    component: () => import('../pages/UserProfile/UserProfile.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({

@@ -207,3 +207,35 @@ export interface ColumnInteractionRequest {
   columnId: number
   type: 'LIKE' | 'COIN'
 }
+
+/**
+ * 用户公开详情
+ */
+export interface UserPublicDetailResponse {
+  userIntroduction?: string
+  userCity?: string
+  userGender?: string
+  [key: string]: any
+}
+
+/**
+ * 搜索用户结果
+ */
+export interface SearchUserItem {
+  userName: string
+  userAvatar: string
+  followerCount: number
+  isFollowing: boolean
+  isFollowed: boolean
+  [key: string]: any
+}
+
+/**
+ * 用户粉丝/关注列表
+ */
+export interface UserRelationListResponse {
+  id: number
+  userName: string
+  userAvatar: string
+  [key: string]: any
+}

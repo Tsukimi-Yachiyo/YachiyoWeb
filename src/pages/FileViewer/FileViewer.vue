@@ -19,10 +19,17 @@
   const loading = ref(true)
   const error = ref('')
   const isHtmlFile = ref(false)
+  const isPdfFile = ref(false) // 新增：PDF文件标识
   const essayUrlRef = ref('')
 
   const handleExit = () => {
     router.back()
+  }
+
+  // 判断是否是 PDF 文件
+  const checkIsPdfFile = (url: string): boolean => {
+    // 检查 URL 扩展名
+    return url.toLowerCase().endsWith('.pdf')
   }
 
   // 判断是否是 HTML 文件
@@ -45,7 +52,23 @@
     try {
       essayUrlRef.value = url
 
-      // 先检查 URL 是否是 HTML 文件
+      // 检查是否为PDF文件
+      if (checkIsPdfFile(url)) {
+        isPdfFile.value = true
+        loading.value = false
+        // 重定向到PDFViewer
+        router.push({
+          name: 'PDFViewer',
+          query: {
+            pdfUrl: url,
+            essayUrl: url, // 保持向后兼容
+            title: title.value,
+          },
+        })
+        return
+      }
+
+      // 检查是否为HTML文件
       if (checkIsHtmlFile(url)) {
         isHtmlFile.value = true
         loading.value = false

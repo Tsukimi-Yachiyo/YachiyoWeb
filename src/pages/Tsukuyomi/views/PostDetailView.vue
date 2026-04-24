@@ -15,12 +15,10 @@
     const iconData = checkIconCache('arrow-left.svg')
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
   })
-
   const likeIconUrl = computed(() => {
     const iconData = checkIconCache('heart.svg')
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
   })
-
   const collectionIconUrl = computed(() => {
     const iconData = checkIconCache('bookmark.svg')
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
@@ -57,7 +55,6 @@
   // 计算属性，用于渲染 markdown 内容并处理多媒体
   const renderedContent = computed(() => {
     if (!postData.value || !postData.value.content) return ''
-
     let content = postData.value.content
     console.log('原始内容:', content)
     console.log('文件名列表:', postData.value.filenames)
@@ -67,7 +64,6 @@
     content = content.replace(/\{photo:"([^"]+)"\}/g, (match, filename) => {
       console.log('匹配到多媒体标记:', match)
       console.log('提取的文件名:', filename)
-
       // 查找对应的文件索引
       const fileIndex = postData.value.filenames?.indexOf(filename)
       console.log('文件索引:', fileIndex)
@@ -77,12 +73,10 @@
         console.log('文件数据类型:', typeof postData.value.files[fileIndex])
         console.log('文件数据长度:', postData.value.files[fileIndex].length)
         console.log('文件数据前10个元素:', postData.value.files[fileIndex].slice(0, 10))
-
         try {
           // 尝试不同的方式处理图片数据
           let imageUrl = ''
           const fileData = postData.value.files[fileIndex]
-
           if (typeof fileData === 'string') {
             // 如果是 Base64 字符串
             console.log('文件数据是字符串')
@@ -100,7 +94,6 @@
             const base64 = btoa(binary)
             imageUrl = `data:image/gif;base64,${base64}`
           }
-
           console.log('生成的图片URL:', imageUrl)
           return `<img src="${imageUrl}" alt="${filename}" class="post-media-image" />`
         } catch (error) {
@@ -110,7 +103,6 @@
       }
       return match
     })
-
     console.log('处理后的内容:', content)
     return marked(content)
   })
@@ -120,7 +112,6 @@
     try {
       loading.value = true
       error.value = null
-
       // 获取帖子详情
       const result = await postAPI.getPosting(postId.value)
       if (result.success) {
@@ -129,12 +120,10 @@
         error.value = result.message || '获取帖子失败'
         return
       }
-
       // 获取帖子简介信息
       const encapsulateResponse = await postAPI.getPostingEncapsulate(postId.value)
       if (encapsulateResponse.success && encapsulateResponse.data) {
         postInfo.value = encapsulateResponse.data
-
         // 获取发帖人详情
         if (postInfo.value.posterId) {
           const posterResponse = await userAPI.getPosterDetail(postInfo.value.posterId)
@@ -143,10 +132,8 @@
           }
         }
       }
-
       // 获取帖子的点赞数和收藏数
       await loadPostStats()
-
       // 加载评论列表
       await loadComments()
     } catch (err) {
@@ -183,7 +170,6 @@
   // 处理点赞
   const handleLike = async () => {
     if (actionLoading.value) return
-
     actionLoading.value = true
     try {
       const action = isLiked.value ? 'REMOVE' : 'ADD'
@@ -202,7 +188,6 @@
   // 处理收藏
   const handleCollection = async () => {
     if (actionLoading.value) return
-
     actionLoading.value = true
     try {
       const action = isCollected.value ? 'REMOVE' : 'ADD'
@@ -220,6 +205,13 @@
     }
   }
 
+  // 跳转到用户个人资料页面
+  const goToUserProfile = () => {
+    if (postInfo.value?.posterId) {
+      router.push(`/user/${postInfo.value.posterId}`)
+    }
+  }
+
   // 加载评论列表
   const loadComments = async () => {
     try {
@@ -230,7 +222,10 @@
         // 获取评论者的头像和昵称
         const commentsWithUserInfo = await Promise.all(
           response.data.map(async comment => {
-            let userInfo = { userName: '未知用户', userAvatar: null }
+            let userInfo = {
+              userName: '未知用户',
+              userAvatar: null,
+            }
             if (comment.userId) {
               try {
                 const userResponse = await userAPI.getPosterDetail(comment.userId)
@@ -333,16 +328,22 @@
           <h1 class="page-title">{{ postInfo?.title || '帖子详情' }}</h1>
           <!-- 用户名和头像 -->
           <div v-if="posterDetail" class="user-info">
-            <span class="user-name">{{ posterDetail?.userName || '未知用户' }}</span>
-            <img
-              v-if="posterDetail?.userAvatar"
-              :src="processImageData(posterDetail.userAvatar)"
-              alt="用户头像"
-              class="user-avatar"
-            />
-            <span v-else class="user-avatar-placeholder">{{
-              posterDetail?.userName?.charAt(0).toUpperCase() || 'U'
-            }}</span>
+            <button class="user-name-button" @click="goToUserProfile">
+              <span class="user-name">
+                {{ posterDetail?.userName || '未知用户' }}
+              </span>
+            </button>
+            <button class="avatar-button" @click="goToUserProfile">
+              <img
+                v-if="posterDetail?.userAvatar"
+                :src="processImageData(posterDetail.userAvatar)"
+                alt="用户头像"
+                class="user-avatar"
+              />
+              <span v-else class="user-avatar-placeholder">
+                {{ posterDetail?.userName?.charAt(0).toUpperCase() || 'U' }}
+              </span>
+            </button>
           </div>
         </div>
 
@@ -381,7 +382,9 @@
                   style="width: 16px; height: 16px; filter: brightness(0) invert(1)"
                 />
                 <span v-else class="action-icon">❤️</span>
-                <span class="action-count">{{ likeCount }}</span>
+                <span class="action-count">
+                  {{ likeCount }}
+                </span>
               </button>
               <button
                 class="action-button collection-button"
@@ -397,7 +400,9 @@
                   style="width: 16px; height: 16px; filter: brightness(0) invert(1)"
                 />
                 <span v-else class="action-icon">⭐</span>
-                <span class="action-count">{{ collectionCount }}</span>
+                <span class="action-count">
+                  {{ collectionCount }}
+                </span>
               </button>
             </div>
           </div>
@@ -405,7 +410,6 @@
           <!-- 评论区域 -->
           <div class="comments-section">
             <h3 class="comments-title">评论</h3>
-
             <!-- 评论输入框 -->
             <div class="comment-input-container">
               <img
@@ -414,9 +418,9 @@
                 alt="用户头像"
                 class="comment-input-avatar"
               />
-              <span v-else class="comment-input-avatar-placeholder">{{
-                username?.charAt(0).toUpperCase() || 'U'
-              }}</span>
+              <span v-else class="comment-input-avatar-placeholder">
+                {{ username?.charAt(0).toUpperCase() || 'U' }}
+              </span>
               <div class="comment-input-wrapper">
                 <textarea
                   v-model="commentContent"
@@ -433,18 +437,15 @@
                 </button>
               </div>
             </div>
-
             <!-- 评论错误信息 -->
             <div v-if="commentError" class="comment-error">
               {{ commentError }}
             </div>
-
             <!-- 评论加载状态 -->
             <div v-if="commentLoading" class="comment-loading">
               <div class="loading-spinner small"></div>
               <span>加载评论中...</span>
             </div>
-
             <!-- 评论列表 -->
             <div v-else class="comments-list">
               <div v-if="comments.length === 0" class="no-comments">
@@ -457,9 +458,9 @@
                   alt="用户头像"
                   class="comment-avatar"
                 />
-                <span v-else class="comment-avatar-placeholder">{{
-                  comment.userName?.charAt(0).toUpperCase() || 'U'
-                }}</span>
+                <span v-else class="comment-avatar-placeholder">
+                  {{ comment.userName?.charAt(0).toUpperCase() || 'U' }}
+                </span>
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-username">{{ comment.userName }}</span>
@@ -560,6 +561,23 @@
     margin-left: 16px;
   }
 
+  .user-name-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    transition: all 0.3s ease;
+  }
+
+  .user-name-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .user-name-button:hover .user-name {
+    color: #2196f3;
+  }
+
   .user-name {
     font-size: 14px;
     font-weight: 500;
@@ -570,17 +588,34 @@
     max-width: 120px;
   }
 
+  .avatar-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+
+  .avatar-button:hover {
+    box-shadow:
+      0 0 20px rgba(33, 150, 243, 0.6),
+      0 0 40px rgba(33, 150, 243, 0.3);
+    transform: scale(1.05);
+  }
+
   .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .user-avatar-placeholder {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
     display: flex;
@@ -616,7 +651,6 @@
     0% {
       transform: rotate(0deg);
     }
-
     100% {
       transform: rotate(360deg);
     }
@@ -920,7 +954,7 @@
   .no-comments {
     text-align: center;
     color: rgba(255, 255, 255, 0.6);
-    padding: 40px 20px;
+    padding: 60px 20px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     border: 1px dashed rgba(255, 255, 255, 0.2);
@@ -1009,32 +1043,6 @@
     word-break: break-word;
   }
 
-  /* 帖子图片 */
-  .post-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .image-item {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-  }
-
-  .image-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-
-  .post-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
   /* 帖子操作按钮 */
   .post-actions {
     position: absolute;
@@ -1080,15 +1088,6 @@
     box-shadow: none;
   }
 
-  .action-icon {
-    font-size: 16px;
-  }
-
-  .action-count {
-    font-size: 14px;
-    font-weight: 500;
-  }
-
   /* 空状态 */
   .empty-container {
     flex: 1;
@@ -1118,10 +1117,6 @@
     border-radius: 3px;
   }
 
-  .content-area::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
   /* 响应式设计 */
   @media (max-width: 768px) {
     .content-area {
@@ -1138,34 +1133,6 @@
 
     .post-text {
       font-size: 15px;
-    }
-
-    .post-images {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 10px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .content-area {
-      padding: 12px;
-    }
-
-    .page-title {
-      font-size: 18px;
-    }
-
-    .post-content {
-      padding: 12px;
-    }
-
-    .post-text {
-      font-size: 14px;
-    }
-
-    .post-images {
-      grid-template-columns: 1fr;
-      gap: 8px;
     }
   }
 </style>

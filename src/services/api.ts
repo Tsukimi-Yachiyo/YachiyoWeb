@@ -25,6 +25,9 @@ import type {
   ColumnResponse,
   ColumnInteractionResponse,
   ColumnInteractionRequest,
+  UserPublicDetailResponse,
+  SearchUserItem,
+  UserRelationListResponse,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -300,7 +303,47 @@ export const userAPI = {
   getPosterDetail(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
     return unwrapData(
       apiClient.post<ApiResponse<PosterDetailResponse>>(
-        `/api/v2/user/detail/get/user?userId=${userId}`
+        `/api/v2/user/detail/poster/get?userId=${userId}`
+      )
+    )
+  },
+
+  getUserDetailById(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<PosterDetailResponse>>(`/api/v2/user/detail/get?userId=${userId}`)
+    )
+  },
+
+  getUserPublicDetail(userId: number): Promise<ApiResponse<UserPublicDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<UserPublicDetailResponse>>(
+        `/api/v2/user/detail/user/detail/get?userId=${userId}`
+      )
+    )
+  },
+
+  getUserFollows(): Promise<ApiResponse<number[]>> {
+    return unwrapData(apiClient.post<ApiResponse<number[]>>('/api/v2/user/detail/user/follow/get'))
+  },
+
+  getUserFollowers(): Promise<ApiResponse<number[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number[]>>('/api/v2/user/detail/user/follow/getFollower')
+    )
+  },
+
+  followUser(followeeId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v2/user/detail/user/follow/follow?followeeId=${followeeId}`
+      )
+    )
+  },
+
+  getFollowStatus(followeeId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v2/user/detail/user/follow/status/get?followeeId=${followeeId}`
       )
     )
   },
@@ -440,6 +483,13 @@ export const postAPI = {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       })
+    )
+  },
+
+  // 获取用户的帖子列表
+  getUserPosting(userId: number): Promise<ApiResponse<number[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number[]>>(`/api/v2/posting/user?userId=${userId}`)
     )
   },
 }
