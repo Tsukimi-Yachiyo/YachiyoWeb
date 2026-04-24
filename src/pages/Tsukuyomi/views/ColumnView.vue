@@ -268,7 +268,17 @@
 
   const handleCardClick = (column: ColumnItem) => {
     if (column.essayUrl) {
-      router.push({ name: 'FileViewer', query: { essayUrl: column.essayUrl, title: column.name } })
+      // 检查URL是否是PDF文件
+      if (column.essayUrl.toLowerCase().endsWith('.pdf')) {
+        // 直接导航到PDF查看器
+        router.push({ name: 'PDFViewer', query: { pdfUrl: column.essayUrl, title: column.name } })
+      } else {
+        // 对于非PDF文件，使用现有的FileViewer
+        router.push({
+          name: 'FileViewer',
+          query: { essayUrl: column.essayUrl, title: column.name },
+        })
+      }
     }
   }
 
