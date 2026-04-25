@@ -1,5 +1,38 @@
 @import 'tailwindcss';
 
+/* 全局禁止选择 */
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 例外：内容区域允许选择 */
+.content-area,
+.message-bubble,
+.post-content,
+textarea,
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='search'],
+input[type='number'],
+input[type='tel'],
+input[type='url'] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* 图片禁止拖拽 */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: auto;
+}
+
 body {
   color: #fff;
   background-color: #000;

@@ -24,7 +24,14 @@ import type {
   SelfPostResponse,
   ColumnResponse,
   ColumnInteractionResponse,
-  ColumnInteractionRequest,
+  UserPublicDetailResponse,
+  SearchUserItem,
+  UserRelationListResponse,
+  SearchDetailResponse,
+  ChatConnection,
+  ChatMessage,
+  CreateChatConnectionRequest,
+  SendPrivateMessageRequest,
 } from '../types/api'
 
 // 扩展 Axios 请求配置，添加 metadata 字段
@@ -45,6 +52,41 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// 防止并发刷新令牌
+let isRefreshing = false
+let refreshSubscribers: Array<(token: string) => void> = []
+
+const subscribeTokenRefresh = (callback: (token: string) => void) => {
+  refreshSubscribers.push(callback)
+}
+
+const onTokenRefreshed = (token: string) => {
+  refreshSubscribers.forEach(callback => callback(token))
+  refreshSubscribers = []
+}
+
+// 解析 JWT token 获取 userId
+const getUserIdFromToken = (token: string): number | null => {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map(c => {
+          return `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`
+        })
+        .join('')
+    )
+    const payload = JSON.parse(jsonPayload)
+    return payload.userId || payload.id || null
+  } catch (error) {
+    console.error('解析 token 失败:', error)
+    return null
+  }
+}
 
 // 性能监控
 const performanceMonitor = {
@@ -101,7 +143,7 @@ apiClient.interceptors.request.use(
 )
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse<RawApiResponse>) => {
+  (response: AxiosResponse<RawApiResponse | RawApiResponse[]>) => {
     // 性能监控：计算响应时间
     const startTime = response.config.metadata?.startTime
     if (startTime) {
@@ -114,6 +156,27 @@ apiClient.interceptors.response.use(
     if (import.meta.env.DEV) console.log('API响应原始数据:', response.data)
     if (import.meta.env.DEV) console.log('API响应状态:', response.status)
     const responseData = response.data
+
+    // 处理响应是数组的情况（例如搜索API返回多个响应对象）
+    if (Array.isArray(responseData)) {
+      if (import.meta.env.DEV) console.log('响应是数组，处理每个元素:', responseData)
+
+      // 提取每个元素中的 data 字段，只保留 code === '200' 的
+      const extractedData = responseData
+        .filter(item => item.code === '200' && item.data)
+        .map(item => item.data)
+
+      response.data = {
+        success: true,
+        code: '200',
+        message: 'success',
+        data: extractedData,
+        detail: null,
+      } as any
+      return response
+    }
+
+    // 处理响应是单个对象的情况
     if (responseData) {
       // 如果有code字段且为200，使用标准格式
       if (responseData.code === '200') {
@@ -164,13 +227,13 @@ apiClient.interceptors.response.use(
     if (import.meta.env.DEV) console.log('响应异常或错误:', responseData)
     return Promise.reject({
       success: false,
-      code: responseData?.code || 400,
-      message: responseData?.message || '请求失败',
-      data: responseData?.data || null,
-      detail: responseData?.detail || null,
+      code: (responseData as any)?.code || 400,
+      message: (responseData as any)?.message || '请求失败',
+      data: (responseData as any)?.data || null,
+      detail: (responseData as any)?.detail || null,
     })
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     // 性能监控：记录失败请求
     performanceMonitor.failedRequests++
     const startTime = error.config?.metadata?.startTime
@@ -181,6 +244,78 @@ apiClient.interceptors.response.use(
       }
     }
     if (import.meta.env.DEV) console.log('API请求错误:', error)
+
+    const originalRequest = error.config as any
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      const token = localStorage.getItem('token')
+      const adminToken = localStorage.getItem('adminToken')
+
+      // 检查是否是管理员接口
+      const isAdminRequest = originalRequest.url?.includes('/api/yachiyo/168/mini/admin')
+      const currentToken = isAdminRequest ? adminToken : token
+
+      if (!currentToken) {
+        // 没有 token，直接跳转登录
+        redirectToLogin()
+        return Promise.reject(error)
+      }
+
+      if (isRefreshing) {
+        // 如果正在刷新，等待刷新完成后重试
+        return new Promise(resolve => {
+          subscribeTokenRefresh(newToken => {
+            if (isAdminRequest) {
+              localStorage.setItem('adminToken', newToken)
+            } else {
+              localStorage.setItem('token', newToken)
+            }
+            originalRequest.headers.Authorization = `Bearer ${newToken}`
+            resolve(apiClient(originalRequest))
+          })
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken')
+        if (!refreshToken) {
+          throw new Error('没有 refreshToken')
+        }
+
+        const userId = getUserIdFromToken(currentToken)
+        if (!userId) {
+          throw new Error('无法从 token 中解析 userId')
+        }
+
+        // 调用刷新令牌接口
+        const refreshResponse = await apiClient.post(
+          `/api/v1/auth/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}&userId=${userId}`
+        )
+
+        const newToken = refreshResponse.data.data
+        if (isAdminRequest) {
+          localStorage.setItem('adminToken', newToken)
+        } else {
+          localStorage.setItem('token', newToken)
+        }
+
+        onTokenRefreshed(newToken)
+
+        // 重试原始请求
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return apiClient(originalRequest)
+      } catch (refreshError) {
+        console.error('刷新令牌失败:', refreshError)
+        // 刷新失败，清除所有认证信息并跳转登录
+        redirectToLogin()
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
+      }
+    }
+
     if (error.response) {
       const responseData = error.response.data as any
       if (import.meta.env.DEV) console.log('错误响应数据:', responseData)
@@ -202,6 +337,15 @@ apiClient.interceptors.response.use(
     })
   }
 )
+
+// 跳转到登录页面
+const redirectToLogin = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('adminToken')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('username')
+  window.location.href = '/'
+}
 
 function unwrapData<T>(request: Promise<AxiosResponse<ApiResponse<T>>>): Promise<ApiResponse<T>> {
   return request.then(response => response.data)
@@ -300,7 +444,70 @@ export const userAPI = {
   getPosterDetail(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
     return unwrapData(
       apiClient.post<ApiResponse<PosterDetailResponse>>(
-        `/api/v2/user/detail/get/user?userId=${userId}`
+        `/api/v2/user/detail/poster/get?userId=${userId}`
+      )
+    )
+  },
+
+  getUserDetailById(userId: number): Promise<ApiResponse<PosterDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<PosterDetailResponse>>(`/api/v2/user/detail/get?userId=${userId}`)
+    )
+  },
+
+  getUserPublicDetail(userId: number): Promise<ApiResponse<UserPublicDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<UserPublicDetailResponse>>(
+        `/api/v2/user/detail/user/detail/get?userId=${userId}`
+      )
+    )
+  },
+
+  getUserFollows(): Promise<ApiResponse<number[]>> {
+    return unwrapData(apiClient.post<ApiResponse<number[]>>('/api/v2/user/detail/user/follow/get'))
+  },
+
+  getUserFollowers(): Promise<ApiResponse<number[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number[]>>('/api/v2/user/detail/user/follow/getFollower')
+    )
+  },
+
+  followUser(followeeId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v2/user/detail/user/follow/follow?followeeId=${followeeId}`
+      )
+    )
+  },
+
+  getFollowStatus(followeeId: number): Promise<ApiResponse<boolean>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<boolean>>(
+        `/api/v2/user/detail/user/follow/status/get?followeeId=${followeeId}`
+      )
+    )
+  },
+
+  getInteractionDetail(followeeId: number): Promise<ApiResponse<SearchDetailResponse>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<SearchDetailResponse>>(
+        `/api/v2/user/detail/user/interaction/get?followeeId=${followeeId}`
+      )
+    )
+  },
+
+  // 新增搜索用户接口
+  searchUsers(
+    keyword: string,
+    pageNum: number = 1,
+    pageSize: number = 20
+  ): Promise<ApiResponse<SearchUserItem[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<SearchUserItem[]>>(
+        `/api/v2/user/detail/user/search?userName=${encodeURIComponent(
+          keyword
+        )}&pageNum=${pageNum}&pageSize=${pageSize}`
       )
     )
   },
@@ -440,6 +647,13 @@ export const postAPI = {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       })
+    )
+  },
+
+  // 获取用户的帖子列表
+  getUserPosting(userId: number): Promise<ApiResponse<number[]>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<number[]>>(`/api/v2/posting/user?userId=${userId}`)
     )
   },
 }
@@ -747,6 +961,75 @@ export const authAPI = {
       apiClient.post<ApiResponse<string>>(
         `/api/v1/auth/refresh-token?refreshToken=${encodeURIComponent(refreshToken)}&userId=${userId}`
       )
+    )
+  },
+}
+
+// =========== 新增 ChatService API ===========
+export const chatServiceAPI = {
+  // 获取好友列表
+  getFriends(): Promise<ApiResponse<number[]>> {
+    return unwrapData(apiClient.get<ApiResponse<number[]>>('/api/v2/chat/friends'))
+  },
+
+  // 创建聊天连接
+  createChatConnection(toUserId: number): Promise<ApiResponse<ChatConnection>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<ChatConnection>>('/api/v2/chat/connection/create', {
+        to_user_id: toUserId,
+      })
+    )
+  },
+
+  // 获取聊天连接详情
+  getChatConnectionDetail(connectionId: number): Promise<ApiResponse<ChatConnection>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ChatConnection>>(`/api/v2/chat/connection/${connectionId}`)
+    )
+  },
+
+  // 获取聊天连接列表
+  getChatConnections(): Promise<ApiResponse<ChatConnection[]>> {
+    return unwrapData(apiClient.get<ApiResponse<ChatConnection[]>>('/api/v2/chat/connection/list'))
+  },
+
+  // 发送私聊消息
+  sendPrivateMessage(connectionId: number, message: string): Promise<ApiResponse<ChatMessage>> {
+    return unwrapData(
+      apiClient.post<ApiResponse<ChatMessage>>('/api/v2/chat/message/send', {
+        connection_id: connectionId,
+        message,
+      })
+    )
+  },
+
+  // 接收新消息
+  receiveNewMessages(
+    connectionId: number,
+    lastTimestamp: string
+  ): Promise<ApiResponse<ChatMessage[]>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ChatMessage[]>>('/api/v2/chat/message/receive', {
+        params: {
+          connection_id: connectionId,
+          last_timestamp: lastTimestamp,
+        },
+      })
+    )
+  },
+
+  // 获取历史消息
+  getPrivateMessageHistory(
+    connectionId: number,
+    page: number = 1
+  ): Promise<ApiResponse<ChatMessage[]>> {
+    return unwrapData(
+      apiClient.get<ApiResponse<ChatMessage[]>>('/api/v2/chat/message/history', {
+        params: {
+          connection_id: connectionId,
+          page,
+        },
+      })
     )
   },
 }

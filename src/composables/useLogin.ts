@@ -404,7 +404,14 @@ export function useLogin() {
       )
 
       if (response.success) {
-        login(response.data, form.value.username)
+        // 检查响应数据是否包含 refreshToken
+        let refreshToken = undefined
+        if (response.data && typeof response.data === 'object' && response.data.refreshToken) {
+          refreshToken = response.data.refreshToken
+        }
+        const token =
+          typeof response.data === 'object' ? response.data.token || response.data : response.data
+        login(token, form.value.username, refreshToken)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
@@ -428,7 +435,14 @@ export function useLogin() {
       const response = await authAPI.login(form.value.username, form.value.password)
 
       if (response.success) {
-        login(response.data, form.value.username)
+        // 检查响应数据是否包含 refreshToken
+        let refreshToken = undefined
+        if (response.data && typeof response.data === 'object' && response.data.refreshToken) {
+          refreshToken = response.data.refreshToken
+        }
+        const token =
+          typeof response.data === 'object' ? response.data.token || response.data : response.data
+        login(token, form.value.username, refreshToken)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')
@@ -470,7 +484,14 @@ export function useLogin() {
       const response = await authAPI.loginByEmail(email.value, code.value)
 
       if (response.success) {
-        login(response.data, email.value.split('@')[0])
+        // 检查响应数据是否包含 refreshToken
+        let refreshToken = undefined
+        if (response.data && typeof response.data === 'object' && response.data.refreshToken) {
+          refreshToken = response.data.refreshToken
+        }
+        const token =
+          typeof response.data === 'object' ? response.data.token || response.data : response.data
+        login(token, email.value.split('@')[0], refreshToken)
         loginSuccess.value = true
         setTimeout(() => {
           router.push('/chat/home')

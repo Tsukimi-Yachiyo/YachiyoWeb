@@ -11,9 +11,11 @@ export function useAuth() {
 
   const isAuthenticated = () => !!token.value
 
-  const login = (newToken, newUsername) => {
+  const login = (newToken, newUsername, newRefreshToken?: string) => {
     localStorage.setItem('token', newToken)
     localStorage.setItem('username', newUsername)
+    // 如果提供了 refreshToken 则保存，否则将 token 也作为 refreshToken 使用
+    localStorage.setItem('refreshToken', newRefreshToken || newToken)
     token.value = newToken
     username.value = newUsername
   }
@@ -28,6 +30,8 @@ export function useAuth() {
     } finally {
       // 清除本地存储
       localStorage.removeItem('token')
+      localStorage.removeItem('adminToken')
+      localStorage.removeItem('refreshToken')
       localStorage.removeItem('username')
       token.value = null
       username.value = ''
