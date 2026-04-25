@@ -1,9 +1,14 @@
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useChatHome } from '../composables/useChatHome'
+  import { usePrivateChat } from '../composables/usePrivateChat'
   import { useIconManager } from '../composables/useIconManager'
   import BackgroundMusicToggle from '../components/BackgroundMusicToggle.vue'
   import Live2DModel from '../components/Live2DModel/Live2DModel.vue'
+  import ChatSessionPanel from '../components/ChatSessionPanel.vue'
+  import NewChatDialog from '../components/NewChatDialog.vue'
+  import PrivateChatView from '../components/PrivateChatView.vue'
+  import type { ChatSession, ChatSessionType } from '../types/api'
 
   // 海洋动物像素画
   import img1 from '../assets/images/ChatHome-1.png'
@@ -19,20 +24,15 @@
     for (let i = 0; i < total; i++) {
       const img = animals[Math.floor(Math.random() * animals.length)]
 
-      // 均匀分布，不扎堆
       const section = 100 / total
       const baseLeft = i * section + Math.random() * (section * 0.7)
       const left = `${baseLeft + Math.random() * 5}%`
       const top = `${10 + Math.random() * 75}%`
-
-      // 大小层次：近大远小
       const sizeRand = Math.random()
       let size
       if (sizeRand > 0.85) size = 60 + Math.random() * 25
       else if (sizeRand > 0.6) size = 40 + Math.random() * 18
       else size = 22 + Math.random() * 14
-
-      // 大小不同速度不同
       const duration = size > 50 ? 22 + Math.random() * 8 : 14 + Math.random() * 6
 
       list.push({
@@ -43,12 +43,12 @@
         left,
         top,
         size: `${size}px`,
-        shadow: size > 40 ? '0 4px 8px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.2)',
         opacity: size > 40 ? 0.95 : 0.75,
       })
     }
     return list
   })
+
   interface BubbleStyle {
     width: string
     height: string
@@ -57,19 +57,11 @@
     animationDelay: string
   }
 
-  interface AnimalStyle {
-    left: string
-    animationDuration: string
-    animationDelay: string
-  }
-
-  //随机气泡大小、位置、速度
   const getBubbleStyle = (i: number): BubbleStyle => {
     const size = `${5 + Math.random() * 30}px`
     const left = `${Math.random() * 100}%`
     const duration = `${10 + Math.random() * 15}s`
     const delay = `${Math.random() * 5}s`
-
     return {
       width: size,
       height: size,
@@ -79,25 +71,10 @@
     }
   }
 
-  // 动物随机参数
-  const getAnimalStyle = (index: number): AnimalStyle => {
-    const duration = `${15 + index * 5}s`
-    const delay = `${index * 2}s`
-    const left = `${10 + index * 20}%`
-
-    return {
-      left,
-      animationDuration: duration,
-      animationDelay: delay,
-    }
-  }
-
   const enterIconUrl = `${import.meta.env.BASE_URL}icons/theme/ENTER.svg`
 
-  // 初始化图标管理器
   const { checkIconCache } = useIconManager()
 
-  // 计算属性，用于获取图标数据URL
   const editIconUrl = computed(() => {
     const iconData = checkIconCache('edit.svg')
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
@@ -113,22 +90,27 @@
     return iconData ? `data:image/svg+xml;utf8,${encodeURIComponent(iconData)}` : ''
   })
 
-  const hoveredConversationId = ref(null)
-  const longPressedConversationId = ref(null)
-  const editModeConversationId = ref(null)
+  const hoveredConversationId = ref<number | string | null>(null)
+  const longPressedConversationId = ref<number | string | null>(null)
+  const editModeConversationId = ref<number | string | null>(null)
   const editTitle = ref('')
 
+  // ============ 新增：双模聊天状态 ============
+  const currentChatType = ref<ChatSessionType>('ai')
+  const showNewChatDialog = ref(false)
+
+  // AI聊天
   const {
     username,
     conversations,
     currentConversationId,
-    messages,
-    inputMessage,
-    isLoading: isChatLoading,
+    messages: aiMessages,
+    inputMessage: aiInputMessage,
+    isLoading: isAiLoading,
     isTyping,
     isCreating,
-    messageListRef,
-    inputRef,
+    messageListRef: aiMessageListRef,
+    inputRef: aiInputRef,
     isSidebarOpen,
     sidebarRef,
     isVoiceClickable,
@@ -137,18 +119,86 @@
     closeSidebar,
     onTouchStart,
     onTouchEnd,
-    selectConversation,
-    createNewConversation,
+    selectConversation: selectAiConversation,
+    createNewConversation: createNewAiConversation,
     updateConversationTitle,
     deleteConversation,
-    sendMessage,
+    sendMessage: sendAiMessage,
     playVoice,
     isModelLoading,
     loadProgress,
     loadStatus,
   } = useChatHome()
 
-  const handleMouseEnter = conversationId => {
+  // 用户私聊
+  const {
+    chatSessions: userSessions,
+    messages: userMessages,
+    currentConnectionId,
+    isLoading: isPrivateLoading,
+    isSending: isPrivateSending,
+    wsConnected,
+    loadChatConnections,
+    selectChatConnection,
+    sendMessage: sendPrivateMessage,
+    createChatConnection,
+  } = usePrivateChat()
+
+  // 会话列表数据
+  const aiChatSessions = computed<ChatSession[]>(() => {
+    return conversations.value.map(conv => ({
+      id: conv.id,
+      type: 'ai',
+      name: conv.title || '对话',
+      aiConversationId: conv.id,
+    }))
+  })
+
+  const userChatSessions = computed<ChatSession[]>(() => {
+    return userSessions.value
+  })
+
+  // 当前会话ID
+  const currentAiSessionId = computed(() => currentConversationId.value)
+  const currentUserSessionId = computed(() => currentConnectionId.value)
+
+  // 选择会话
+  const handleSelectSession = (session: ChatSession) => {
+    if (session.type === 'ai') {
+      currentChatType.value = 'ai'
+      selectAiConversation({ id: session.aiConversationId })
+    } else {
+      currentChatType.value = 'user'
+      if (session.connectionId) {
+        selectChatConnection(session.connectionId)
+      }
+    }
+    closeSidebar()
+  }
+
+  // 打开新建聊天
+  const handleOpenNewChat = () => {
+    showNewChatDialog.value = true
+  }
+
+  // 开始新聊天
+  const handleStartChat = async (userId: number) => {
+    try {
+      const connection = await createChatConnection(userId)
+      if (connection) {
+        currentChatType.value = 'user'
+        selectChatConnection(connection.connection_id)
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '创建聊天失败')
+    }
+  }
+
+  const handleSendPrivateMessage = (message: string) => {
+    sendPrivateMessage(message)
+  }
+
+  const handleMouseEnter = (conversationId: number | string) => {
     hoveredConversationId.value = conversationId
   }
 
@@ -156,11 +206,11 @@
     hoveredConversationId.value = null
   }
 
-  const handleLongPress = conversationId => {
+  const handleLongPress = (conversationId: number | string) => {
     longPressedConversationId.value = conversationId
   }
 
-  const startEditTitle = conversation => {
+  const startEditTitle = (conversation: any) => {
     editModeConversationId.value = conversation.id
     editTitle.value = conversation.title || `对话 ${conversation.id}`
   }
@@ -169,19 +219,24 @@
     editModeConversationId.value = null
   }
 
-  const handleDeleteConversation = async (conversationId, event) => {
+  const handleDeleteConversation = async (conversationId: number | string, event: Event) => {
     event.stopPropagation()
     if (confirm('确定要删除这个会话吗？')) {
       await deleteConversation(conversationId)
     }
   }
 
-  const saveEditTitle = async conversationId => {
+  const saveEditTitle = async (conversationId: number | string) => {
     if (editTitle.value.trim()) {
       await updateConversationTitle(conversationId, editTitle.value.trim())
     }
     editModeConversationId.value = null
   }
+
+  // 初始化
+  onMounted(() => {
+    loadChatConnections()
+  })
 </script>
 
 <template>
@@ -201,7 +256,6 @@
           animationDelay: item.delay,
           animationDuration: item.duration,
           transform: item.flip ? 'scaleX(-1)' : '',
-          // boxShadow: item.shadow,
           opacity: item.opacity,
         }"
       >
@@ -226,27 +280,31 @@
 
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧会话栏 -->
-      <aside ref="sidebarRef" :class="['sidebar', { 'sidebar-open': isSidebarOpen }]">
+      <!-- 左侧会话栏（仅AI聊天显示） -->
+      <aside
+        v-if="currentChatType === 'ai'"
+        ref="sidebarRef"
+        :class="['sidebar', { 'sidebar-open': isSidebarOpen }]"
+      >
         <div class="sidebar-header">
           <h2>对话选择</h2>
           <button
             class="new-chat-btn"
             :disabled="isCreating || isModelLoading"
-            @click="createNewConversation"
+            @click="createNewAiConversation"
           >
             <span class="plus-icon">+</span>
             <span class="btn-text">{{ isCreating ? '创建中...' : '新建' }}</span>
           </button>
         </div>
-        <div ref="conversationListRef" class="conversation-list">
+        <div class="conversation-list">
           <transition-group name="conversation">
             <div
               v-for="conv in conversations"
               :key="conv.id"
               :class="['conversation-item', { active: conv.id === currentConversationId }]"
               :disabled="isModelLoading"
-              @click="selectConversation(conv)"
+              @click="selectAiConversation(conv)"
               @mouseenter="handleMouseEnter(conv.id)"
               @mouseleave="handleMouseLeave"
               @touchstart="onTouchStart($event, () => handleLongPress(conv.id))"
@@ -311,8 +369,9 @@
         </div>
       </aside>
 
-      <!-- 右滑按钮 -->
+      <!-- 右滑按钮（仅AI聊天显示） -->
       <button
+        v-if="currentChatType === 'ai'"
         class="sidebar-toggle-btn"
         :class="{ 'btn-hidden': isSidebarOpen }"
         :disabled="isModelLoading"
@@ -323,102 +382,131 @@
 
       <!-- 右侧聊天区 -->
       <main class="chat-main" @click="isSidebarOpen && closeSidebar()">
-        <!-- Live2D 模型展示 -->
-        <div class="live2d-display">
+        <!-- Live2D 模型展示（AI模式显示） -->
+        <div v-if="currentChatType === 'ai'" class="live2d-display">
           <Live2DModel />
         </div>
 
-        <!-- 欢迎界面 -->
-        <div v-if="!currentConversationId && !isModelLoading" class="welcome-screen">
-          <div class="welcome-content">
-            <!-- 音乐开关按钮 -->
-            <BackgroundMusicToggle
-              button-class="music-toggle-btn"
-              icon-class="music-icon"
-              icon-size="20px"
-              title="音乐开关"
-            />
-            <!-- 对下面标签文字加粗 -->
-            <h1>太阳西沉 夜幕降临</h1>
-            <p>欢迎来到月读，{{ username }}！</p>
-            <button
-              class="start-chat-btn"
-              :disabled="isModelLoading"
-              @click="createNewConversation"
-            >
-              开始新对话
-            </button>
+        <!-- ============ AI聊天界面 ============ -->
+        <template v-if="currentChatType === 'ai'">
+          <!-- 欢迎界面 -->
+          <div v-if="!currentConversationId && !isModelLoading" class="welcome-screen">
+            <div class="welcome-content">
+              <!-- 音乐开关按钮 -->
+              <BackgroundMusicToggle
+                button-class="music-toggle-btn"
+                icon-class="music-icon"
+                icon-size="20px"
+                title="音乐开关"
+              />
+              <!-- 对下面标签文字加粗 -->
+              <h1>太阳西沉 夜幕降临</h1>
+              <p>欢迎来到月读，{{ username }}！</p>
+              <button
+                class="start-chat-btn"
+                :disabled="isModelLoading"
+                @click="createNewAiConversation"
+              >
+                开始新对话
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- 消息列表  -  修复版-->
-        <div v-else-if="!isModelLoading" ref="messageListRef" class="message-list">
-          <transition-group name="message">
-            <div
-              v-for="msg in messages"
-              :key="msg.id || JSON.stringify(msg)"
-              :class="['message', msg.type]"
-            >
-              <div class="message-bubble">
-                <span v-if="msg.type === 'assistant' && msg.isStreaming && !msg.content"
-                  >思考中
-                  <div v-if="isTyping" class="typing-indicator">
-                    <div class="typing-bubbles">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+          <!-- 消息列表 -->
+          <div v-else-if="!isModelLoading" ref="aiMessageListRef" class="message-list">
+            <transition-group name="message">
+              <div
+                v-for="msg in aiMessages"
+                :key="msg.id || JSON.stringify(msg)"
+                :class="['message', msg.type]"
+              >
+                <div class="message-bubble">
+                  <span v-if="msg.type === 'assistant' && msg.isStreaming && !msg.content">
+                    思考中
+                    <div v-if="isTyping" class="typing-indicator">
+                      <div class="typing-bubbles">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
                     </div>
+                  </span>
+                  <span v-else>{{ msg.content }}</span>
+                  <div v-if="msg.type === 'assistant' && !msg.isStreaming" class="message-actions">
+                    <button
+                      class="voice-btn"
+                      :class="{
+                        'voice-loading': getVoiceStatus(msg.content).isLoading,
+                        'voice-disabled': !isVoiceClickable(msg.content),
+                      }"
+                      :disabled="!isVoiceClickable(msg.content)"
+                      title="播放语音"
+                      @click="playVoice(msg.content)"
+                    >
+                      <span
+                        v-if="getVoiceStatus(msg.content).isLoading"
+                        class="voice-spinner"
+                      ></span>
+                      <img
+                        v-else-if="voiceIconUrl"
+                        :src="voiceIconUrl"
+                        alt="播放语音"
+                        style="width: 16px; height: 16px"
+                      />
+                      <span v-else>🔊</span>
+                    </button>
                   </div>
-                </span>
-                <span v-else>{{ msg.content }}</span>
-                <div v-if="msg.type === 'assistant' && !msg.isStreaming" class="message-actions">
-                  <button
-                    class="voice-btn"
-                    :class="{
-                      'voice-loading': getVoiceStatus(msg.content).isLoading,
-                      'voice-disabled': !isVoiceClickable(msg.content),
-                    }"
-                    :disabled="!isVoiceClickable(msg.content)"
-                    title="播放语音"
-                    @click="playVoice(msg.content)"
-                  >
-                    <span v-if="getVoiceStatus(msg.content).isLoading" class="voice-spinner"></span>
-                    <img
-                      v-else-if="voiceIconUrl"
-                      :src="voiceIconUrl"
-                      alt="播放语音"
-                      style="width: 16px; height: 16px"
-                    />
-                    <span v-else>🔊</span>
-                  </button>
                 </div>
               </div>
-            </div>
-          </transition-group>
-        </div>
-        <!-- 输入区 -->
-        <div v-if="currentConversationId && !isModelLoading" class="input-area">
-          <div class="input-wrapper">
-            <input
-              ref="inputRef"
-              v-model="inputMessage"
-              placeholder="输入消息，按 Enter 发送..."
-              :disabled="isChatLoading || isModelLoading"
-              @keyup.enter="sendMessage"
-            />
-            <button
-              class="send-btn"
-              :disabled="isChatLoading || isModelLoading || !inputMessage.trim()"
-              @click="sendMessage"
-            >
-              <span v-if="isChatLoading" class="loading-spinner"></span>
-              <!-- <span v-else>发送</span> -->
-              <img v-else :src="enterIconUrl" alt="发送" width="36" height="36" />
-            </button>
+            </transition-group>
           </div>
-        </div>
+
+          <!-- 输入区 -->
+          <div v-if="currentConversationId && !isModelLoading" class="input-area">
+            <div class="input-wrapper">
+              <input
+                ref="aiInputRef"
+                v-model="aiInputMessage"
+                placeholder="输入消息，按 Enter 发送..."
+                :disabled="isAiLoading || isModelLoading"
+                @keyup.enter="sendAiMessage"
+              />
+              <button
+                class="send-btn"
+                :disabled="isAiLoading || isModelLoading || !aiInputMessage.trim()"
+                @click="sendAiMessage"
+              >
+                <span v-if="isAiLoading" class="loading-spinner"></span>
+                <img v-else :src="enterIconUrl" alt="发送" width="36" height="36" />
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- ============ 用户私聊界面 ============ -->
+        <template v-else>
+          <PrivateChatView
+            :messages="userMessages"
+            :is-sending="isPrivateSending"
+            :ws-connected="wsConnected"
+            @send-message="handleSendPrivateMessage"
+          />
+        </template>
       </main>
     </div>
+
+    <!-- ============ 会话面板 ============ -->
+    <ChatSessionPanel
+      :ai-sessions="aiChatSessions"
+      :user-sessions="userChatSessions"
+      :current-session-id="currentChatType === 'ai' ? currentAiSessionId : currentUserSessionId"
+      :current-session-type="currentChatType"
+      @select-session="handleSelectSession"
+      @open-new-chat="handleOpenNewChat"
+    />
+
+    <!-- ============ 新建聊天弹窗 ============ -->
+    <NewChatDialog v-model:visible="showNewChatDialog" @start-chat="handleStartChat" />
   </div>
 </template>
 
@@ -432,53 +520,38 @@
     background: linear-gradient(180deg, #3498db 0%, #2a5298 30%, #0d1642 70%, #050b2c 100%);
     overflow: hidden;
     position: relative;
-    box-shadow: none !important;
-    border-top: none !important;
-    margin-top: 0 !important;
-
-    /*
-    todo:
-          background: radial-gradient(
-        circle at 50% 10%,
-        rgba(135, 206, 235, 0.35),
-        rgba(0, 191, 255, 0.15) 60%,
-        transparent 100%
-      );
-    */
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      backdrop-filter: blur(1.5px);
-      opacity: 0.85;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 40%;
-      background: linear-gradient(to top, #02051a, transparent);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* 让内部子元素层级高于背景层，不被遮挡 */
-    > * {
-      position: relative;
-      z-index: 1;
-    }
   }
 
-  /* 海洋层 */
-  /* 🌊 海洋背景层（核心修复：只让背景不拦截点击，不影响Live2D） */
+  .chat-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(1.5px);
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .chat-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(to top, #02051a, transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .chat-container > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .ocean-container {
     position: absolute;
     top: 0;
@@ -487,12 +560,9 @@
     height: 100%;
     overflow: hidden;
     z-index: 0;
-    /* 最底层，在所有内容之下 */
     pointer-events: none;
-    /* 仅背景层不拦截点击 ✅ */
   }
 
-  /* 气泡：继承父级的pointer-events: none，不拦截点击 */
   .bubble {
     position: absolute;
     bottom: -30px;
@@ -502,13 +572,13 @@
     pointer-events: none;
   }
 
-  /* 动物：继承父级的pointer-events: none，不拦截点击 */
   .animal {
     position: absolute;
     animation: swimFloat ease-in-out infinite;
     pointer-events: none;
     will-change: transform;
   }
+
   .animal img {
     width: 100%;
     height: 100%;
@@ -516,20 +586,16 @@
     pointer-events: none;
   }
 
-  /* 气泡动画 */
   @keyframes bubbleUp {
     0% {
       transform: translateY(0) scale(0.8);
       opacity: 0.7;
     }
-
     100% {
       transform: translateY(-110vh) scale(1.2);
       opacity: 0;
     }
   }
-
-  /* 动物漂浮动画 */
 
   @keyframes swimFloat {
     0% {
@@ -549,7 +615,6 @@
     }
   }
 
-  /* 主内容区 */
   .main-content {
     display: flex;
     flex: 1;
@@ -557,7 +622,6 @@
     position: relative;
   }
 
-  /* 模型加载覆盖层 */
   .model-loading-overlay {
     position: fixed;
     top: 0;
@@ -608,7 +672,6 @@
     from {
       opacity: 0;
     }
-
     to {
       opacity: 1;
     }
@@ -618,28 +681,23 @@
     0% {
       opacity: 0.7;
     }
-
     50% {
       opacity: 1;
     }
-
     100% {
       opacity: 0.7;
     }
   }
 
-  /* 过渡动画 */
   .fade-enter-active,
   .fade-leave-active {
     transition: opacity 0.5s ease;
   }
-
   .fade-enter-from,
   .fade-leave-to {
     opacity: 0;
   }
 
-  /* 左侧边栏 */
   .sidebar {
     width: 280px;
     display: flex;
@@ -658,7 +716,7 @@
   }
 
   .sidebar-header h2 {
-    color: #fff;
+    color: white;
     font-size: 18px;
     font-weight: 500;
     margin: 0;
@@ -688,7 +746,6 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
-
   .plus-icon {
     font-size: 18px;
     font-weight: bold;
@@ -732,19 +789,14 @@
     box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
   }
 
-  .conversation-icon {
-    display: none;
-  }
-
   .conversation-name {
-    color: #fff;
+    color: white;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* 会话列表动画 */
   .conversation-enter-active,
   .conversation-leave-active {
     transition: all 0.3s ease;
@@ -754,74 +806,11 @@
     opacity: 0;
     transform: translateX(-20px);
   }
-
   .conversation-leave-to {
     opacity: 0;
     transform: translateX(20px);
   }
 
-  /* 用户信息 */
-  .user-info {
-    padding: 15px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .user-avatar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
-  }
-
-  .user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .username {
-    flex: 1;
-    color: #fff;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .logout-btn {
-    padding: 6px 12px;
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-    border: 1px solid rgba(244, 67, 54, 0.3);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .logout-btn:hover {
-    background: rgba(244, 67, 54, 0.3);
-    transform: scale(1.05);
-  }
-
-  /* 主聊天区 */
   .chat-main {
     flex: 1;
     display: flex;
@@ -829,7 +818,6 @@
     position: relative;
   }
 
-  /* Live2D 模型展示 */
   .live2d-display {
     position: absolute;
     top: 0;
@@ -847,7 +835,6 @@
     }
   }
 
-  /* 欢迎界面 */
   .welcome-screen {
     flex: 1;
     display: flex;
@@ -863,11 +850,11 @@
   }
 
   .welcome-content h1 {
-    color: #fff;
+    color: white;
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #fff 0%, #64b5f6 100%);
+    background: linear-gradient(135deg, white 0%, #64b5f6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -894,11 +881,6 @@
   .music-toggle-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
-  }
-
-  .music-toggle-btn.playing {
-    background: rgba(100, 181, 246, 0.4);
-    border-color: rgba(100, 181, 246, 0.6);
   }
 
   .music-icon {
@@ -933,14 +915,12 @@
       opacity: 0;
       transform: translateY(30px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
-  /* 消息列表 */
   .message-list {
     flex: 1;
     overflow-y: auto;
@@ -962,7 +942,6 @@
     align-self: flex-end;
     justify-content: flex-end;
   }
-
   .message.assistant {
     align-self: flex-start;
     justify-content: flex-start;
@@ -973,7 +952,6 @@
       opacity: 0;
       transform: translateY(20px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
@@ -997,7 +975,7 @@
 
   .message.assistant .message-bubble {
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: white;
     border-bottom-left-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 40px;
@@ -1028,12 +1006,10 @@
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
   }
-
   .voice-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-
   .voice-btn.voice-loading {
     background: rgba(33, 150, 243, 0.3);
   }
@@ -1053,27 +1029,22 @@
     }
   }
 
-  /* 消息动画 */
   .message-enter-active,
   .message-leave-active {
     transition: all 0.3s ease;
   }
-
   .message-enter-from {
     opacity: 0;
     transform: translateY(20px);
   }
-
   .message-leave-to {
     opacity: 0;
     transform: translateY(-20px);
   }
 
-  /* 输入中动画 */
   .typing-indicator {
     display: flex;
     align-items: center;
-    align-items: flex-start;
     gap: 12px;
   }
 
@@ -1098,7 +1069,6 @@
   .typing-bubbles span:nth-child(1) {
     animation-delay: -0.32s;
   }
-
   .typing-bubbles span:nth-child(2) {
     animation-delay: -0.16s;
   }
@@ -1116,7 +1086,6 @@
     }
   }
 
-  /* 输入区 */
   .input-area {
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -1138,7 +1107,7 @@
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 25px;
-    color: #fff;
+    color: white;
     font-size: 14px;
     outline: none;
     transition: all 0.3s ease;
@@ -1147,13 +1116,11 @@
   .input-wrapper input::placeholder {
     color: rgba(255, 255, 255, 0.4);
   }
-
   .input-wrapper input:focus {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(33, 150, 243, 0.5);
     box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
   }
-
   .input-wrapper input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -1193,48 +1160,18 @@
     animation: spin 0.8s linear infinite;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* 滚动条样式 */
   ::-webkit-scrollbar {
     width: 6px;
   }
-
   ::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
   }
-
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
-  }
-
-  /* 响应式设计 */
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 240px;
-    }
-
-    .message-content-wrapper {
-      max-width: 80%;
-    }
-
-    .welcome-content h1 {
-      font-size: 28px;
-    }
-  }
-
-  /* 移动端侧边栏切换按钮 */
-  .sidebar-toggle-btn {
-    display: none;
   }
 
   @media (max-width: 768px) {
@@ -1247,12 +1184,9 @@
       transition: transform 0.3s ease;
       height: 100%;
     }
-
     .sidebar.sidebar-open {
       transform: translateX(280px);
     }
-
-    /* 遮罩层 */
     .sidebar-overlay {
       position: fixed;
       top: 0;
@@ -1263,8 +1197,6 @@
       z-index: 350;
       backdrop-filter: blur(2px);
     }
-
-    /* 切换按钮 */
     .sidebar-toggle-btn {
       display: flex;
       position: fixed;
@@ -1283,34 +1215,28 @@
       box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
       transition: all 0.3s ease;
     }
-
     .sidebar-toggle-btn:hover {
       transform: translateY(-50%) scale(1.1);
       box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
     }
-
     .sidebar-toggle-btn.btn-hidden {
       opacity: 0;
       pointer-events: none;
     }
-
     .toggle-icon {
       color: white;
       font-size: 18px;
     }
-
     .chat-main {
       width: 100%;
     }
   }
 
-  /* 会话操作按钮样式 */
   .conversation-actions {
     display: flex;
     gap: 8px;
     margin-left: 10px;
   }
-
   .action-btn {
     background: none;
     border: none;
@@ -1320,12 +1246,10 @@
     border-radius: 4px;
     transition: background-color 0.2s ease;
   }
-
   .action-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
 
-  /* 编辑标题样式 */
   .edit-title-input-wrapper {
     flex: 1;
     display: flex;
@@ -1333,26 +1257,22 @@
     gap: 8px;
     width: 100%;
   }
-
   .mobile-buttons {
     display: none;
   }
-
   .edit-title-input {
     flex: 1;
     padding: 6px 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 4px;
     background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    color: white;
     font-size: 14px;
   }
-
   .edit-title-input:focus {
     outline: none;
     border-color: #2196f3;
   }
-
   .edit-save-btn,
   .edit-cancel-btn {
     padding: 4px 8px;
@@ -1362,26 +1282,21 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
-
   .edit-save-btn {
     background-color: #2196f3;
     color: white;
   }
-
-  .edit-cancel-btn {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
-
   .edit-save-btn:hover {
     background-color: #1976d2;
   }
-
+  .edit-cancel-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
   .edit-cancel-btn:hover {
     background-color: rgba(255, 255, 255, 0.15);
   }
 
-  /* 移动端适配 */
   @media (max-width: 768px) {
     .conversation-actions {
       position: absolute;
@@ -1393,19 +1308,16 @@
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-
     .mobile-buttons {
       display: flex;
       gap: 8px;
       width: 100%;
     }
-
     .edit-title-input-wrapper {
       flex-direction: column;
       align-items: stretch;
       gap: 8px;
     }
-
     .edit-save-btn,
     .edit-cancel-btn {
       flex: 1;

@@ -577,7 +577,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-    z-index: 100;
+    z-index: 10;
   }
 
   .edit-button:hover {
