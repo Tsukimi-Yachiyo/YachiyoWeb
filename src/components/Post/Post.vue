@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref, watch, onMounted } from 'vue'
+  import UserAvatar from '../UserAvatar.vue'
   import { processImageData } from '@/composables/useImageData'
-  import defaultIcon from '@/assets/images/default_icon.gif'
   import defaultCover from '@/assets/images/default_cover.gif'
 
   const props = defineProps({
@@ -31,21 +31,11 @@
     },
   })
 
-  // 从缓存中获取头像
-  const userAvatarSrc = ref(null)
   // 从缓存中获取封面
   const coverImageSrc = ref(null)
 
-  // 从缓存获取数据或使用传递的数据
-  const fetchUserAvatar = () => {
-    if (props.userAvatar) {
-      // 使用从父组件传递的头像数据
-      userAvatarSrc.value = processImageData(props.userAvatar)
-    } else {
-      // 实际项目中，这里应该从缓存或本地存储中获取头像
-      // 这里使用模拟数据
-      userAvatarSrc.value = defaultIcon
-    }
+  const handleCoverError = () => {
+    coverImageSrc.value = null
   }
 
   const fetchCoverImage = () => {
@@ -59,14 +49,6 @@
     }
   }
 
-  // 监听属性变化
-  watch(
-    () => props.userAvatar,
-    () => {
-      fetchUserAvatar()
-    }
-  )
-
   watch(
     () => props.coverImage,
     () => {
@@ -74,9 +56,7 @@
     }
   )
 
-  // 组件挂载时获取数据
   onMounted(() => {
-    fetchUserAvatar()
     fetchCoverImage()
   })
 </script>

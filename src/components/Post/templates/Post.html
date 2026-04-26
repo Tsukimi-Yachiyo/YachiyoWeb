@@ -10,7 +10,12 @@
     </div>
   </div>
   <div class="post-avatar">
-    <img v-if="userAvatarSrc" :src="userAvatarSrc" alt="用户头像" loading="lazy" @error="handleAvatarError" />
-    <span v-else>{{ userName.charAt(0).toUpperCase() }}</span>
+    <UserAvatar
+      :userId="userId"
+      :avatar-url="userAvatar"
+      :username="userName"
+      :size="60"
+      :clickable="true"
+    />
   </div>
 </div>

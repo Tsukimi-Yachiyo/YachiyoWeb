@@ -4,6 +4,7 @@
   import { useUserProfile } from '@/composables/useUserProfile'
   import { useIconManager } from '@/composables/useIconManager'
   import { processImageData } from '@/composables/useImageData'
+  import UserAvatar from '@/components/UserAvatar.vue'
   import { postAPI, userAPI, commentAPI } from '@/services/api'
   import { marked } from 'marked'
 
@@ -334,15 +335,13 @@
           <!-- 用户名和头像 -->
           <div v-if="posterDetail" class="user-info">
             <span class="user-name">{{ posterDetail?.userName || '未知用户' }}</span>
-            <img
-              v-if="posterDetail?.userAvatar"
-              :src="processImageData(posterDetail.userAvatar)"
-              alt="用户头像"
-              class="user-avatar"
+            <UserAvatar
+              :user-id="postInfo?.posterId || 0"
+              :avatar-url="posterDetail?.userAvatar"
+              :username="posterDetail?.userName"
+              :size="32"
+              :clickable="true"
             />
-            <span v-else class="user-avatar-placeholder">{{
-              posterDetail?.userName?.charAt(0).toUpperCase() || 'U'
-            }}</span>
           </div>
         </div>
 
@@ -408,15 +407,13 @@
 
             <!-- 评论输入框 -->
             <div class="comment-input-container">
-              <img
-                v-if="userAvatar"
-                :src="userAvatar"
-                alt="用户头像"
-                class="comment-input-avatar"
+              <UserAvatar
+                :user-id="0"
+                :avatar-url="userAvatar"
+                :username="username"
+                :size="40"
+                :clickable="false"
               />
-              <span v-else class="comment-input-avatar-placeholder">{{
-                username?.charAt(0).toUpperCase() || 'U'
-              }}</span>
               <div class="comment-input-wrapper">
                 <textarea
                   v-model="commentContent"
@@ -451,15 +448,13 @@
                 暂无评论，快来发表第一条评论吧！
               </div>
               <div v-for="comment in comments" :key="comment.id" class="comment-item">
-                <img
-                  v-if="comment.userAvatar"
-                  :src="processImageData(comment.userAvatar)"
-                  alt="用户头像"
-                  class="comment-avatar"
+                <UserAvatar
+                  :user-id="comment.userId || 0"
+                  :avatar-url="comment.userAvatar"
+                  :username="comment.userName"
+                  :size="36"
+                  :clickable="true"
                 />
-                <span v-else class="comment-avatar-placeholder">{{
-                  comment.userName?.charAt(0).toUpperCase() || 'U'
-                }}</span>
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-username">{{ comment.userName }}</span>

@@ -207,3 +207,109 @@ export interface ColumnInteractionRequest {
   columnId: number
   type: 'LIKE' | 'COIN'
 }
+
+/**
+ * 用户公开详情
+ */
+export interface UserPublicDetailResponse {
+  userIntroduction?: string
+  userCity?: string
+  userGender?: string
+  [key: string]: any
+}
+
+/**
+ * 搜索用户结果
+ */
+export interface SearchUserItem {
+  id?: number
+  userId?: number
+  userName: string
+  userAvatar: string
+  followerCount: number
+  isFollowing: boolean
+  isFollowed: boolean
+  [key: string]: any
+}
+
+/**
+ * 用户粉丝/关注列表
+ */
+export interface UserRelationListResponse {
+  id: number
+  userName: string
+  userAvatar: string
+  [key: string]: any
+}
+
+/**
+ * 用户互动详情
+ */
+export interface SearchDetailResponse {
+  userName: string
+  userAvatar: string
+  followerCount: number
+  followeeCount: number
+  isFollowing: boolean
+  isFollowed: boolean
+  [key: string]: any
+}
+
+// =========== 新增 ChatService 相关类型 ===========
+
+/**
+ * 聊天连接类型
+ */
+export interface ChatConnection {
+  connection_id: number
+  first_user_id: number
+  second_user_id: number
+  message_list: ChatMessage[]
+}
+
+/**
+ * 聊天消息类型
+ */
+export interface ChatMessage {
+  id: number
+  connection_id: number
+  user_id: number
+  user_name: string
+  message: string
+  create_time: string
+}
+
+/**
+ * 创建聊天连接请求
+ */
+export interface CreateChatConnectionRequest {
+  to_user_id: number
+}
+
+/**
+ * 发送私聊消息请求
+ */
+export interface SendPrivateMessageRequest {
+  connection_id: number
+  message: string
+}
+
+/**
+ * 通用会话类型
+ */
+export type ChatSessionType = 'ai' | 'user'
+
+export interface ChatSession {
+  id: string | number
+  type: ChatSessionType
+  name?: string
+  avatar?: string
+  lastMessage?: string
+  lastMessageTime?: string
+  unreadCount?: number
+  // AI会话特有字段
+  aiConversationId?: string
+  // 用户会话特有字段
+  userId?: number
+  connectionId?: number
+}

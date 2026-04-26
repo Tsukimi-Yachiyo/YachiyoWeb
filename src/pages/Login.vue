@@ -400,6 +400,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 版权信息 -->
+    <div class="copyright-info">
+      <p>
+        本站使用的《超时空辉夜姬》相关素材版权归原作者所有，本站为非盈利性质，如有侵权请联系删除。
+      </p>
+      <p>备案号：京ICP备2026016717号</p>
+    </div>
   </div>
 </template>
 <style scoped>
@@ -803,6 +811,31 @@
 
   .confirm-btn:hover:not(:disabled) {
     background-color: #42a5f5;
+  }
+
+  /* 版权信息样式 */
+  .copyright-info {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #ffffffff;
+    font-size: 12px;
+    line-height: 1.5;
+    z-index: 1;
+    padding: 0 20px;
+  }
+
+  .copyright-info p {
+    margin: 5px 0;
+  }
+
+  @media (max-width: 768px) {
+    .copyright-info {
+      font-size: 11px;
+      bottom: 10px;
+    }
   }
 
   .confirm-btn:disabled {
