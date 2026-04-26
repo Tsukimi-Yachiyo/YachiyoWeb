@@ -3,6 +3,7 @@
   import { useRouter } from 'vue-router'
   import { useFriends } from '../composables/useFriends'
   import { useUserSearch } from '../composables/useUserSearch'
+  import { processImageData } from '../composables/useImageData'
   import type { SearchUserItem } from '../types/api'
 
   const router = useRouter()
@@ -78,7 +79,16 @@
   const handleFollowUser = async (user: any) => {
     const userId = user.id || user.userId
     if (userId) {
-      await followUser(userId)
+      try {
+        await followUser(userId)
+        // 关注成功后重新加载关系数据和搜索结果
+        await loadRelations()
+        if (searchKeyword.value) {
+          await searchUsers(searchKeyword.value)
+        }
+      } catch (err) {
+        console.error('关注失败:', err)
+      }
     } else {
       console.error('无法获取用户ID:', user)
     }
@@ -166,7 +176,15 @@
                 :title="`点击查看 ${friend.userName} 的主页`"
                 @click.stop="handleGoToUserProfile(friend, $event)"
               >
-                {{ friend.userName?.charAt(0) || '?' }}
+                <img
+                  v-if="(friend as any).userAvatar"
+                  :src="processImageData((friend as any).userAvatar)"
+                  :alt="friend.userName"
+                  class="avatar-img"
+                />
+                <span v-else class="avatar-placeholder">{{
+                  friend.userName?.charAt(0) || '?'
+                }}</span>
               </div>
               <div class="user-info">
                 <div class="user-name">{{ friend.userName }}</div>
@@ -188,7 +206,13 @@
                 :title="`点击查看 ${user.userName} 的主页`"
                 @click.stop="handleGoToUserProfile(user, $event)"
               >
-                {{ user.userName?.charAt(0) || '?' }}
+                <img
+                  v-if="user.userAvatar"
+                  :src="processImageData(user.userAvatar)"
+                  :alt="user.userName"
+                  class="avatar-img"
+                />
+                <span v-else class="avatar-placeholder">{{ user.userName?.charAt(0) || '?' }}</span>
               </div>
               <div class="user-info">
                 <div class="user-name">{{ user.userName }}</div>
@@ -406,6 +430,19 @@
     font-weight: bold;
     font-size: 16px;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
   }
 
   .user-info {

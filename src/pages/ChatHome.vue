@@ -135,6 +135,8 @@
     chatSessions: userSessions,
     messages: userMessages,
     currentConnectionId,
+    currentConnection,
+    currentChatPartnerInfo,
     isLoading: isPrivateLoading,
     isSending: isPrivateSending,
     wsConnected,
@@ -146,12 +148,22 @@
 
   // 会话列表数据
   const aiChatSessions = computed<ChatSession[]>(() => {
-    return conversations.value.map(conv => ({
+    const sessions = conversations.value.map(conv => ({
       id: conv.id,
       type: 'ai',
       name: conv.title || '对话',
       aiConversationId: conv.id,
     }))
+    // 如果没有会话，添加一个默认的AI会话
+    if (sessions.length === 0) {
+      sessions.push({
+        id: 'ai-default',
+        type: 'ai',
+        name: '八千代',
+        aiConversationId: undefined,
+      })
+    }
+    return sessions
   })
 
   const userChatSessions = computed<ChatSession[]>(() => {
@@ -489,6 +501,9 @@
             :messages="userMessages"
             :is-sending="isPrivateSending"
             :ws-connected="wsConnected"
+            :target-user-id="currentConnectionId ? currentConnection?.chatPartnerId : undefined"
+            :target-user-name="currentChatPartnerInfo?.userName"
+            :target-user-avatar="currentChatPartnerInfo?.userAvatar"
             @send-message="handleSendPrivateMessage"
           />
         </template>
@@ -1087,18 +1102,20 @@
   }
 
   .input-area {
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
-    position: relative;
-    z-index: 2;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 900px;
+    padding: 0 20px;
+    z-index: 100;
   }
 
   .input-wrapper {
     display: flex;
     gap: 12px;
-    max-width: 900px;
-    margin: 0 auto;
+    align-items: center;
   }
 
   .input-wrapper input {

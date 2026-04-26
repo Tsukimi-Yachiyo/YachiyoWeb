@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, computed } from 'vue'
   import { useRouter } from 'vue-router'
+  import UserAvatar from './UserAvatar.vue'
   import type { ChatSession, ChatSessionType } from '../types/api'
 
   const router = useRouter()
@@ -79,8 +80,26 @@
   <div class="chat-session-panel">
     <!-- 当前聊天对象 (常驻) -->
     <div class="current-session" @click="togglePanel">
-      <div class="session-avatar">
-        {{ currentSessionType === 'ai' ? 'AI' : currentSession?.name?.charAt(0) }}
+      <div
+        class="session-avatar"
+        :style="{ cursor: currentSessionType === 'user' ? 'pointer' : 'default' }"
+        @click.stop="
+          currentSessionType === 'user' && currentSession?.userId
+            ? handleGoToUserProfile(currentSession, $event)
+            : void 0
+        "
+      >
+        <UserAvatar
+          v-if="currentSessionType === 'user' && currentSession?.userId"
+          :user-id="currentSession.userId"
+          :avatar-url="currentSession.avatar"
+          :username="currentSession.name"
+          :size="44"
+          :clickable="false"
+        />
+        <span v-else>{{
+          currentSessionType === 'ai' ? 'AI' : currentSession?.name?.charAt(0)
+        }}</span>
       </div>
       <div class="session-info">
         <div class="session-name">
@@ -99,7 +118,7 @@
     <!-- 会话列表面板 -->
     <transition name="slide-up">
       <div v-if="isPanelOpen" class="session-list-panel">
-        <!-- 头像网格 -->
+        <!-- 头像网格 - 保持纵向排列但用圆形无边框 -->
         <div class="avatar-grid">
           <!-- 新建聊天按钮 -->
           <div class="avatar-item new-chat" title="新建聊天" @click="emit('openNewChat')">
@@ -120,13 +139,16 @@
             :title="session.name"
             @click="handleSelectSession(session)"
           >
-            <div
-              v-if="session.type === 'user'"
-              class="avatar-content"
-              :title="`点击查看 ${session.name} 的主页`"
-              @click.stop="handleGoToUserProfile(session, $event)"
-            >
-              {{ session.name?.charAt(0) }}
+            <div v-if="session.type === 'user'" class="avatar-content-wrapper">
+              <UserAvatar
+                v-if="session.userId"
+                :user-id="session.userId"
+                :avatar-url="session.avatar"
+                :username="session.name"
+                :size="48"
+                :clickable="false"
+              />
+              <span v-else class="avatar-text">{{ session.name?.charAt(0) }}</span>
             </div>
             <div v-else class="avatar-content">AI</div>
             <div v-if="session.unreadCount" class="unread-badge">
@@ -163,7 +185,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    max-width: 320px;
+    max-width: 200px;
   }
 
   .current-session:hover {
@@ -256,12 +278,10 @@
   /* 头像网格 */
   .avatar-grid {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 10px;
-    max-width: 280px;
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
-    overflow-x: visible;
     padding: 8px;
   }
 
@@ -276,9 +296,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: 2px solid transparent;
     flex-shrink: 0;
-    z-index: 1;
   }
 
   .avatar-item:hover {
@@ -288,7 +306,7 @@
   }
 
   .avatar-item.active {
-    border-color: #667eea;
+    border: 2px solid #667eea;
     box-shadow:
       0 0 0 3px rgba(102, 126, 234, 0.3),
       0 4px 15px rgba(102, 126, 234, 0.4);
@@ -299,16 +317,30 @@
   }
 
   .avatar-item.new-chat {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     border: 2px dashed rgba(255, 255, 255, 0.4);
   }
 
   .avatar-item.new-chat:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     border-style: solid;
   }
 
+  .avatar-content-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .avatar-content {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .avatar-text {
     color: white;
     font-weight: bold;
     font-size: 16px;

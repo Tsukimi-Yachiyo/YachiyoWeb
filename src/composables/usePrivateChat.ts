@@ -1,10 +1,13 @@
-import { ref, computed } from 'vue'
+﻿import { ref, computed } from 'vue'
 import { chatServiceAPI, userAPI } from '../services/api'
-import type { ChatConnection, ChatMessage, ChatSession } from '../types/api'
+import type { ChatConnection, ChatMessage, ChatSession, PosterDetailResponse } from '../types/api'
+
+interface ChatConnectionWithUser extends ChatConnection {
+  chatPartnerId?: number
+}
 
 export function usePrivateChat() {
-  // 状态
-  const chatConnections = ref<ChatConnection[]>([])
+  const chatConnections = ref<ChatConnectionWithUser[]>([])
   const currentConnectionId = ref<number | null>(null)
   const messages = ref<ChatMessage[]>([])
   const isLoading = ref(false)
@@ -12,65 +15,126 @@ export function usePrivateChat() {
   const error = ref<string | null>(null)
   const wsConnected = ref(false)
   let ws: WebSocket | null = null
+  const userInfoCache = new Map<number, PosterDetailResponse>()
 
-  // 当前聊天连接
   const currentConnection = computed(() => {
     return chatConnections.value.find(conn => conn.connection_id === currentConnectionId.value)
   })
 
-  // 获取聊天会话列表（用于UI展示）
+  const currentChatPartnerInfo = computed(() => {
+    if (!currentConnection.value?.chatPartnerId) return null
+    return userInfoCache.get(currentConnection.value.chatPartnerId) || null
+  })
+
   const chatSessions = computed<ChatSession[]>(() => {
+    console.log('📋 Computing chat sessions! chatConnections count:', chatConnections.value.length)
     return chatConnections.value.map(conn => {
       const lastMsg = conn.message_list?.[conn.message_list.length - 1]
-      return {
+      const userInfo = conn.chatPartnerId ? userInfoCache.get(conn.chatPartnerId) : undefined
+      const sessionData = {
         id: conn.connection_id,
         type: 'user',
-        name: '用户', // 这里需要根据对方ID获取用户名
-        avatar: '', // 这里需要根据对方ID获取头像
+        name: userInfo?.userName || '用户',
+        avatar: userInfo?.userAvatar || '',
         lastMessage: lastMsg?.message || '',
         lastMessageTime: lastMsg?.create_time || '',
         connectionId: conn.connection_id,
+        userId: conn.chatPartnerId,
       }
+      console.log('📋 Session data:', sessionData)
+      return sessionData
     })
   })
 
-  // 加载聊天连接列表
+  const fetchUserInfo = async (userId: number): Promise<PosterDetailResponse | null> => {
+    console.log('🚀 Fetching user info for userId:', userId)
+    if (userInfoCache.has(userId)) {
+      console.log('📦 User info found in cache for userId:', userId)
+      console.log('📦 Cached data:', userInfoCache.get(userId))
+      return userInfoCache.get(userId)!
+    }
+    try {
+      const res = await userAPI.getPosterDetail(userId)
+      console.log('📡 getPosterDetail full response:', res)
+      console.log('📡 getPosterDetail response.success:', res.success)
+      console.log('📡 getPosterDetail response.data:', res.data)
+      if (res.success && res.data) {
+        userInfoCache.set(userId, res.data)
+        console.log('✅ User info cached:', res.data)
+        console.log('✅ Cached userName:', res.data.userName)
+        console.log('✅ Cached userAvatar:', res.data.userAvatar)
+        return res.data
+      }
+    } catch (err) {
+      console.error('❌ Failed to fetch user info:', err)
+    }
+    return null
+  }
+
   const loadChatConnections = async () => {
     isLoading.value = true
     error.value = null
     try {
+      console.log('Calling getChatConnections')
       const res = await chatServiceAPI.getChatConnections()
+      console.log('getChatConnections response:', res)
       if (res.success && res.data) {
-        chatConnections.value = res.data
+        const connectionsWithUser = res.data.map(conn => {
+          let chatPartnerId: number | undefined
+          // 严格按照要求：获取判断 first_user_id或者second_user_id不为-1，将其作为聊天对象的id
+          if (conn.first_user_id !== -1) {
+            chatPartnerId = conn.first_user_id
+          } else if (conn.second_user_id !== -1) {
+            chatPartnerId = conn.second_user_id
+          }
+          console.log('Connection:', conn.connection_id, 'Chat partner ID:', chatPartnerId)
+          return {
+            ...conn,
+            chatPartnerId,
+          }
+        })
+
+        chatConnections.value = connectionsWithUser
+
+        const userIdsToFetch = connectionsWithUser
+          .map(conn => conn.chatPartnerId)
+          .filter((id): id is number => id !== undefined && !userInfoCache.has(id))
+        console.log('User IDs to fetch:', userIdsToFetch)
+
+        await Promise.all(
+          userIdsToFetch.map(async id => {
+            await fetchUserInfo(id)
+          })
+        )
+
+        // 强制重新触发响应式更新，让 chatSessions 重新计算
+        chatConnections.value = [...chatConnections.value]
       }
     } catch (err: any) {
-      console.error('加载聊天连接列表失败:', err)
-      error.value = err.message || '加载失败'
+      console.error('Failed to load chat connections:', err)
+      error.value = err.message || 'Failed to load'
     } finally {
       isLoading.value = false
     }
   }
 
-  // 选择聊天连接
   const selectChatConnection = async (connectionId: number) => {
     currentConnectionId.value = connectionId
     await loadMessageHistory(connectionId)
     connectWebSocket(connectionId)
   }
 
-  // 加载历史消息
   const loadMessageHistory = async (connectionId: number) => {
     try {
       const res = await chatServiceAPI.getPrivateMessageHistory(connectionId)
       if (res.success && res.data) {
         messages.value = res.data
       }
-    } catch (err: any) {
-      console.error('加载历史消息失败:', err)
+    } catch (err) {
+      console.error('Failed to load message history:', err)
     }
   }
 
-  // 发送消息
   const sendMessage = async (message: string) => {
     if (!currentConnectionId.value || !message.trim()) return
 
@@ -81,8 +145,7 @@ export function usePrivateChat() {
         messages.value.push(res.data)
       }
     } catch (err: any) {
-      console.error('发送消息失败:', err)
-      // 检查是否是1002错误（非好友）
+      console.error('Failed to send message:', err)
       if (err.code === 1002) {
         error.value = '需要先与对方互相关注才能聊天'
       }
@@ -92,7 +155,6 @@ export function usePrivateChat() {
     }
   }
 
-  // 创建聊天连接
   const createChatConnection = async (toUserId: number) => {
     try {
       const res = await chatServiceAPI.createChatConnection(toUserId)
@@ -101,7 +163,7 @@ export function usePrivateChat() {
         return res.data
       }
     } catch (err: any) {
-      console.error('创建聊天连接失败:', err)
+      console.error('Failed to create chat connection:', err)
       if (err.code === 1002) {
         throw new Error('需要先与对方互相关注才能聊天')
       }
@@ -110,25 +172,19 @@ export function usePrivateChat() {
     return null
   }
 
-  // 连接WebSocket
   const connectWebSocket = (connectionId: number) => {
-    // 关闭之前的连接
     disconnectWebSocket()
 
-    const token = localStorage.getItem('token')
-    const userId = getUserIdFromToken(token || '')
-    if (!userId) return
-
+    // WebSocket URL 不需要 userId，因为连接已经包含认证信息
     const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${
       window.location.host
-    }/ws/chat/${connectionId}?user_id=${userId}`
+    }/ws/chat/${connectionId}`
 
     ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
       wsConnected.value = true
-      console.log('WebSocket连接成功')
-      // 启动心跳
+      console.log('WebSocket connected')
       startHeartbeat()
     }
 
@@ -137,25 +193,22 @@ export function usePrivateChat() {
         const data = JSON.parse(event.data)
         if (data.type === 'message' && data.id) {
           messages.value.push(data)
-        } else if (data.type === 'heartbeat_ack') {
-          // 心跳响应，无需处理
         }
       } catch (e) {
-        console.error('解析WebSocket消息失败:', e)
+        console.error('Failed to parse WebSocket message:', e)
       }
     }
 
     ws.onclose = () => {
       wsConnected.value = false
-      console.log('WebSocket连接关闭')
+      console.log('WebSocket disconnected')
     }
 
     ws.onerror = err => {
-      console.error('WebSocket错误:', err)
+      console.error('WebSocket error:', err)
     }
   }
 
-  // 断开WebSocket连接
   const disconnectWebSocket = () => {
     if (ws) {
       ws.close()
@@ -164,18 +217,14 @@ export function usePrivateChat() {
     wsConnected.value = false
   }
 
-  // 心跳
   let heartbeatInterval: ReturnType<typeof setInterval> | null = null
   const startHeartbeat = () => {
     stopHeartbeat()
     heartbeatInterval = setInterval(() => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        const token = localStorage.getItem('token')
-        const userId = getUserIdFromToken(token || '')
         ws.send(
           JSON.stringify({
             type: 'heartbeat',
-            user_id: userId,
           })
         )
       }
@@ -189,28 +238,11 @@ export function usePrivateChat() {
     }
   }
 
-  // 简单的JWT解析获取userId
-  const getUserIdFromToken = (token: string): number | null => {
-    try {
-      const base64Url = token.split('.')[1]
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-          .join('')
-      )
-      const payload = JSON.parse(jsonPayload)
-      return payload.userId || payload.id || null
-    } catch {
-      return null
-    }
-  }
-
   return {
     chatConnections,
     currentConnectionId,
     currentConnection,
+    currentChatPartnerInfo,
     chatSessions,
     messages,
     isLoading,
@@ -224,5 +256,7 @@ export function usePrivateChat() {
     loadMessageHistory,
     connectWebSocket,
     disconnectWebSocket,
+    fetchUserInfo,
+    userInfoCache,
   }
 }

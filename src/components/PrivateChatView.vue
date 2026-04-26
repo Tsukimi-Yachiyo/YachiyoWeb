@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { ref, computed, watch, nextTick, onMounted } from 'vue'
+  import UserAvatar from './UserAvatar.vue'
   import type { ChatMessage } from '../types/api'
 
   // 格式化时间
@@ -47,6 +48,8 @@
     wsConnected: boolean
     currentUserName?: string
     targetUserName?: string
+    targetUserId?: number
+    targetUserAvatar?: string | Array<any> | null
   }>()
 
   // 定义emit
@@ -122,7 +125,17 @@
       <div v-for="msg in messages" :key="msg.id" class="message-wrapper">
         <div :class="['message', msg.user_id === currentUserId ? 'own' : 'other']">
           <div v-if="msg.user_id !== currentUserId" class="message-avatar">
-            {{ targetUserName?.charAt(0) || '?' }}
+            <UserAvatar
+              v-if="targetUserId"
+              :user-id="targetUserId"
+              :avatar-url="targetUserAvatar"
+              :username="targetUserName"
+              :size="36"
+              :clickable="false"
+            />
+            <div v-else class="fallback-avatar">
+              {{ targetUserName?.charAt(0) || '?' }}
+            </div>
           </div>
           <div class="message-content">
             <div v-if="msg.user_id !== currentUserId" class="message-sender">
@@ -199,6 +212,12 @@
   .message-avatar {
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
+  }
+
+  .fallback-avatar {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
@@ -207,7 +226,6 @@
     color: white;
     font-weight: bold;
     font-size: 14px;
-    flex-shrink: 0;
   }
 
   .message-content {
@@ -263,15 +281,19 @@
 
   /* 输入区域 */
   .input-area {
-    padding: 16px 20px 24px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 800px;
+    padding: 0 20px;
+    z-index: 100;
   }
 
   .input-wrapper {
     display: flex;
     gap: 12px;
-    max-width: 800px;
-    margin: 0 auto;
     align-items: center;
   }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { computed, ref, onMounted, onUnmounted } from 'vue'
   import UserProfilePopover from './UserProfilePopover/UserProfilePopover.vue'
+  import UserAvatar from './UserAvatar.vue'
   import WaveEffect from './WaveEffect.vue'
   import CheckinModule from './CheckinModule.vue'
   import { useUserProfile } from '../composables/useUserProfile'
@@ -162,17 +163,19 @@
         >
           <template #trigger="{ showPopover, hidePopover, isVisible }">
             <div
-              class="user-avatar-header"
+              class="user-avatar-header-wrapper"
               :class="{ 'avatar-active': isVisible }"
               @mouseenter="showPopover"
               @mouseleave="hidePopover"
             >
-              <img v-if="resolvedUserAvatar" :src="resolvedUserAvatar" alt="用户头像" />
-              <span v-else>{{
-                resolvedUsername && resolvedUsername.length > 0
-                  ? resolvedUsername.charAt(0).toUpperCase()
-                  : 'U'
-              }}</span>
+              <UserAvatar
+                :user-id="0"
+                :avatar-url="resolvedUserAvatar"
+                :username="resolvedUsername"
+                :size="48"
+                :clickable="false"
+                class="user-avatar-inner"
+              />
             </div>
           </template>
         </UserProfilePopover>
@@ -279,17 +282,10 @@
     position: relative;
   }
 
-  .user-avatar-header {
+  .user-avatar-header-wrapper {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
     overflow: hidden;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -298,7 +294,7 @@
     position: relative;
   }
 
-  .user-avatar-header.avatar-active {
+  .user-avatar-header-wrapper.avatar-active {
     transform: scale(2);
     box-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
     z-index: 1000;
@@ -308,10 +304,8 @@
     transform: translateX(-40px) translateY(40px);
   }
 
-  .user-avatar-header img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .user-avatar-header-wrapper :deep(.user-avatar) {
+    transition: none;
   }
 
   /* 签到模块弹出层样式 */
